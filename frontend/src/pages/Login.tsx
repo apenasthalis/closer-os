@@ -4,8 +4,8 @@ import { api, csrf } from '../lib/api'
 import { useAuth } from '../stores/auth'
 
 export default function Login() {
-  const [email, setEmail] = useState('admin@closeros.test')
-  const [password, setPassword] = useState('password')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [err, setErr] = useState('')
   const { setUser } = useAuth()
   const nav = useNavigate()
