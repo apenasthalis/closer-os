@@ -81,7 +81,7 @@ export default function Pipeline() {
   const pct = (a:number,b:number)=> b? Math.round(a/b*100)+'%':'0%'
 
   return (
-    <div className="flex flex-col gap-4">
+    <>
       <div className="pbar">
         <div><h1>Pipeline</h1><p className="sub" style={{marginTop:4,maxWidth:'60ch'}}>Arraste os cards entre as colunas. Fechado abre a venda; Loss e Desqualificado pedem o motivo.</p></div>
         <div className="filters">
@@ -111,13 +111,13 @@ export default function Pipeline() {
           <div className="kanban" id="kanban">
             {data.columns.map((col: any) => <Column key={col.stage} stage={col.stage} label={col.label} leads={col.leads} onOpen={(lead: any) => navigate(`/lead/${lead.id}`)} onSale={(lead: any) => setSaleLead(lead)} />)}
           </div>
-          <DragOverlay>{dragging && <div className="kc ghost" style={{width:220}}><div className="kc-top"><strong>{dragging.name}</strong></div><div className="meta"><span>{STAGE_LABEL[dragging.stage]}</span></div></div>}</DragOverlay>
+          <DragOverlay>{dragging && <div className="kc ghost" style={{width:220}}><strong>{dragging.name}</strong><div className="meta"><span>{STAGE_LABEL[dragging.stage]}</span></div></div>}</DragOverlay>
         </DndContext>
       )}
 
       {newLead && <LeadModal onClose={() => setNewLead(false)} onSaved={(l: any) => navigate(`/lead/${l.id}`)} />}
       {saleLead && <SaleModal leadId={saleLead.id} leadName={saleLead.name} onClose={() => setSaleLead(null)} onSaved={invalidate} />}
       {reason && <ReasonModal stage={reason.stage} leadName={reason.lead.name} onClose={() => setReason(null)} onConfirm={(r, n) => { transition.mutate({ lead: reason.lead, stage: reason.stage, reason: r, note: n }); setReason(null) }} />}
-    </div>
+    </>
   )
 }
