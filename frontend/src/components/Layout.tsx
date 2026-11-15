@@ -4,64 +4,68 @@ import { api } from '../lib/api'
 
 const NAV = [
   { g: 'Operação', items: [
-    { t: 'Hoje', to: '/hoje', icon: 'M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z' },
-    { t: 'Faturamento e caixa', to: '/faturamento', icon: 'M4 5h16v14H4zM4 10h16M8 15h3' },
-    { t: 'Pipeline', to: '/pipeline', icon: 'M4 4h5v16H4zM10.5 4h5v10h-5zM17 4h3v6h-3z' },
-    { t: 'Lead 360', to: '/lead', icon: 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21a8 8 0 0 1 16 0' },
-    { t: 'Cadência de FUP', to: '/cadencia', icon: 'M4 6h16M4 12h10M4 18h7M17 12l3 2-3 2z' },
+    { t: 'Hoje', to: '/hoje', id: 'hoje', icon: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>' },
+    { t: 'Faturamento e caixa', to: '/faturamento', id: 'faturamento', icon: '<path d="M12 3v18"/><path d="M16 7.5c-.8-1.2-2.3-2-4-2-2.3 0-4 1.2-4 3 0 4 8 2 8 6 0 1.8-1.7 3-4 3-1.8 0-3.3-.8-4.2-2"/>' },
+    { t: 'Pipeline', to: '/pipeline', id: 'pipeline', icon: '<rect x="3" y="4" width="5" height="16" rx="1"/><rect x="10" y="4" width="5" height="10" rx="1"/><rect x="17" y="4" width="4" height="6" rx="1"/>' },
+    { t: 'Lead 360', to: '/lead', id: 'lead', icon: '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>' },
+    { t: 'Cadência de FUP', to: '/cadencia', id: 'cadencia', icon: '<path d="M21 12a9 9 0 11-3-6.7"/><path d="M21 4v5h-5"/>' },
   ]},
   { g: 'Inteligência comercial', items: [
-    { t: 'Scorecard de calls', to: '/calls', icon: 'M4 4h16v12H4zM8 20h8M12 16v4M8 9l2 2 4-4' },
-    { t: 'Banco de objeções', to: '/objecoes', icon: 'M12 3l9 16H3zM12 9v4M12 16h.01' },
-    { t: 'Perdas e recuperação', to: '/perdas', icon: 'M4 7l7 6 7-6M4 7v10h16V7' },
-    { t: 'Metas e ritmo', to: '/ritmo', icon: 'M4 19V9M10 19V5M16 19v-7M22 19H2' },
+    { t: 'Scorecard de calls', to: '/calls', id: 'calls', icon: '<path d="M4 14v-2a8 8 0 0116 0v2"/><rect x="3" y="14" width="4" height="6" rx="1"/><rect x="17" y="14" width="4" height="6" rx="1"/>' },
+    { t: 'Banco de objeções', to: '/objecoes', id: 'objecoes', icon: '<path d="M4 5h16v11H9l-5 4z"/>' },
+    { t: 'Perdas e recuperação', to: '/perdas', id: 'perdas', icon: '<path d="M3 6l6 6 4-4 8 8"/><path d="M15 16h6v-6"/>' },
+    { t: 'Metas e ritmo', to: '/ritmo', id: 'ritmo', icon: '<path d="M3 12h4l3-8 4 16 3-8h4"/>' },
   ]},
   { g: 'Configurações', items: [
-    { t: 'Operações e comissão', to: '/operacoes', icon: 'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.83 2.83-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1 1.55V21h-4v-.08a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.88.34l-.06.06-2.83-2.83.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.55-1H3v-4h.08a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.83-2.83.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-1.55V3h4v.08a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.88-.34l.06-.06 2.83 2.83-.06.06A1.7 1.7 0 0 0 19.4 9c.14.62.66 1.05 1.3 1.05H21v4h-.08a1.7 1.7 0 0 0-1.55 1z' },
-    { t: 'Administração', to: '/admin', admin: true, icon: 'M12 3l8 4v6c0 4.5-3.4 7.3-8 8-4.6-.7-8-3.5-8-8V7zM9 12l2 2 4-4' },
+    { t: 'Operações e comissão', to: '/operacoes', id: 'operacoes', icon: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>' },
+    { t: 'Administração', to: '/admin', id: 'admin', admin: true, icon: '<path d="M12 3l8 4v5c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V7z"/><path d="M9 12l2 2 4-4"/>' },
   ]},
   { g: 'Documentação', items: [
-    { t: 'Prompt do produto', to: '/prompt', icon: 'M6 3h9l4 4v14H6zM14 3v5h5M9 13h6M9 17h6' },
+    { t: 'Prompt do agente', to: '/prompt', id: 'prompt', icon: '<path d="M8 6l-5 6 5 6"/><path d="M16 6l5 6-5 6"/>' },
   ]},
 ]
+
+function initials(name?: string) {
+  if (!name) return 'CO'
+  const p = name.trim().split(/\s+/)
+  return ((p[0]?.[0] || '') + (p[1]?.[0] || '')).toUpperCase() || 'CO'
+}
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const loc = useLocation()
   const { user, setUser } = useAuth()
+  const cur = loc.pathname.split('/')[1] || 'hoje'
   async function logout() {
     try { await api.post('/auth/logout') } finally { setUser(null) }
   }
   return (
-    <div className="app">
-      <aside className="side">
-        <Link to="/hoje" className="brand" style={{ textDecoration: 'none', color: 'inherit' }}>
-          <i>CO</i>
-          <span>Closer OS <small>PRO</small></span>
-        </Link>
-        <nav className="nav" aria-label="Módulos">
+    <div className="app" id="app">
+      <aside className="side" id="side">
+        <div className="brand"><i>CO</i><span>Closer OS <small>PRO</small></span></div>
+        <nav className="nav" id="nav" aria-label="Módulos">
           {NAV.map(group => {
             const items = group.items.filter((it: any) => !it.admin || user?.role === 'admin')
             if (!items.length) return null
             return (
-              <div key={group.g}>
-                <span className="grp eyebrow">{group.g}</span>
+              <div key={group.g} style={{display:'contents'}}>
+                <span className="eyebrow grp">{group.g}</span>
                 {items.map((it: any) => (
-                  <Link key={it.to} to={it.to} aria-current={loc.pathname === it.to || (it.to !== '/hoje' && loc.pathname.startsWith(it.to)) ? 'page' : undefined}>
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d={it.icon} /></svg>
-                    <span>{it.t}</span>
+                  <Link key={it.to} to={it.to} title={it.t} aria-current={cur === it.id ? 'page' : undefined}>
+                    <svg viewBox="0 0 24 24" aria-hidden="true" dangerouslySetInnerHTML={{__html: it.icon}} />
+                    <span className="lbl">{it.t}</span>
                   </Link>
                 ))}
               </div>
             )
           })}
         </nav>
-        <div style={{ marginTop: 'auto', borderTop: '1px solid var(--line)', paddingTop: 12 }}>
-          <div style={{ fontWeight: 600 }}>{user?.name}</div>
-          <div className="sub" style={{ textTransform: 'capitalize' }}>{user?.role} · {user?.email}</div>
-          <button className="btn sm" style={{ marginTop: 8 }} onClick={logout}>Sair</button>
+        <div className="sfoot">
+          <span className="av" aria-hidden="true">{initials(user?.name)}</span>
+          <div className="who"><b>{user?.name || 'Usuário'}</b><span style={{textTransform:'capitalize'}}>{user?.role === 'admin' ? 'Administrador' : 'Closer'}</span></div>
+          <button className="btn iconb" id="logout" title="Sair" aria-label="Sair" onClick={logout}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4H5v16h4"/><path d="M16 8l4 4-4 4"/><path d="M20 12H9"/></svg></button>
         </div>
       </aside>
-      <main className="main">{children}</main>
+      <div className={`content${cur === 'pipeline' ? ' pipe' : ''}`} id="content"><main className="main" id="view">{children}</main></div>
     </div>
   )
 }

@@ -1,11 +1,10 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { DndContext, DragOverlay, PointerSensor, pointerWithin, useDraggable, useDroppable, useSensor, useSensors } from '@dnd-kit/core'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '../lib/api'
-import { apiError, brl, dateBR, STAGES, STAGE_LABEL } from '../lib/format'
+import { apiError, brl, dateBR, STAGE_LABEL } from '../lib/format'
 import { showToast } from '../lib/toast'
-import { useAuth } from '../stores/auth'
 import LeadModal from '../components/LeadModal'
 import SaleModal from '../components/SaleModal'
 import ReasonModal from '../components/ReasonModal'
@@ -14,26 +13,23 @@ function saleTotal(sale: any): number {
   if (!sale || sale.refund) return 0
   return (sale.payments || []).reduce((sum: number, p: any) => sum + p.amount_cents, 0)
 }
+function daysInStage(l: any){ const t = l.stage_changed_at ? new Date(l.stage_changed_at).getTime() : Date.now(); return Math.max(0, Math.floor((Date.now()-t)/86400000)); }
+function ageCls(d:number){ return d>=6?'crit':d>=3?'warn':'ok'; }
 
 function Card({ lead, onOpen, onSale }: { lead: any; onOpen: () => void; onSale: () => void }) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: lead.id })
   const total = saleTotal(lead.sale)
+  const d = daysInStage(lead)
+  const open = !['fechado','loss','desqualificado','reembolso'].includes(lead.stage)
   return (
-    <article ref={setNodeRef} className={`kcard ${isDragging ? 'dragging' : ''}`} onClick={onOpen}>
+    <article ref={setNodeRef} className={`kc${isDragging ? ' dragging' : ''}`} onClick={onOpen} tabIndex={0} role="button">
       <div className="kc-top">
         <strong>{lead.name}</strong>
         <button className="drag" {...listeners} {...attributes} onClick={e => e.stopPropagation()} aria-label="Arrastar lead">⠿</button>
       </div>
-      <div className="kc-meta">
-        {lead.company?.name && <span>{lead.company.name}</span>}
-        {lead.closer?.name && <span>{lead.closer.name}</span>}
-        {lead.call_at && <span>{dateBR(lead.call_at)}</span>}
-      </div>
-      <div className="kc-bot">
-        {lead.no_show_count > 0 && <span className="pill danger">{lead.no_show_count} no-show</span>}
-        {total > 0 && <span className="pill ok">{brl(total)}</span>}
-        {lead.stage === 'fechado' && !lead.sale && <button className="btn sm primary" onClick={e => { e.stopPropagation(); onSale() }}>Registrar venda</button>}
-      </div>
+      <div className="meta"><span>{lead.call_at ? dateBR(lead.call_at) : 'Sem call'}</span>{open && <span className={`age ${ageCls(d)}`}>{d}d</span>}</div>
+      <div className="meta">{lead.no_show_count > 0 ? <span className="pill hot">{lead.no_show_count} no-show</span> : <span></span>}{total > 0 ? <span className="pill ok">{brl(total)}</span> : (lead.loss_reason ? <span className="pill">{lead.loss_reason}</span> : '')}</div>
+      {lead.stage === 'fechado' && !lead.sale && <button className="btn sm primary" onClick={e => { e.stopPropagation(); onSale() }}>Registrar venda</button>}
     </article>
   )
 }
@@ -41,50 +37,40 @@ function Card({ lead, onOpen, onSale }: { lead: any; onOpen: () => void; onSale:
 function Column({ stage, label, leads, onOpen, onSale }: any) {
   const { setNodeRef, isOver } = useDroppable({ id: stage })
   return (
-    <section ref={setNodeRef} className={`kcol ${isOver ? 'over' : ''}`}>
-      <header><span>{label}</span><b>{leads.length}</b></header>
-      <div className="kbody">
+    <div ref={setNodeRef} className={`col${isOver ? ' over' : ''}`} data-stage={stage}>
+      <header><h3>{label}</h3><span className="pill num">{leads.length}</span></header>
+      <div className="cards">
         {leads.map((lead: any) => <Card key={lead.id} lead={lead} onOpen={() => onOpen(lead)} onSale={() => onSale(lead)} />)}
-        {leads.length === 0 && <p className="kempty">Solte um lead aqui</p>}
+        {leads.length === 0 && <div className="empty">Solte um card aqui</div>}
       </div>
-    </section>
+    </div>
   )
 }
 
 export default function Pipeline() {
   const navigate = useNavigate()
   const qc = useQueryClient()
-  const { user } = useAuth()
-  const [filters, setFilters] = useState({ q: '', company_id: '', department_id: '', closer_id: '' })
+  const [filters, setFilters] = useState({ q: '', from: '', to: '', company_id: '', department_id: '', closer_id: '' })
   const [newLead, setNewLead] = useState(false)
   const [saleLead, setSaleLead] = useState<any>(null)
   const [reason, setReason] = useState<{ lead: any; stage: 'loss' | 'desqualificado' } | null>(null)
   const [dragging, setDragging] = useState<any>(null)
 
-  const { data: companies } = useQuery({ queryKey: ['companies'], queryFn: async () => (await api.get('/companies')).data })
-  const { data: departments } = useQuery({ queryKey: ['departments'], queryFn: async () => (await api.get('/departments')).data })
-  const { data: users } = useQuery({ queryKey: ['users'], queryFn: async () => (await api.get('/users')).data, enabled: user?.role === 'admin', retry: false })
   const { data, isLoading, error } = useQuery({ queryKey: ['pipeline', filters], queryFn: async () => (await api.get('/pipeline/board', { params: filters })).data })
 
-  const depts = (departments || []).filter((d: any) => !filters.company_id || d.company_id === Number(filters.company_id))
-
   const invalidate = () => {
-    qc.invalidateQueries({ queryKey: ['pipeline'] })
-    qc.invalidateQueries({ queryKey: ['leads'] })
-    qc.invalidateQueries({ queryKey: ['lead'] })
-    qc.invalidateQueries({ queryKey: ['dashboard'] })
+    qc.invalidateQueries({ queryKey: ['pipeline'] }); qc.invalidateQueries({ queryKey: ['leads'] }); qc.invalidateQueries({ queryKey: ['lead'] }); qc.invalidateQueries({ queryKey: ['dashboard'] })
   }
-
   const transition = useMutation({
     mutationFn: async ({ lead, stage, reason, note }: any) => (await api.post(`/leads/${lead.id}/transition`, { stage, loss_reason: reason, loss_note: note })).data,
     onSuccess: () => { showToast('Lead movido.'); invalidate() },
     onError: (e: any) => showToast(apiError(e), 'err'),
   })
-
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }))
+  const allLeads = useMemo(()=> (data?.columns||[]).flatMap((c:any)=>c.leads), [data])
 
   function drop(leadId: number, stage: string) {
-    const lead = data?.columns?.flatMap((c: any) => c.leads).find((l: any) => l.id === leadId)
+    const lead = allLeads.find((l: any) => l.id === leadId)
     if (!lead || lead.stage === stage) return
     if (stage === 'fechado') return setSaleLead(lead)
     if (stage === 'reembolso') return showToast('Reembolso só é criado pela exclusão de uma venda.', 'err')
@@ -92,44 +78,43 @@ export default function Pipeline() {
     transition.mutate({ lead, stage })
   }
 
-  const metrics = data?.metrics || { counts: {}, total: 0, no_show_rate: 0 }
+  const m = data?.metrics || { counts: {}, total: 0, no_show_rate: 0, no_show_leads: 0, disqualified: 0 }
+  const ag = m.total || 0
+  const ns = m.no_show_leads || 0
+  const pct = (a:number,b:number)=> b? Math.round(a/b*100)+'%':'0%'
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="head">
-        <div><h1>Pipeline</h1><p>Arraste para mover. Fechou abre a venda; Loss e Desqualificado pedem motivo; Reembolso só pela venda.</p></div>
-        <div className="acts"><button className="btn primary" onClick={() => setNewLead(true)}>Novo lead</button></div>
+      <div className="pbar">
+        <div><h1>Pipeline</h1><p className="sub" style={{marginTop:4,maxWidth:'60ch'}}>Arraste os cards entre as colunas. Fechado abre a venda; Loss e Desqualificado pedem o motivo.</p></div>
+        <div className="filters">
+          <div className="field" style={{minWidth:200}}><label htmlFor="pq">Buscar lead</label><input className="in" id="pq" value={filters.q} onChange={e=>setFilters({...filters,q:e.target.value})} placeholder="Nome do lead" /></div>
+          <div className="field"><label htmlFor="pf">Call de</label><input className="in" type="date" id="pf" value={filters.from} onChange={e=>setFilters({...filters,from:e.target.value})} /></div>
+          <div className="field"><label htmlFor="pt">Call até</label><input className="in" type="date" id="pt" value={filters.to} onChange={e=>setFilters({...filters,to:e.target.value})} /></div>
+          {(filters.from||filters.to||filters.q) && <button className="btn" onClick={()=>setFilters({...filters,q:'',from:'',to:''})}>Limpar</button>}
+          <button className="btn primary" onClick={()=>setNewLead(true)}>Novo lead</button>
+          <span className="chip"><b></b>Salvo no banco</span>
+        </div>
       </div>
 
-      <section className="card">
-        <div className="kstrip">
-          <div><span>Total</span><b className="num">{metrics.total}</b></div>
-          <div><span>No-show rate</span><b className="num">{metrics.no_show_rate}%</b></div>
-          {STAGES.map(([stage, label]) => <div key={stage}><span>{label}</span><b className="num">{metrics.counts?.[stage] ?? 0}</b></div>)}
-        </div>
-        <div className="grid g4" style={{ marginTop: 12 }}>
-          <div className="field"><label>Busca</label><input className="in" value={filters.q} onChange={e => setFilters({ ...filters, q: e.target.value })} placeholder="Nome ou telefone" /></div>
-          <div className="field"><label>Empresa</label><select className="in" value={filters.company_id} onChange={e => setFilters({ ...filters, company_id: e.target.value, department_id: '' })}><option value="">Todas</option>{(companies || []).map((c: any) => <option key={c.id} value={c.id}>{c.name}</option>)}</select></div>
-          <div className="field"><label>Gerência</label><select className="in" value={filters.department_id} onChange={e => setFilters({ ...filters, department_id: e.target.value })}><option value="">Todas</option>{depts.map((d: any) => <option key={d.id} value={d.id}>{d.name}</option>)}</select></div>
-          {user?.role === 'admin' && <div className="field"><label>Closer</label><select className="in" value={filters.closer_id} onChange={e => setFilters({ ...filters, closer_id: e.target.value })}><option value="">Todos</option>{(users || []).map((u: any) => <option key={u.id} value={u.id}>{u.name}</option>)}</select></div>}
-        </div>
-      </section>
+      <div className="kstrip">
+        {[['Calls agendadas', ag, 'leads com call no filtro',''], ['No-shows', ns, 'leads que faltaram', ns?'var(--crit)':''], ['Taxa de no-show', pct(ns,ag), 'no-shows / agendadas',''], ['Fechados', m.counts?.fechado||0, 'no pipeline', 'var(--accent-text)'], ['Desqualificados', m.disqualified||0, 'no pipeline','']].map((k:any)=>(
+          <div className="ks" key={k[0]}><span className="eyebrow">{k[0]}</span><div><strong className="num" style={k[3]?{color:k[3]}:undefined}>{k[1]}</strong><small>{k[2]}</small></div></div>
+        ))}
+      </div>
 
       {isLoading && <p className="muted">Carregando pipeline...</p>}
       {error && <div className="alert"><h3>Erro ao carregar</h3><p className="sub">{apiError(error)}</p></div>}
 
       {data && (
-        <DndContext
-          sensors={sensors}
-          collisionDetection={pointerWithin}
-          onDragStart={(e) => setDragging(data.columns.flatMap((c: any) => c.leads).find((l: any) => l.id === Number(e.active.id)))}
+        <DndContext sensors={sensors} collisionDetection={pointerWithin}
+          onDragStart={(e) => setDragging(allLeads.find((l: any) => l.id === Number(e.active.id)))}
           onDragEnd={(e) => { setDragging(null); if (e.over) drop(Number(e.active.id), String(e.over.id)) }}
-          onDragCancel={() => setDragging(null)}
-        >
-          <div className="kanban">
+          onDragCancel={() => setDragging(null)}>
+          <div className="kanban" id="kanban">
             {data.columns.map((col: any) => <Column key={col.stage} stage={col.stage} label={col.label} leads={col.leads} onOpen={(lead: any) => navigate(`/lead/${lead.id}`)} onSale={(lead: any) => setSaleLead(lead)} />)}
           </div>
-          <DragOverlay>{dragging && <div className="kcard overlay"><strong>{dragging.name}</strong><span className="sub">{STAGE_LABEL[dragging.stage]}</span></div>}</DragOverlay>
+          <DragOverlay>{dragging && <div className="kc ghost" style={{width:220}}><div className="kc-top"><strong>{dragging.name}</strong></div><div className="meta"><span>{STAGE_LABEL[dragging.stage]}</span></div></div>}</DragOverlay>
         </DndContext>
       )}
 
