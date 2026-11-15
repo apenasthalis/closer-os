@@ -1,0 +1,13 @@
+:root{
+  --bg:#070a08; --surface:#0e1311; --raise:#151c18; --line:#212b26;
+  --fg:#f1f6f3; --muted:#8c9a92; --accent:#1ed760; --accent-text:#1ed760;
+  --accent-ink:#03130a; --accent-soft:rgba(30,215,96,.12);
+  --warn:#f2b441; --crit:#ff6159; --info:#58b4ff;
+  --warn-soft:rgba(242,180,65,.14); --crit-soft:rgba(255,97,89,.14); --info-soft:rgba(88,180,255,.14);
+  --scrim:rgba(0,0,0,.66);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:'Inter',system-ui,sans-serif;font-size:14px;line-height:1.5}
+h1,h2,h3{font-family:'Space Grotesk',system-ui,sans-serif;margin:0;letter-spacing:-.01em}
+.num{font-variant-numeric:tabular-nums}

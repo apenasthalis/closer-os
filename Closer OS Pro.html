@@ -1,0 +1,914 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Closer OS Pro</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap">
+<style>
+/* Layout: barra lateral de módulos à esquerda, área de trabalho à direita, modais por cima; no celular a barra vira abas rolantes. */
+:root{
+  --bg:#070a08; --surface:#0e1311; --raise:#151c18; --line:#212b26;
+  --fg:#f1f6f3; --muted:#8c9a92; --accent:#1ed760; --accent-text:#1ed760;
+  --accent-ink:#03130a; --accent-soft:rgba(30,215,96,.12);
+  --warn:#f2b441; --crit:#ff6159; --info:#58b4ff;
+  --warn-soft:rgba(242,180,65,.14); --crit-soft:rgba(255,97,89,.14); --info-soft:rgba(88,180,255,.14);
+  --scrim:rgba(0,0,0,.66);
+  --font-display:'Space Grotesk',system-ui,sans-serif;
+  --font-body:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  color-scheme:dark;
+}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){
+    --bg:#f2f6f3; --surface:#ffffff; --raise:#e8efea; --line:#d3ddd7;
+    --fg:#09100b; --muted:#56645b; --accent:#14a44d; --accent-text:#0b7a37;
+    --accent-ink:#ffffff; --accent-soft:rgba(20,164,77,.12);
+    --warn:#9a6200; --crit:#c2332b; --info:#1b64a8;
+    --warn-soft:rgba(154,98,0,.12); --crit-soft:rgba(194,51,43,.1); --info-soft:rgba(27,100,168,.1);
+    --scrim:rgba(8,16,10,.5); color-scheme:light;
+  }
+}
+:root[data-theme="light"]{
+  --bg:#f2f6f3; --surface:#ffffff; --raise:#e8efea; --line:#d3ddd7;
+  --fg:#09100b; --muted:#56645b; --accent:#14a44d; --accent-text:#0b7a37;
+  --accent-ink:#ffffff; --accent-soft:rgba(20,164,77,.12);
+  --warn:#9a6200; --crit:#c2332b; --info:#1b64a8;
+  --warn-soft:rgba(154,98,0,.12); --crit-soft:rgba(194,51,43,.1); --info-soft:rgba(27,100,168,.1);
+  --scrim:rgba(8,16,10,.5); color-scheme:light;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--font-body);font-size:14px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+h1,h2,h3{font-family:var(--font-display);margin:0;text-wrap:balance;letter-spacing:-.01em}
+h1{font-size:26px;line-height:1.15}
+h2{font-size:17px}
+h3{font-size:14px}
+p{margin:0}
+button,input,select,textarea{font:inherit;color:inherit}
+textarea{resize:vertical}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+.num{font-variant-numeric:tabular-nums}
+.eyebrow{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.muted{color:var(--muted)}
+.app{max-width:1280px;margin:0 auto;display:grid;grid-template-columns:230px minmax(0,1fr);gap:28px;align-items:start}
+.side{position:sticky;top:20px;display:flex;flex-direction:column;gap:18px}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--font-display);font-weight:700;font-size:17px}
+.brand i{width:30px;height:30px;border-radius:8px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-style:normal;font-size:12px;font-weight:700}
+.brand small{font-size:10px;color:var(--muted);font-weight:500}
+.nav{display:flex;flex-direction:column;gap:2px}
+.nav .grp{margin:12px 0 4px 10px}
+.nav a{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;color:var(--muted);text-decoration:none;font-weight:500}
+.nav a svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.nav a:hover{color:var(--fg);background:var(--raise)}
+.nav a[aria-current="page"]{background:var(--accent);color:var(--accent-ink)}
+.nav .tag{margin-left:auto;font-size:10px;font-weight:700;background:var(--accent-soft);color:var(--accent-text);padding:1px 6px;border-radius:99px}
+.nav a[aria-current="page"] .tag{background:rgba(0,0,0,.18);color:inherit}
+.main{min-width:0;display:flex;flex-direction:column;gap:18px}
+.head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
+.head p{color:var(--muted);margin-top:6px;max-width:64ch}
+.head .acts{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;padding:4px 10px;border-radius:99px;border:1px solid var(--line);color:var(--muted);background:var(--surface)}
+.chip b{width:6px;height:6px;border-radius:50%;background:var(--accent)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;min-width:0}
+.card > .top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.card .sub,.sub{color:var(--muted);font-size:12.5px;margin-top:2px}
+.grid{display:grid;gap:16px;min-width:0}
+.g2{grid-template-columns:minmax(0,1.5fr) minmax(0,1fr)}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.gsplit{grid-template-columns:minmax(0,300px) minmax(0,1fr)}
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.btn{background:var(--raise);border:1px solid var(--line);border-radius:8px;padding:7px 12px;cursor:pointer;font-weight:600;font-size:12.5px}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.sm{padding:4px 9px;font-size:12px}
+.btn.danger{color:var(--crit)}
+.btn.danger:hover{border-color:var(--crit)}
+.pill{display:inline-block;font-size:11px;font-weight:600;padding:2px 9px;border-radius:99px;background:var(--raise);color:var(--muted);white-space:nowrap}
+.pill.hot{background:var(--crit-soft);color:var(--crit)}
+.pill.warm{background:var(--warn-soft);color:var(--warn)}
+.pill.cold{background:var(--info-soft);color:var(--info)}
+.pill.ok{background:var(--accent-soft);color:var(--accent-text)}
+.kpi{display:flex;flex-direction:column;gap:2px}
+.kpi strong{font-family:var(--font-display);font-size:26px;line-height:1.1}
+.kpi span{color:var(--muted);font-size:12px}
+.kgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+.kgrid .card{padding:16px}
+.kgrid .kpi strong{font-size:22px}
+.list{display:flex;flex-direction:column}
+.row{display:flex;align-items:center;gap:12px;padding:11px 0;border-top:1px solid var(--line);min-width:0;flex-wrap:wrap}
+.row:first-child{border-top:0;padding-top:0}
+.row .grow{flex:1;min-width:150px}
+.row .grow strong{display:block;font-weight:600}
+.row .grow span{color:var(--muted);font-size:12.5px;display:block}
+.time{font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;width:48px;flex:none}
+.bar{height:8px;border-radius:99px;background:var(--raise);overflow:hidden}
+.bar>i{display:block;height:100%;background:var(--accent);border-radius:99px}
+.alert{border:1px solid var(--warn);background:var(--warn-soft);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.alert h3{color:var(--warn)}
+.note{border:1px dashed var(--line);border-radius:12px;padding:12px 14px;color:var(--muted);font-size:12.5px;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.kanban{display:grid;grid-template-columns:repeat(8,minmax(188px,1fr));gap:12px;overflow-x:auto;padding-bottom:8px}
+.col{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:10px;min-height:170px;align-content:start}
+.col.over{border-color:var(--accent);background:var(--accent-soft)}
+.col header{display:flex;justify-content:space-between;align-items:center;gap:6px}
+.kc{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:6px;width:100%}
+.kc:hover{border-color:var(--accent)}
+.kc[draggable="true"]{cursor:grab}
+.kc strong{font-weight:600;overflow-wrap:anywhere}
+.kc .meta{display:flex;justify-content:space-between;align-items:center;gap:6px;font-size:12px;color:var(--muted);flex-wrap:wrap}
+.kc select{font-size:12px;padding:4px 6px}
+.age{font-size:11px;font-weight:700;font-variant-numeric:tabular-nums}
+.age.ok{color:var(--accent-text)}.age.warn{color:var(--warn)}.age.crit{color:var(--crit)}
+.leadlist{display:flex;flex-direction:column;gap:6px}
+.lbtn{display:flex;justify-content:space-between;align-items:center;gap:8px;text-align:left;background:transparent;border:1px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer;width:100%}
+.lbtn[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.lbtn span{display:block;color:var(--muted);font-size:12px}
+.tl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px}
+.tl li{display:grid;grid-template-columns:14px minmax(0,1fr);gap:10px}
+.tl li::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--accent);margin-top:6px}
+.tl small{color:var(--muted);display:block;font-size:11.5px}
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.field label{font-size:12px;color:var(--muted);font-weight:600}
+.in{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%;min-width:0}
+.in:focus{outline:none;border-color:var(--accent)}
+.in::placeholder{color:var(--muted);opacity:.7}
+.in.err{border-color:var(--crit)}
+.filters{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end}
+.filters .field{min-width:130px}
+.opts{display:flex;flex-wrap:wrap;gap:8px}
+.tog{display:flex;align-items:center;gap:10px;padding:9px 12px;border:1px solid var(--line);border-radius:10px;cursor:pointer;background:var(--bg);text-align:left;width:100%}
+.tog[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.tog .bx{width:16px;height:16px;border-radius:5px;border:2px solid var(--line);flex:none}
+.tog[aria-pressed="true"] .bx{background:var(--accent);border-color:var(--accent)}
+.tog em{margin-left:auto;font-style:normal;font-size:11.5px;color:var(--muted)}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button{padding:6px 12px;border-radius:99px;border:1px solid var(--line);background:transparent;cursor:pointer;font-weight:600;font-size:12.5px;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.hbar{display:grid;grid-template-columns:150px minmax(0,1fr) 40px;align-items:center;gap:10px;width:100%;background:transparent;border:0;padding:6px 0;text-align:left}
+button.hbar{cursor:pointer}
+.hbar .bar{height:12px}
+.hbar .bar>i{background:var(--muted);opacity:.7}
+.hbar[aria-pressed="true"] .lab{color:var(--accent-text);font-weight:700}
+.hbar[aria-pressed="true"] .bar>i,.hbar.solid .bar>i{background:var(--accent);opacity:1}
+.hbar b{text-align:right;font-size:12px}
+.heat{display:grid;grid-template-columns:34px repeat(5,minmax(0,1fr));gap:6px;align-items:center}
+.heat .cell{aspect-ratio:1.6;border-radius:6px;display:grid;place-items:center;font-size:11px;font-weight:600;font-variant-numeric:tabular-nums}
+.funnel{display:flex;flex-direction:column;gap:10px}
+.fstep{display:grid;grid-template-columns:110px minmax(0,1fr) 92px;gap:10px;align-items:center}
+.fstep .bar{height:26px;border-radius:8px}
+.fstep .bar>i{border-radius:8px}
+.trend{display:flex;align-items:flex-end;gap:8px;height:96px}
+.trend div{flex:1;background:var(--accent);border-radius:6px 6px 2px 2px;position:relative;min-width:0}
+.trend div span{position:absolute;top:-17px;left:0;right:0;text-align:center;font-size:10.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.say{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:12px;white-space:pre-wrap;overflow-wrap:anywhere}
+.steps{display:flex;flex-direction:column;gap:12px}
+.step{display:grid;grid-template-columns:54px minmax(0,1fr);gap:12px;align-items:start}
+.step .d{font-family:var(--font-display);font-weight:700;color:var(--accent-text);padding-top:12px}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:780px}
+th{text-align:left;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap;font-weight:600}
+td{padding:11px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+td.r,th.r{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.mbars{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;height:190px}
+.mcol{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0}
+.mpair{display:flex;align-items:flex-end;gap:4px;width:100%;flex:1}
+.mpair i{flex:1;border-radius:5px 5px 2px 2px;min-height:2px;display:block}
+.mpair i.c{background:var(--accent);opacity:.38}
+.mpair i.r{background:var(--accent)}
+.mcol b{font-size:11px;font-variant-numeric:tabular-nums}
+.mcol small{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--muted)}
+.legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;background:var(--accent);vertical-align:-1px}
+.legend span.c::before{opacity:.38}
+.prompt{white-space:pre-wrap;overflow-wrap:anywhere;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px;line-height:1.6;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:16px;max-height:68vh;overflow:auto}
+/* modais */
+.mback{position:fixed;inset:0;background:var(--scrim);z-index:30;overflow-y:auto;display:flex;
+  padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.mdlg{background:var(--surface);border:1px solid var(--line);border-radius:16px;width:100%;max-width:640px;margin:auto;display:flex;flex-direction:column;min-width:0}
+.mh{padding:18px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.mb{padding:18px 20px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.mf{padding:14px 20px;border-top:1px solid var(--line);display:flex;gap:10px;justify-content:flex-end;align-items:center;flex-wrap:wrap}
+.mf .sp{margin-right:auto}
+.pcard{border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:12px;background:var(--bg)}
+.pcard .ph{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.pcard .ph div{display:flex;gap:8px;align-items:center}
+.tot{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.tot .card{padding:12px 14px;background:var(--bg)}
+.tot .card strong{display:block;font-family:var(--font-display);font-size:20px;margin-top:2px}
+.tot .card.cx strong{color:var(--accent-text)}
+.msg{color:var(--crit);font-size:12.5px;min-height:18px}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--accent);color:var(--accent-ink);font-weight:700;padding:9px 16px;border-radius:99px;z-index:40;box-shadow:0 6px 24px rgba(0,0,0,.35)}
+@media (max-width:1020px){
+  .g2,.gsplit{grid-template-columns:minmax(0,1fr)}
+  .g4{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:860px){
+  .app{grid-template-columns:minmax(0,1fr);gap:16px}
+  .side{position:static}
+  .nav{flex-direction:row;overflow-x:auto;gap:6px;padding-bottom:4px}
+  .nav .grp{display:none}
+  .nav a{white-space:nowrap;border:1px solid var(--line)}
+  .g3{grid-template-columns:minmax(0,1fr)}
+  .hbar{grid-template-columns:110px minmax(0,1fr) 34px}
+  .fstep{grid-template-columns:84px minmax(0,1fr) 70px}
+  .two{grid-template-columns:minmax(0,1fr)}
+}
+@media (prefers-reduced-motion:no-preference){
+  .bar>i{transition:width .35s ease}
+  .main>*{animation:in .25s ease both}
+  @keyframes in{from{opacity:.4;transform:translateY(4px)}to{opacity:1;transform:none}}
+}
+</style>
+
+<div class="app">
+  <aside class="side">
+    <div class="brand"><i>CO</i><span>Closer OS <small>PRO</small></span></div>
+    <nav class="nav" id="nav" aria-label="Módulos"></nav>
+  </aside>
+  <main class="main" id="view"></main>
+</div>
+<div id="modal"></div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(function(){
+var PROMPT_MD="# Prompt: Closer OS (monorepo Laravel + React)\n\n## 1. Papel e objetivo\n\nVocê é um engenheiro full-stack sênior. Construa o **Closer OS**, um CRM para closers de vendas consultivas de alto ticket, em **um único repositório** com duas pastas: `backend/` (Laravel) e `frontend/` (React). O produto acompanha leads em um pipeline, registra vendas e separa com rigor **faturamento** de **caixa**, e calcula **comissão por operação**.\n\nTrabalhe por fases (seção 9). Ao fim de cada fase: rode testes e lint, faça um commit com mensagem clara e só então siga. Se uma regra deste documento parecer ambígua, escolha a leitura mais simples, registre em `docs/DECISIONS.md` e siga. Não reabra as decisões de stack da seção 2.\n\nIdioma: interface e mensagens em português do Brasil. Identificadores de código (classes, tabelas, colunas, rotas) em inglês. Os rótulos em português ficam em arquivos de tradução/constantes, nunca espalhados.\n\n## 2. Decisões de stack (já tomadas)\n\n**Frontend: Vite + React 18 + TypeScript (SPA).** Não use Next.js.\nMotivo: é um sistema interno atrás de login, sem SEO e sem páginas públicas. O Next.js traria um segundo servidor Node para hospedar e manter ao lado do Laravel, sem benefício para esse caso. O Vite gera arquivos estáticos que o nginx serve, o desenvolvimento é mais rápido e a arquitetura fica simples: Laravel é a API, React é a interface. Reavalie só se surgir uma página pública com SEO (ex.: landing de captura).\n\nBibliotecas do frontend:\n- React Router (rotas), TanStack Query (dados do servidor), Zustand só para estado de UI local (modais, filtros).\n- Tailwind CSS + componentes próprios no estilo shadcn/ui (Radix para Dialog, Select, Tabs).\n- react-hook-form + zod (formulários e validação), date-fns (datas, fuso America/Sao_Paulo).\n- @dnd-kit para arrastar cards no pipeline (com alternativa por menu \"Mover para\" no celular).\n- Vitest + Testing Library; Playwright para 2 a 3 fluxos ponta a ponta.\n\n**Backend: Laravel 12, PHP 8.3, MySQL 8 (ou PostgreSQL).**\n- Autenticação: Laravel Sanctum no modo SPA (cookie, sem token no localStorage). Em desenvolvimento, o Vite faz proxy de `/api` e `/sanctum` para o Laravel.\n- API REST JSON, versionada em `/api/v1`, com Form Requests, API Resources, Policies e Enums nativos do PHP.\n- Regras financeiras em classes de serviço puras e testáveis (`app/Domain/Finance`), sem depender do Eloquent.\n- **Dinheiro sempre em centavos, inteiro (`bigint`)**, nunca float. O frontend formata com `Intl.NumberFormat('pt-BR')`.\n- Datas em UTC no banco; exibir em America/Sao_Paulo.\n- Testes com Pest. Estilo com Laravel Pint. Análise estática com Larastan (nível 6).\n\n## 3. Estrutura do repositório\n\n```\ncloser-os/\n├─ backend/                 # Laravel 12\n│  ├─ app/Domain/Finance/   # SaleCalculator, PaymentRules (puro, sem Eloquent)\n│  ├─ app/Domain/Pipeline/  # StageTransition, NoShowMetrics\n│  ├─ app/Enums/            # Stage, PaymentMethod, PaymentStatus, LossReason\n│  ├─ app/Http/             # Controllers, Requests, Resources\n│  ├─ database/             # migrations, factories, seeders\n│  └─ tests/                # Unit (Finance, Pipeline) e Feature (API)\n├─ frontend/                # Vite + React + TS\n│  └─ src/{app,features,components,lib,styles}\n├─ docs/DECISIONS.md\n├─ docker-compose.yml       # mysql + mailpit para desenvolvimento\n├─ Makefile                 # make setup | dev | test | lint\n├─ AGENTS.md                # regras para agentes (cópia resumida das seções 4 e 8)\n└─ README.md\n```\n\n## 4. Regras de negócio (invioláveis)\n\n### 4.1 Lead\nO formulário de lead tem **apenas estes campos**:\n- `name` (obrigatório), `phone`, `email`, `description` (descrição pessoal: quem é, contexto, dor), `call_at` (data e hora da call).\n\nNão adicione outros campos ao formulário. Estado de pipeline, qualificação e histórico são mantidos pelo sistema, fora do formulário. Telefone é normalizado para o formato brasileiro e um telefone repetido gera **aviso**, não bloqueio.\n\nA **descrição pessoal do lead** e a **descrição da venda** são campos separados, em tabelas diferentes. Nunca misture.\n\n### 4.2 Operações e comissão\n- Uma **Operação** é uma frente de venda (ex.: Mercado Livre, Visagismo masculino) com um **percentual de comissão** próprio.\n- Valores iniciais (seeder): **Mercado Livre = 7%** e **Visagismo masculino = 10%**.\n- O usuário gerencia operações em Configurações: criar, renomear, alterar o percentual, arquivar. Operação com vendas não pode ser apagada, só arquivada.\n- A operação é escolhida **na venda** (não no formulário do lead).\n- Ao salvar a venda, **grave uma cópia do percentual** em `sales.commission_percent`. Mudar o percentual da operação depois não altera vendas já registradas.\n- **Comissão da venda = caixa líquido recebido × `commission_percent`.** (Premissa: base é o caixa líquido, depois da taxa do gateway. Registre em DECISIONS.md.)\n\n### 4.3 Pipeline\nEtapas (enum `Stage`), nesta ordem no quadro:\n`lead_agendado` → `no_show` → `fup` → `remarcado` → `negociacao` → `fechado`, mais duas etapas finais: `loss` (lead qualificado que não comprou) e `desqualificado` (lead sem perfil).\n\nTransições:\n- Para `fechado`: **exige o preenchimento da venda** (modal da seção 7). Se o usuário cancelar o modal, o lead **permanece na etapa anterior**.\n- Para `loss` ou `desqualificado`: exige um **motivo** (lista configurável: preço, sem tempo, decide com terceiro, concorrente, sem fit, sem resposta) e aceita uma nota.\n- Para `no_show`: registra o evento e incrementa o contador de no-shows do lead.\n- Sair de `fechado` é bloqueado. Para reabrir, é preciso cancelar a venda (ação explícita, só admin, registrada no histórico).\n- Toda mudança grava um registro em `lead_events` (tipo, de, para, payload, autor, data). É dele que saem a linha do tempo, os dias na etapa e as métricas.\n\n**Métricas de no-show** (filtráveis por período de `call_at`):\n- Calls agendadas = leads com `call_at` no período.\n- No-shows = leads com ao menos um evento `no_show` no período.\n- **Taxa de no-show = no-shows ÷ calls agendadas.**\n- Recuperados = leads com no-show que hoje estão em `remarcado`, `fup`, `negociacao` ou `fechado`.\n- **Taxa de desqualificação = desqualificados ÷ leads do período.**\n\n### 4.4 Venda e pagamentos (faturamento x caixa)\nUma venda tem uma lista de pagamentos. Cada pagamento tem forma, valor e, quando aplicável, parcelas, taxa de gateway, status e data de recebimento.\n\n| Forma | Conta como faturamento | Entra no caixa | Status |\n|---|---|---|---|\n| Pix | sim | sim, quando `pago` | Pago ou Pendente (escolha do usuário) |\n| Cartão | sim | sim, quando `pago`, **menos a taxa do gateway** | Pago ou Pendente |\n| Boleto | sim | **não** | **sempre `pago`**, nunca pendente |\n| Contrato | sim | **não** | **sempre `pago`**, nunca pendente |\n\nO sistema **não monitora boleto nem contrato**: eles nunca ficam pendentes e nunca geram caixa. O backend força `status = paid` e ignora data de recebimento e taxa nesses dois casos, mesmo que o cliente envie outra coisa.\n\nFórmulas (em `SaleCalculator`):\n- **Faturamento da venda** = soma do valor de **todos** os pagamentos.\n- **Caixa bruto** = soma dos pagamentos `pix` e `cartao` com status `paid`.\n- **Caixa líquido** = caixa bruto − soma das taxas de gateway desses pagamentos.\n- **A receber** = soma dos pagamentos `pix` e `cartao` com status `pending`.\n- **Caixa no período**: reconhecido pela `received_at` de cada pagamento, não pela data da venda. Faturamento no período: pela data de fechamento da venda.\n\n**Casos de teste obrigatórios (Pest, `tests/Unit/Finance`):**\n1. Venda de R$ 8.000: Pix R$ 2.000 pago + Boleto R$ 6.000 → faturamento 8.000, caixa 2.000, a receber 0. Em Mercado Livre (7%): comissão R$ 140,00.\n2. Cartão R$ 3.000 pago com taxa R$ 90 + Contrato R$ 5.000 → faturamento 8.000, caixa líquido 2.910.\n3. Pix R$ 1.000 pendente + Boleto R$ 4.000 → faturamento 5.000, caixa 0, a receber 1.000.\n4. Boleto enviado como `pending` com taxa e data → salvo como `paid`, sem taxa, sem data, caixa 0.\n5. Alterar o percentual da operação depois não muda a comissão de uma venda já salva.\n6. Pagamento com valor ≤ 0 ou venda sem pagamentos → erro de validação.\n\n## 5. Modelo de dados (migrations)\n\nTodas as tabelas têm `id`, `timestamps` e `user_id` (dono do registro; base para multiusuário no futuro). Valores monetários em centavos.\n\n- `users`: padrão do Laravel + `role` (`admin` | `closer`).\n- `operations`: `name`, `commission_percent` (decimal 5,2), `archived_at`.\n- `leads`: `name`, `phone`, `email`, `description` (text), `call_at`, `stage` (enum), `stage_changed_at`, `no_show_count` (int), `loss_reason`, `loss_note`, `qualification` (json: budget, authority, need, timing).\n- `lead_events`: `lead_id`, `type` (`created`, `edited`, `stage_changed`, `no_show`, `note`, `sale_saved`), `from_stage`, `to_stage`, `payload` (json), `created_at`.\n- `sales`: `lead_id` (único), `operation_id`, `description` (text, **descrição da venda**), `closed_at` (date), `commission_percent` (cópia da operação), `receipt_path` (comprovante, opcional).\n- `payments`: `sale_id`, `method` (`pix|card|boleto|contract`), `amount_cents`, `installments` (só cartão), `gateway_fee_cents` (só cartão), `status` (`paid|pending`), `received_at` (date, só pix/cartão pagos).\n\nÍndices: `leads(user_id, stage)`, `leads(call_at)`, `payments(received_at)`, `sales(closed_at)`.\n\n## 6. API (`/api/v1`, autenticada por Sanctum)\n\n- `POST /auth/login`, `POST /auth/logout`, `GET /me`\n- `GET/POST /operations`, `PATCH /operations/{id}`, `POST /operations/{id}/archive`\n- `GET /leads` (filtros: `q` nome/telefone/email, `stage`, `call_from`, `call_to`), `POST /leads`, `GET /leads/{id}` (inclui eventos e venda), `PATCH /leads/{id}` (só os 5 campos), `DELETE /leads/{id}`\n- `POST /leads/{id}/transition` com `{ stage, loss_reason?, loss_note?, sale? }`. Para `fechado`, o payload `sale` vem junto e a venda é criada **na mesma transação**.\n- `PATCH /leads/{id}/qualification`, `POST /leads/{id}/notes`\n- `GET /sales` (filtros: `from`, `to`, `q`, `operation_id`), `GET/PATCH /sales/{id}`, `DELETE /sales/{id}` (cancela a venda e reabre o lead; só admin)\n- `GET /metrics/finance?from&to&q&operation_id` → faturamento, caixa líquido, a receber, ticket médio, comissão, série mensal (contratado x caixa) e total por operação.\n- `GET /metrics/pipeline?from&to` → calls agendadas, no-shows, taxa de no-show, recuperados, desqualificados, taxa de desqualificação, funil e mapa de calls por dia da semana.\n- `POST /sales/{id}/receipt` (upload PNG/JPG/WEBP até 5 MB, opcional)\n\nResposta de venda e de métricas já traz faturamento, caixa líquido, a receber e comissão calculados pelo backend. O frontend **nunca recalcula** valores oficiais; só mostra uma prévia em tempo real no modal, usando as mesmas fórmulas.\n\n## 7. Frontend\n\nVisual: **preto e verde estilo Spotify**, modo escuro como padrão e modo claro suportado. Tokens em CSS variables: fundo `#070a08`, superfície `#0e1311`, borda `#212b26`, verde `#1ed760`, fonte de títulos Space Grotesk, texto Inter. Números com `tabular-nums`.\n\nNavegação lateral: Hoje · Faturamento e caixa · Pipeline · Lead 360 · Cadência de FUP · Scorecard de calls · Banco de objeções · Perdas e recuperação · Metas e ritmo · Configurações (Operações e comissão).\n\nTelas e modais:\n- **Hoje**: agenda de calls do dia (ações: abrir, marcar no-show, fechar venda), alerta de leads sem data de call futura ou em no-show para remarcar, resumo do mês (faturamento e caixa).\n- **Pipeline (kanban)** com as 8 etapas, arrastar e soltar, dias na etapa por card (verde, amarelo, vermelho), busca por nome e filtro de período. Bloco de métricas de no-show e desqualificação.\n- **Modal Editar lead**: nome, telefone, e-mail, descrição, data/hora da call. Se o lead está em `fechado`, mostra o resumo financeiro da venda e o botão \"Editar venda\". Botão \"Abrir Lead 360\".\n- **Modal Registrar venda** (abre ao mover para Fechado e ao editar a venda), no padrão dos cards de pagamento do CRM atual do dono:\n  - Operação (mostra o percentual) e data de fechamento.\n  - Lista de **Pagamentos**: cada card tem forma (Pix, Cartão, Boleto, Contrato), valor, e conforme a forma: parcelas e taxa do gateway (cartão), status Pago/Pendente (Pix e cartão), data de recebimento. Boleto e contrato mostram o aviso \"Conta como faturamento. Não entra no caixa. Sempre pago.\" Selo no card: `ENTRA NO CAIXA` ou `SÓ FATURAMENTO`.\n  - Botão \"Adicionar pagamento\".\n  - **Descrição da venda** (campo próprio, separado da descrição pessoal do lead).\n  - Rodapé com **Faturamento (valor total da venda)**, **Caixa gerado (líquido)** e **Comissão**, atualizados em tempo real.\n  - Cancelar (o lead volta à etapa anterior) e Salvar venda.\n- **Modal Motivo** para `loss` e `desqualificado`.\n- **Lead 360**: pontuação e temperatura (quente, morno, frio) pela qualificação BANT e pelo engajamento, descrição pessoal, descrição da venda e resumo financeiro (se vendido), linha do tempo e anotação rápida.\n- **Faturamento e caixa**: filtros (busca por cliente, período com atalhos, operação), cinco indicadores (faturamento contratado, caixa recebido, a receber, ticket médio, comissão), gráfico de contratado x caixa dos últimos 6 meses, total por operação e tabela de vendas com ação de editar.\n- **Configurações → Operações**: lista editável de operações com nome e percentual.\n\nAcessibilidade e qualidade: foco visível, modais com `Esc` e retorno de foco, layout funcional a 400 px de largura sem rolagem horizontal da página, estados de carregamento, vazio e erro em toda lista.\n\n## 8. Qualidade\n\n- `make test` roda Pest (unit + feature) e Vitest. `make lint` roda Pint, Larastan, ESLint e `tsc --noEmit`.\n- Cobertura obrigatória para: `SaleCalculator`, regras de pagamento, transições de etapa, métricas de no-show e a transação que fecha a venda.\n- Teste de feature: mover para `fechado` sem `sale` retorna 422; com `sale` válida cria venda e muda a etapa em uma transação; falha na venda não altera a etapa.\n- CI no GitHub Actions: instalar, lint e testes em cada push.\n- Seeders: operações padrão (7% e 10%), um usuário admin e um conjunto de leads e vendas **marcado como exemplo** para desenvolvimento.\n\n## 9. Plano em fases\n\n1. **Base**: monorepo, Docker, Makefile, Laravel + Sanctum, Vite + Tailwind, login funcionando, CI.\n2. **Operações e leads**: migrations, CRUD de operações, CRUD de leads com os 5 campos, busca.\n3. **Pipeline**: etapas, transições, motivos, eventos, kanban com arrastar e soltar, métricas de no-show.\n4. **Vendas e financeiro**: `SaleCalculator` com os 6 testes, modal de venda, transição para `fechado` transacional, edição e cancelamento de venda.\n5. **Faturamento e caixa**: endpoint de métricas, tela com filtros, gráfico e tabela.\n6. **Inteligência comercial**: Lead 360, Hoje, Scorecard de calls, Banco de objeções, Cadência de FUP, Perdas e recuperação, Metas e ritmo.\n7. **Acabamento**: acessibilidade, responsivo, estados vazios, README e DECISIONS.md.\n\nCritério de aceite final: o exemplo da seção 4.4 (venda de R$ 8.000 com R$ 2.000 de caixa) aparece correto no modal, na tela de Faturamento e no endpoint de métricas, com a comissão de R$ 140,00 em Mercado Livre.\n\n## 10. Premissas a confirmar com o dono (registre e siga)\n\n- A comissão incide sobre o **caixa líquido** (depois da taxa do gateway), reconhecida conforme o caixa entra.\n- Boleto e contrato nunca entram no caixa e nunca ficam pendentes.\n- Um lead tem no máximo uma venda.\n- O sistema começa com um usuário; `user_id` fica nas tabelas para permitir equipes depois.\n";
+
+var ICON={
+  hoje:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  faturamento:'<path d="M12 3v18"/><path d="M16 7.5c-.8-1.2-2.3-2-4-2-2.3 0-4 1.2-4 3 0 4 8 2 8 6 0 1.8-1.7 3-4 3-1.8 0-3.3-.8-4.2-2"/>',
+  pipeline:'<rect x="3" y="4" width="5" height="16" rx="1"/><rect x="10" y="4" width="5" height="10" rx="1"/><rect x="17" y="4" width="4" height="6" rx="1"/>',
+  lead:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>',
+  cadencia:'<path d="M21 12a9 9 0 11-3-6.7"/><path d="M21 4v5h-5"/>',
+  calls:'<path d="M4 14v-2a8 8 0 0116 0v2"/><rect x="3" y="14" width="4" height="6" rx="1"/><rect x="17" y="14" width="4" height="6" rx="1"/>',
+  objecoes:'<path d="M4 5h16v11H9l-5 4z"/>',
+  perdas:'<path d="M3 6l6 6 4-4 8 8"/><path d="M15 16h6v-6"/>',
+  ritmo:'<path d="M3 12h4l3-8 4 16 3-8h4"/>',
+  operacoes:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>',
+  prompt:'<path d="M8 6l-5 6 5 6"/><path d="M16 6l5 6-5 6"/>'
+};
+var MODS=[
+  {id:'hoje',t:'Hoje',g:'Operação'},
+  {id:'faturamento',t:'Faturamento e caixa'},
+  {id:'pipeline',t:'Pipeline'},
+  {id:'lead',t:'Lead 360'},
+  {id:'cadencia',t:'Cadência de FUP'},
+  {id:'calls',t:'Scorecard de calls',g:'Inteligência comercial'},
+  {id:'objecoes',t:'Banco de objeções'},
+  {id:'perdas',t:'Perdas e recuperação'},
+  {id:'ritmo',t:'Metas e ritmo'},
+  {id:'operacoes',t:'Operações e comissão',g:'Configurações',tag:'novo'},
+  {id:'prompt',t:'Prompt do agente',g:'Documentação',tag:'novo'}
+];
+var ETAPAS=[['lead_agendado','Lead Agendado'],['no_show','No-show'],['fup','FUP'],['remarcado','Remarcado'],['negociacao','Negociação'],['fechado','Fechado'],['loss','Loss'],['desqualificado','Desqualificado']];
+var ENOME={};ETAPAS.forEach(function(e){ENOME[e[0]]=e[1];});
+var MOTIVOS=['Preço','Sem tempo / timing','Decide com terceiro','Concorrente','Sem fit','Sem resposta'];
+var REATIVAR={'Preço':'Voltar com opção de entrada menor ou parcelamento maior.','Sem tempo / timing':'Retomar na data que o lead indicou, com uma pergunta curta.','Decide com terceiro':'Propor uma call de 15 minutos com quem decide.','Concorrente':'Perguntar como está a experiência e mostrar o diferencial.','Sem fit':'Não reativar. Manter como desqualificado.','Sem resposta':'Enviar a cadência de lead frio.'};
+var METODOS=[['pix','Pix'],['cartao','Cartão'],['boleto','Boleto'],['contrato','Contrato']];
+var MESES=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+var TODAY=new Date();
+var COARSE=false;try{COARSE=window.matchMedia('(pointer:coarse)').matches;}catch(e){}
+
+var S={leads:[],sales:[],ops:[],mode:'loading',slow:false,
+  leadId:'',lq:'',pq:'',pFrom:'',pTo:'',
+  fFrom:'',fTo:'',preset:'mes',fQ:'',fOp:'',nsl:'',
+  lossSel:'',objQ:'',cadSit:'poscall',cadName:'',calls:{},ratio:42,delArm:'',modal:null};
+var DB=null;
+
+/* ---------- utilidades ---------- */
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function norm(s){return String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');}
+function iso(d){return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2);}
+function brl(c){return ((c||0)/100).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});}
+function kfmt(c){var v=(c||0)/100;return v>=1000?'R$ '+(v/1000).toFixed(1).replace('.',',')+'k':'R$ '+Math.round(v);}
+function money(str){var t=String(str||'').replace(/[^\d.,]/g,'');if(t.indexOf(',')>-1)t=t.replace(/\./g,'').replace(',','.');else if((t.match(/\./g)||[]).length>1)t=t.replace(/\./g,'');var n=parseFloat(t);return isFinite(n)?n:0;}
+function toCents(str){return Math.round(money(str)*100);}
+function fromCents(c){return c?(c/100).toFixed(2).replace('.',','):'';}
+function fdate(s){return s?s.slice(8,10)+'/'+s.slice(5,7)+'/'+s.slice(2,4):'';}
+function fcall(s){return s?s.slice(8,10)+'/'+s.slice(5,7)+' '+s.slice(11,16):'';}
+function sum(a,f){return a.reduce(function(t,x){return t+(f(x)||0);},0);}
+function newId(){return 'x'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+function strip(o){var r={};Object.keys(o).forEach(function(k){if(k!=='id'&&o[k]!==undefined)r[k]=o[k];});return r;}
+function each(sel,fn){Array.prototype.forEach.call(document.querySelectorAll(sel),fn);}
+function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.hidden=false;clearTimeout(toast.h);toast.h=setTimeout(function(){t.hidden=true;},1800);}
+function copy(text){
+  function fb(){try{var a=document.createElement('textarea');a.value=text;a.style.position='fixed';a.style.opacity='0';document.body.appendChild(a);a.select();document.execCommand('copy');document.body.removeChild(a);toast('Copiado');}catch(e){toast('Selecione e copie o texto');}}
+  try{navigator.clipboard.writeText(text).then(function(){toast('Copiado');},fb);}catch(e){fb();}
+}
+function lead(id){return S.leads.filter(function(l){return l.id===id;})[0];}
+function sale(id){return S.sales.filter(function(s){return s.id===id;})[0];}
+function saleOfLead(id){return S.sales.filter(function(s){return s.leadId===id;})[0];}
+function op(id){return S.ops.filter(function(o){return o.id===id;})[0];}
+function activeOps(){return S.ops.filter(function(o){return !o.arquivada;});}
+function isOpen(l){return l.etapa!=='fechado'&&l.etapa!=='loss'&&l.etapa!=='desqualificado';}
+function dias(l){return Math.max(0,Math.floor((Date.now()-(l.etapaDesde||l.criadoEm||Date.now()))/864e5));}
+function ageCls(d){return d>=6?'crit':d>=3?'warn':'ok';}
+function temp(sc){return sc>=70?['Quente','hot']:sc>=40?['Morno','warm']:['Frio','cold'];}
+function score(l){var b=(l.bant||[0,0,0,0]).reduce(function(a,x){return a+(x?20:0);},0);return b+Math.min(20,Math.max(0,(l.timeline||[]).length-1)*4);}
+function ring(p,size,label){
+  var r=26,c=2*Math.PI*r,o=c*(1-p/100);
+  return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 64 64" role="img" aria-label="'+label+'">'
+   +'<circle cx="32" cy="32" r="'+r+'" fill="none" stroke="var(--raise)" stroke-width="7"/>'
+   +'<circle cx="32" cy="32" r="'+r+'" fill="none" stroke="var(--accent)" stroke-width="7" stroke-linecap="round" stroke-dasharray="'+c.toFixed(1)+'" stroke-dashoffset="'+o.toFixed(1)+'" transform="rotate(-90 32 32)"/>'
+   +'<text x="32" y="37" text-anchor="middle" font-family="Space Grotesk,sans-serif" font-weight="700" font-size="16" fill="var(--fg)">'+Math.round(p)+'</text></svg>';
+}
+function setPreset(k){var y=TODAY.getFullYear(),m=TODAY.getMonth();
+  if(k==='mes'){S.fFrom=iso(new Date(y,m,1));S.fTo=iso(new Date(y,m+1,0));}
+  else if(k==='ant'){S.fFrom=iso(new Date(y,m-1,1));S.fTo=iso(new Date(y,m,0));}
+  else if(k==='30'){S.fFrom=iso(new Date(y,m,TODAY.getDate()-29));S.fTo=iso(TODAY);}
+  else{S.fFrom='';S.fTo='';}
+  S.preset=k;}
+setPreset('mes');
+
+/* ---------- regras financeiras ---------- */
+function isCash(p){return p.metodo==='pix'||p.metodo==='cartao';}
+function normPay(p){
+  var m=p.metodo,v=toCents(p.valor);
+  if(m==='boleto'||m==='contrato')return {metodo:m,valor:v,parcelas:1,taxa:0,status:'pago',recebidoEm:''};
+  if(m==='pix')return {metodo:m,valor:v,parcelas:1,taxa:0,status:p.status,recebidoEm:p.status==='pago'?p.recebidoEm:''};
+  return {metodo:m,valor:v,parcelas:parseInt(p.parcelas,10)||1,taxa:toCents(p.taxa),status:p.status,recebidoEm:p.status==='pago'?p.recebidoEm:''};
+}
+function calc(pags){
+  var fat=0,bruto=0,taxa=0,aberto=0;
+  (pags||[]).forEach(function(p){
+    fat+=p.valor;
+    if(isCash(p)){if(p.status==='pago'){bruto+=p.valor;taxa+=(p.metodo==='cartao'?(p.taxa||0):0);}else aberto+=p.valor;}
+  });
+  return {fat:fat,bruto:bruto,taxa:taxa,caixa:bruto-taxa,aberto:aberto};
+}
+function fin(from,to,q,opId){
+  function inR(d){return d&&(!from||d>=from)&&(!to||d<=to);}
+  var all=S.sales.filter(function(s){return (!q||norm(s.leadNome).indexOf(q)>-1)&&(!opId||s.opId===opId);});
+  var per=all.filter(function(s){return inR(s.fechadoEm);});
+  var fat=sum(per,function(s){return calc(s.pagamentos).fat;});
+  var caixa=0,com=0;
+  all.forEach(function(s){(s.pagamentos||[]).forEach(function(p){
+    if(isCash(p)&&p.status==='pago'&&inR(p.recebidoEm)){var n=p.valor-(p.metodo==='cartao'?(p.taxa||0):0);caixa+=n;com+=Math.round(n*(s.pct||0)/100);}
+  });});
+  var aberto=sum(all,function(s){return calc(s.pagamentos).aberto;});
+  return {all:all,per:per,fat:fat,caixa:caixa,com:com,aberto:aberto,ticket:per.length?Math.round(fat/per.length):0};
+}
+
+/* ---------- camada de dados ---------- */
+var COL={leads:'leads',sales:'vendas',ops:'operacoes'};
+function arr(c){return S[c];}
+function saveErr(e){toast(e&&e.code==='invalid_argument'?'Sem permissão para salvar':'Não foi possível salvar');}
+function put(c,o){
+  if(!o.id)o.id=newId();
+  if(DB)return DB.doc(COL[c]+'/'+o.id).set(strip(o)).catch(saveErr);
+  var a=arr(c),i=a.map(function(x){return x.id;}).indexOf(o.id);if(i<0)a.push(o);else a[i]=o;
+  return Promise.resolve();
+}
+function patch(c,id,p){
+  if(DB)return DB.doc(COL[c]+'/'+id).update(p).catch(saveErr);
+  var o=arr(c).filter(function(x){return x.id===id;})[0];if(o)Object.keys(p).forEach(function(k){o[k]=p[k];});
+  return Promise.resolve();
+}
+function del(c,id){
+  if(DB)return DB.doc(COL[c]+'/'+id).delete().catch(saveErr);
+  S[c]=S[c].filter(function(x){return x.id!==id;});return Promise.resolve();
+}
+function addEvt(l,text){return (l.timeline||[]).concat([{t:Date.now(),x:text}]).slice(-60);}
+
+/* ---------- movimentação no pipeline ---------- */
+function moveLead(id,etapa){
+  var l=lead(id);if(!l||l.etapa===etapa)return;
+  if(l.etapa==='fechado'){toast('Lead fechado. Edite ou exclua a venda para reabrir.');return;}
+  if(etapa==='fechado'){openSale(l.id,null);return;}
+  if(etapa==='loss'||etapa==='desqualificado'){S.modal={type:'motivo',leadId:id,etapa:etapa,motivo:MOTIVOS[0],nota:''};renderModal();return;}
+  var p={etapa:etapa,etapaDesde:Date.now(),timeline:addEvt(l,'Movido para '+ENOME[etapa])};
+  if(etapa==='no_show'){p.noShows=(l.noShows||0)+1;p.timeline=addEvt(l,'No-show registrado');}
+  patch('leads',id,p).then(function(){toast(ENOME[etapa]);render();});
+  render();
+}
+
+/* ---------- views ---------- */
+function head(t,p,right){return '<div class="head"><div><h1>'+t+'</h1><p>'+p+'</p></div><div class="acts">'+(right||'')+statusChip()+'</div></div>';}
+function statusChip(){
+  var t=S.mode==='db'?'Salvo no banco':S.mode==='local'?'Sem banco: dados só nesta aba':(S.slow?'Banco não respondeu ainda':'Carregando dados');
+  return '<span class="chip"><b></b>'+t+'</span>';
+}
+function hasEx(){return S.leads.some(function(l){return l.exemplo;})||S.sales.some(function(s){return s.exemplo;});}
+
+function vHoje(){
+  var td=iso(TODAY),ym=td.slice(0,7);
+  var ag=S.leads.filter(function(l){return l.callAt&&l.callAt.slice(0,10)===td;}).sort(function(a,b){return a.callAt<b.callAt?-1:1;});
+  var sem=S.leads.filter(function(l){return isOpen(l)&&(!l.callAt||l.callAt.slice(0,10)<td||l.etapa==='no_show')&&!(l.callAt&&l.callAt.slice(0,10)===td);});
+  var f=fin(ym+'-01',ym+'-31','','');
+  var h=head('Bom dia, Thalis','Sua agenda de calls, o que precisa de nova data e o resumo financeiro do mês.','<button class="btn primary" data-act="newlead">Novo lead</button>');
+  if(hasEx())h+='<div class="note"><span>Há dados de exemplo no sistema (leads e vendas marcados como exemplo).</span><button class="btn sm" data-act="rmex">Remover exemplos</button></div>';
+  h+='<div class="kgrid"><section class="card kpi"><div class="eyebrow">Faturamento do mês</div><strong class="num">'+brl(f.fat)+'</strong><span>contratado</span></section>'
+   +'<section class="card kpi"><div class="eyebrow">Caixa do mês</div><strong class="num" style="color:var(--accent-text)">'+brl(f.caixa)+'</strong><span>líquido recebido</span></section>'
+   +'<section class="card kpi"><div class="eyebrow">Calls hoje</div><strong class="num">'+ag.length+'</strong><span>agendadas</span></section>'
+   +'<section class="card kpi"><div class="eyebrow">Precisam de nova data</div><strong class="num" style="color:'+(sem.length?'var(--warn)':'inherit')+'">'+sem.length+'</strong><span>sem call futura ou no-show</span></section></div>';
+  h+='<div class="grid g2"><section class="card"><div class="top"><div><h2>Agenda de hoje</h2><p class="sub">Marque o resultado de cada call sem sair da tela.</p></div></div><div class="list">'
+   +(ag.length?ag.map(function(l){return '<div class="row"><span class="time">'+l.callAt.slice(11,16)+'</span><div class="grow"><strong>'+esc(l.nome)+'</strong><span>'+ENOME[l.etapa]+(l.noShows?' · '+l.noShows+' no-show(s)':'')+'</span></div>'
+     +'<button class="btn sm" data-act="editlead" data-v="'+l.id+'">Abrir</button>'
+     +(l.etapa==='fechado'?'<span class="pill ok">Fechado</span>':'<button class="btn sm" data-act="noshow" data-v="'+l.id+'">No-show</button><button class="btn sm primary" data-act="fechou" data-v="'+l.id+'">Fechou</button>')+'</div>';}).join(''):'<p class="muted">Nenhuma call marcada para hoje. Use "Novo lead" para agendar.</p>')
+   +'</div></section>'
+   +'<section class="alert"><h3>Precisam de nova data</h3>'
+   +(sem.length?sem.map(function(l){return '<div class="row" style="padding:6px 0;border-color:var(--warn)"><div class="grow"><strong>'+esc(l.nome)+'</strong><span>'+ENOME[l.etapa]+' · '+(l.callAt?'call em '+fcall(l.callAt):'sem call marcada')+'</span></div><button class="btn sm" data-act="editlead" data-v="'+l.id+'">Definir</button></div>';}).join(''):'<p class="muted">Todos os leads em aberto têm uma call futura.</p>')
+   +'</section></div>';
+  return h;
+}
+
+/* --- Faturamento --- */
+function vFat(){
+  var q=norm(S.fQ),f=fin(S.fFrom,S.fTo,q,S.fOp);
+  var rows=f.per.slice().sort(function(a,b){return a.fechadoEm<b.fechadoEm?1:-1;});
+  var months=[];
+  for(var i=5;i>=0;i--){var d=new Date(TODAY.getFullYear(),TODAY.getMonth()-i,1);var k=iso(d).slice(0,7);var c=0,r=0;
+    f.all.forEach(function(s){if((s.fechadoEm||'').slice(0,7)===k)c+=calc(s.pagamentos).fat;
+      (s.pagamentos||[]).forEach(function(p){if(isCash(p)&&p.status==='pago'&&(p.recebidoEm||'').slice(0,7)===k)r+=p.valor-(p.metodo==='cartao'?(p.taxa||0):0);});});
+    months.push({m:MESES[d.getMonth()],c:c,r:r});}
+  var mx=Math.max.apply(null,months.map(function(x){return Math.max(x.c,x.r);}).concat([1]));
+  var anyM=months.some(function(x){return x.c||x.r;});
+  var byO={};f.per.forEach(function(s){byO[s.opNome]=(byO[s.opNome]||0)+calc(s.pagamentos).fat;});
+  var ol=Object.keys(byO).map(function(k){return [k,byO[k]];}).sort(function(a,b){return b[1]-a[1];});
+  var cand=S.leads.filter(function(l){return l.etapa!=='fechado';});
+
+  var h=head('Faturamento e caixa','Faturamento é tudo que foi contratado. Caixa é só o que entrou por Pix e cartão, já sem a taxa do gateway.');
+  h+='<section class="card"><div class="filters"><div class="field" style="flex:1;min-width:200px"><label for="fq">Buscar cliente</label><input class="in" id="fq" data-in="fQ" value="'+esc(S.fQ)+'" placeholder="Nome do cliente"></div>'
+   +'<div class="field"><label for="ff">De</label><input class="in" type="date" id="ff" data-in="fFrom" value="'+S.fFrom+'"></div>'
+   +'<div class="field"><label for="ft">Até</label><input class="in" type="date" id="ft" data-in="fTo" value="'+S.fTo+'"></div>'
+   +'<div class="field"><label for="fo">Operação</label><select class="in" id="fo" data-in="fOp"><option value="">Todas</option>'+S.ops.map(function(o){return '<option value="'+o.id+'"'+(o.id===S.fOp?' selected':'')+'>'+esc(o.nome)+'</option>';}).join('')+'</select></div></div>'
+   +'<div class="seg" style="margin-top:12px">'+[['mes','Este mês'],['ant','Mês passado'],['30','Últimos 30 dias'],['tudo','Tudo']].map(function(p){return '<button data-act="pre" data-v="'+p[0]+'" aria-pressed="'+(S.preset===p[0])+'">'+p[1]+'</button>';}).join('')+'</div></section>';
+  h+='<div class="kgrid">'
+   +'<section class="card kpi"><div class="eyebrow">Faturamento contratado</div><strong class="num">'+brl(f.fat)+'</strong><span>'+f.per.length+' venda(s) no período</span></section>'
+   +'<section class="card kpi"><div class="eyebrow">Caixa líquido</div><strong class="num" style="color:var(--accent-text)">'+brl(f.caixa)+'</strong><span>Pix e cartão pagos no período</span></section>'
+   +'<section class="card kpi"><div class="eyebrow">A receber</div><strong class="num" style="color:'+(f.aberto?'var(--warn)':'inherit')+'">'+brl(f.aberto)+'</strong><span>Pix e cartão pendentes</span></section>'
+   +'<section class="card kpi"><div class="eyebrow">Ticket médio</div><strong class="num">'+brl(f.ticket)+'</strong><span>faturamento / vendas</span></section>'
+   +'<section class="card kpi"><div class="eyebrow">Comissão gerada</div><strong class="num">'+brl(f.com)+'</strong><span>% da operação sobre o caixa líquido</span></section></div>';
+  h+='<div class="grid g2"><section class="card"><div class="top"><div><h2>Contratado x caixa</h2><p class="sub">Últimos 6 meses</p></div><div class="legend"><span class="c">Contratado</span><span>Caixa</span></div></div>'
+   +(anyM?'<div class="mbars">'+months.map(function(x){return '<div class="mcol"><div class="mpair"><i class="c" style="height:'+(x.c/mx*100)+'%" title="Contratado '+brl(x.c)+'"></i><i class="r" style="height:'+(x.r/mx*100)+'%" title="Caixa '+brl(x.r)+'"></i></div><b>'+kfmt(x.r)+'</b><small>'+x.m+'</small></div>';}).join('')+'</div>':'<p class="muted">Registre a primeira venda para ver a evolução mês a mês.</p>')
+   +'</section><section class="card"><div class="top"><h2>Contratado por operação</h2></div>'
+   +(ol.length?ol.map(function(n){return '<div class="hbar solid"><span class="lab">'+esc(n[0])+'</span><span class="bar"><i style="width:'+(n[1]/ol[0][1]*100)+'%"></i></span><b class="num">'+kfmt(n[1])+'</b></div>';}).join(''):'<p class="muted">Nenhuma venda no período.</p>')
+   +'</section></div>';
+  h+='<section class="card"><div class="top"><div><h2>Vendas do período</h2><p class="sub">'+rows.length+' registro(s). A venda nasce no pipeline, quando o lead vai para Fechado.</p></div>'
+   +'<div class="filters"><div class="field"><label for="nsl">Registrar venda para</label><select class="in" id="nsl" data-in="nsl"><option value="">Escolha um lead</option>'+cand.map(function(l){return '<option value="'+l.id+'"'+(l.id===S.nsl?' selected':'')+'>'+esc(l.nome)+'</option>';}).join('')+'</select></div><button class="btn primary" data-act="newsale">Abrir venda</button></div></div>';
+  if(!rows.length)h+='<p class="muted">Nenhuma venda neste período. Amplie o período ou registre uma venda.</p>';
+  else h+='<div class="tbl"><table><thead><tr><th>Fechamento</th><th>Cliente</th><th class="r">Faturamento</th><th class="r">Caixa líquido</th><th class="r">A receber</th><th class="r">Comissão</th><th></th></tr></thead><tbody>'
+   +rows.map(function(s){var c=calc(s.pagamentos),com=Math.round(c.caixa*(s.pct||0)/100);
+     return '<tr><td class="num">'+fdate(s.fechadoEm)+'</td><td><strong>'+esc(s.leadNome)+'</strong><div class="muted" style="font-size:12px">'+esc(s.opNome)+' · '+(s.pct||0)+'%</div></td>'
+      +'<td class="r">'+brl(c.fat)+'</td><td class="r">'+brl(c.caixa)+'</td><td class="r">'+(c.aberto?'<span class="pill warm">'+brl(c.aberto)+'</span>':'—')+'</td><td class="r">'+brl(com)+'</td>'
+      +'<td style="text-align:right;white-space:nowrap"><button class="btn sm" data-act="editsale" data-v="'+s.id+'">Editar</button></td></tr>';}).join('')+'</tbody></table></div>';
+  return h+'</section>';
+}
+
+/* --- Pipeline --- */
+function vPipeline(){
+  var q=norm(S.pq);
+  var LS=S.leads.filter(function(l){
+    var okQ=!q||norm(l.nome).indexOf(q)>-1,d=(l.callAt||'').slice(0,10);
+    var okD=(!S.pFrom||(d&&d>=S.pFrom))&&(!S.pTo||(d&&d<=S.pTo));
+    return okQ&&okD;});
+  var ag=LS.length,ns=LS.filter(function(l){return l.noShows>0;}),rec=ns.filter(function(l){return ['remarcado','fup','negociacao','fechado'].indexOf(l.etapa)>-1;});
+  var dq=LS.filter(function(l){return l.etapa==='desqualificado';});
+  var pct=function(a,b){return b?Math.round(a/b*100)+'%':'0%';};
+  var h=head('Pipeline','Arraste os cards entre as etapas. Ir para Fechado abre a venda; Loss e Desqualificado pedem o motivo.','<button class="btn primary" data-act="newlead">Novo lead</button>');
+  h+='<section class="card"><div class="filters"><div class="field" style="flex:1;min-width:200px"><label for="pq">Buscar lead</label><input class="in" id="pq" data-in="pq" value="'+esc(S.pq)+'" placeholder="Nome do lead"></div>'
+   +'<div class="field"><label for="pf">Call de</label><input class="in" type="date" id="pf" data-in="pFrom" value="'+S.pFrom+'"></div>'
+   +'<div class="field"><label for="pt">Call até</label><input class="in" type="date" id="pt" data-in="pTo" value="'+S.pTo+'"></div>'
+   +((S.pFrom||S.pTo||S.pq)?'<button class="btn" data-act="pclear">Limpar</button>':'')+'</div></section>';
+  h+='<div class="kgrid">'
+   +'<section class="card kpi"><div class="eyebrow">Calls agendadas</div><strong class="num">'+ag+'</strong><span>leads com call no filtro</span></section>'
+   +'<section class="card kpi"><div class="eyebrow">No-shows</div><strong class="num" style="color:'+(ns.length?'var(--crit)':'inherit')+'">'+ns.length+'</strong><span>leads que faltaram</span></section>'
+   +'<section class="card kpi"><div class="eyebrow">Taxa de no-show</div><strong class="num">'+pct(ns.length,ag)+'</strong><span>no-shows / agendadas</span></section>'
+   +'<section class="card kpi"><div class="eyebrow">Recuperados</div><strong class="num" style="color:var(--accent-text)">'+rec.length+'</strong><span>voltaram ao fluxo após faltar</span></section>'
+   +'<section class="card kpi"><div class="eyebrow">Desqualificados</div><strong class="num">'+dq.length+'</strong><span>'+pct(dq.length,ag)+' dos leads</span></section></div>';
+  h+='<div class="kanban">'+ETAPAS.map(function(e){var ls=LS.filter(function(l){return l.etapa===e[0];});
+    return '<div class="col" data-stage="'+e[0]+'"><header><h3>'+e[1]+'</h3><span class="pill num">'+ls.length+'</span></header>'
+    +(ls.length?ls.map(function(l){var d=dias(l),open=isOpen(l),s=saleOfLead(l.id);
+      return '<div class="kc" draggable="true" tabindex="0" role="button" data-act="editlead" data-v="'+l.id+'" data-drag="'+l.id+'"><strong>'+esc(l.nome)+'</strong>'
+       +'<div class="meta"><span>'+(l.callAt?fcall(l.callAt):'Sem call')+'</span>'+(open?'<span class="age '+ageCls(d)+'">'+d+'d</span>':'')+'</div>'
+       +'<div class="meta">'+(l.noShows?'<span class="pill hot">'+l.noShows+' no-show</span>':'<span></span>')+(s?'<span class="pill ok">'+kfmt(calc(s.pagamentos).fat)+'</span>':(l.motivo?'<span class="pill">'+esc(l.motivo)+'</span>':''))+'</div>'
+       +(COARSE&&l.etapa!=='fechado'?'<select class="in" data-mv="'+l.id+'" aria-label="Mover '+esc(l.nome)+'">'+ETAPAS.map(function(x){return '<option value="'+x[0]+'"'+(x[0]===l.etapa?' selected':'')+'>'+x[1]+'</option>';}).join('')+'</select>':'')+'</div>';}).join(''):'<span class="muted" style="font-size:12.5px">Nenhum lead</span>')
+    +'</div>';}).join('')+'</div>';
+  return h;
+}
+
+/* --- Lead 360 --- */
+function vLead(){
+  var lq=norm(S.lq);
+  var list=S.leads.filter(function(x){return !lq||norm(x.nome).indexOf(lq)>-1;});
+  var l=lead(S.leadId)||S.leads[0];
+  var h=head('Lead 360','Tudo sobre uma pessoa em uma tela: qualificação, descrição, venda e histórico.');
+  h+='<div class="grid gsplit"><section class="card"><h3 style="margin-bottom:10px">Leads</h3><input class="in" id="lq" data-in="lq" value="'+esc(S.lq)+'" placeholder="Buscar por nome" aria-label="Buscar lead por nome" style="margin-bottom:10px"><div class="leadlist">'
+   +(list.length?list.map(function(x){var t=temp(score(x));return '<button class="lbtn" data-act="sel" data-v="'+x.id+'" aria-pressed="'+(l&&x.id===l.id)+'"><div><strong>'+esc(x.nome)+'</strong><span>'+ENOME[x.etapa]+'</span></div><span class="pill '+t[1]+' num">'+score(x)+'</span></button>';}).join(''):'<p class="muted">Nenhum lead encontrado.</p>')+'</div></section>';
+  if(!l)return h+'<section class="card"><p class="muted">Cadastre o primeiro lead para ver o Lead 360.</p><p style="margin-top:12px"><button class="btn primary" data-act="newlead">Novo lead</button></p></section></div>';
+  var sc=score(l),tp=temp(sc),b=l.bant||[0,0,0,0],s=saleOfLead(l.id);
+  var BN=['Budget: tem verba','Authority: decide sozinho','Need: dor clara e urgente','Timing: prazo definido'];
+  h+='<div class="grid" style="min-width:0"><section class="card"><div class="top" style="margin-bottom:0"><div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap">'+ring(sc,72,'Score do lead')+'<div><h2>'+esc(l.nome)+'</h2><p class="sub">'+esc(l.telefone||'Sem telefone')+' · '+esc(l.email||'Sem e-mail')+'</p><div class="opts" style="margin-top:8px"><span class="pill '+tp[1]+'">'+tp[0]+'</span><span class="pill">'+ENOME[l.etapa]+'</span>'+(isOpen(l)?'<span class="pill num">'+dias(l)+' dias na etapa</span>':'')+(l.noShows?'<span class="pill hot">'+l.noShows+' no-show</span>':'')+'</div></div></div><button class="btn" data-act="editlead" data-v="'+l.id+'">Editar lead</button></div></section>'
+   +'<div class="grid g2"><section class="card"><h3 style="margin-bottom:4px">Qualificação BANT</h3><p class="sub" style="margin-bottom:12px">20 pontos por critério, mais até 20 por engajamento.</p><div class="leadlist">'
+   +BN.map(function(n,i){return '<button class="tog" data-act="bant" data-v="'+i+'" aria-pressed="'+(b[i]?'true':'false')+'"><span class="bx"></span>'+n+'</button>';}).join('')+'</div></section>'
+   +'<section class="card"><h3 style="margin-bottom:6px">Descrição pessoal</h3><p class="say" style="margin-bottom:14px">'+(l.descricao?esc(l.descricao):'<span class="muted">Sem descrição. Use Editar lead para adicionar.</span>')+'</p>'
+   +'<h3 style="margin-bottom:6px">Próxima call</h3><p>'+(l.callAt?'<strong>'+fcall(l.callAt)+'</strong>':'<span class="pill warm">Nenhuma marcada</span>')+'</p></section></div>';
+  if(s){var c=calc(s.pagamentos),com=Math.round(c.caixa*(s.pct||0)/100);
+    h+='<section class="card"><div class="top"><div><h2>Venda</h2><p class="sub">'+esc(s.opNome)+' · comissão de '+(s.pct||0)+'% · fechada em '+fdate(s.fechadoEm)+'</p></div><button class="btn" data-act="editsale" data-v="'+s.id+'">Editar venda</button></div>'
+     +'<div class="tot" style="margin-bottom:12px"><div class="card"><span class="eyebrow">Faturamento</span><strong class="num">'+brl(c.fat)+'</strong></div><div class="card cx"><span class="eyebrow">Caixa líquido</span><strong class="num">'+brl(c.caixa)+'</strong></div><div class="card"><span class="eyebrow">A receber</span><strong class="num">'+brl(c.aberto)+'</strong></div><div class="card"><span class="eyebrow">Comissão</span><strong class="num">'+brl(com)+'</strong></div></div>'
+     +'<h3 style="margin-bottom:6px">Descrição da venda</h3><p class="say">'+(s.descricao?esc(s.descricao):'<span class="muted">Sem descrição da venda.</span>')+'</p></section>';}
+  var tl=(l.timeline||[]).slice().reverse();
+  h+='<section class="card"><div class="top"><h3>Linha do tempo</h3></div><form id="nf" data-form="note" style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap"><input class="in" id="nt" style="flex:1;min-width:180px" placeholder="Anotar contato rápido" aria-label="Anotar contato rápido"><button class="btn primary" type="submit">Adicionar</button></form>'
+   +'<ul class="tl">'+tl.map(function(n){var d=new Date(n.t);return '<li><div>'+esc(n.x)+'<small>'+d.toLocaleDateString('pt-BR')+' '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})+'</small></div></li>';}).join('')+'</ul></section></div></div>';
+  return h;
+}
+
+/* --- Cadência --- */
+var CAD={
+ poscall:['Pós-call',[['D0','{nome}, foi muito bom falar com você hoje. Resumindo: sua prioridade é resolver [dor] e o próximo passo é [passo]. Qualquer dúvida, me chama por aqui.'],['D1','{nome}, passei para ver se ficou alguma dúvida sobre o que conversamos. Consegue me dar um retorno até amanhã?'],['D3','{nome}, lembrei de você quando vi o resultado de um cliente com o mesmo desafio. Posso te mostrar como ele resolveu?'],['D7','{nome}, queria entender onde ficamos. Faz sentido seguir, ou prefere que eu encerre por aqui sem problema?']]],
+ proposta:['Proposta enviada',[['D0','{nome}, enviei a proposta. Ela cobre [dor] com o prazo que combinamos. Me avisa quando abrir que eu tiro qualquer dúvida.'],['D2','{nome}, conseguiu olhar a proposta? Se preferir, explico em 10 minutos por áudio ou ligação.'],['D4','{nome}, algum ponto da proposta travou a decisão? Se eu souber qual é, consigo te ajudar a resolver.'],['D8','{nome}, vou manter sua condição até sexta. Quer que eu reserve sua vaga?']]],
+ noshow:['No-show',[['D0','{nome}, tivemos nossa call agora e não consegui falar com você. Está tudo bem? Posso remarcar para hoje mais tarde ou amanhã.'],['D1','{nome}, sem problema, imprevistos acontecem. Tenho horário às [horário] e às [horário]. Qual fica melhor?'],['D3','{nome}, última tentativa de remarcar nossa conversa. Se ainda for importante para você, me responde com "sim".']]],
+ frio:['Lead frio',[['D0','{nome}, tudo bem? Faz um tempo que conversamos. Como está [dor] por aí?'],['D3','{nome}, separei um conteúdo curto que ajuda com [dor]. Posso te enviar?'],['D10','{nome}, abri poucas vagas este mês. Faz sentido retomarmos nossa conversa?']]]
+};
+function vCad(){
+  var s=CAD[S.cadSit];
+  return head('Cadência de follow-up','Mensagens prontas por situação. Ajuste os campos entre colchetes e envie.')
+  +'<section class="card"><div class="grid g2" style="margin-bottom:16px"><div class="field"><label>Situação</label><div class="seg">'+Object.keys(CAD).map(function(k){return '<button data-act="sit" data-v="'+k+'" aria-pressed="'+(k===S.cadSit)+'">'+CAD[k][0]+'</button>';}).join('')+'</div></div>'
+  +'<div class="field"><label for="cn">Nome do lead</label><input class="in" id="cn" data-in="cadName" value="'+esc(S.cadName)+'" placeholder="Nome para preencher as mensagens" list="cdl"></div><datalist id="cdl">'+S.leads.map(function(l){return '<option value="'+esc(l.nome.split(' ')[0])+'">';}).join('')+'</datalist></div><div class="steps">'
+  +s[1].map(function(x,i){return '<div class="step"><div class="d">'+x[0]+'</div><div class="say">'+esc(x[1].replace(/\{nome\}/g,S.cadName||'[nome]'))+'<div style="margin-top:10px"><button class="btn" data-act="cpcad" data-v="'+i+'">Copiar</button></div></div></div>';}).join('')
+  +'</div></section>';
+}
+
+/* --- Scorecard --- */
+var CHECK=[['Abri com contrato de tempo e objetivo da call',10],['Mapeei a situação atual do lead',15],['O lead disse a dor com as próprias palavras',15],['Quantifiquei o custo de não resolver',15],['Defini critério e prazo de decisão',10],['Apresentei a solução ligada à dor',15],['Pedi o fechamento de forma direta',10],['Combinei próximo passo com data e hora',10]];
+function vCalls(){
+  var c=S.calls,total=CHECK.reduce(function(a,x,i){return a+(c[i]?x[1]:0);},0);
+  var r=S.ratio,pen=(r>=30&&r<=50)?0:(r>=20&&r<=60)?5:10,final=Math.max(0,total-pen);
+  var past=[62,70,58,74,66,81,77,final];
+  var miss=CHECK.map(function(x,i){return {t:x[0],w:x[1],i:i};}).filter(function(x){return !c[x.i];}).sort(function(a,b){return b.w-a.w;})[0];
+  var rtxt=r<30?'Você falou pouco. Pergunte menos e dê mais contexto.':r>50?'Você falou demais. Pergunte mais e deixe o lead desenvolver.':'Boa proporção. O lead falou mais da metade da call.';
+  return head('Scorecard de calls','Depois de cada call, marque o que aconteceu. A nota mostra onde você perde força antes de perder a venda.')
+  +'<div class="grid g2"><section class="card"><div class="top"><div><h2>Call de hoje</h2><p class="sub">Descoberta</p></div></div><div class="leadlist">'
+  +CHECK.map(function(x,i){return '<button class="tog" data-act="ck" data-v="'+i+'" aria-pressed="'+(c[i]?'true':'false')+'"><span class="bx"></span>'+x[0]+'<em>+'+x[1]+'</em></button>';}).join('')
+  +'</div><div class="field" style="margin-top:16px"><label for="rt">Quanto da call você falou: <b class="num" id="rtv">'+r+'%</b></label><input id="rt" type="range" min="10" max="80" value="'+r+'" data-in="ratio"><p class="sub">'+rtxt+' Ideal entre 30% e 50%.</p></div></section>'
+  +'<div class="grid" style="align-content:start"><section class="card" style="display:flex;gap:16px;align-items:center">'+ring(final,92,'Nota da call')+'<div><h2>Nota '+final+'</h2><p class="sub">'+(pen?'Descontei '+pen+' pontos pela proporção de fala.':'Sem desconto por proporção de fala.')+'</p></div></section>'
+  +'<section class="card"><h3 style="margin-bottom:6px">Foco da próxima call</h3><p>'+(miss?'<strong>'+esc(miss.t)+'</strong><br><span class="muted">É o critério de maior peso que ficou de fora ('+miss.w+' pontos).</span>':'Todos os critérios cumpridos. Mantenha o padrão.')+'</p></section>'
+  +'<section class="card"><h3 style="margin-bottom:22px">Últimas 8 calls</h3><div class="trend">'+past.map(function(v,i){return '<div style="height:'+Math.max(4,v)+'%;'+(i===7?'':'opacity:.55')+'"><span>'+v+'</span></div>';}).join('')+'</div></section></div></div>';
+}
+
+/* --- Objeções --- */
+var OBJ=[
+ ['Vou pensar','Decisão','62%','Faz sentido pensar. O que exatamente você precisa avaliar para ter certeza? Se eu esclarecer isso agora, você decide hoje?'],
+ ['Está caro','Preço','48%','Caro comparado a quê? Se o resultado que você descreveu for alcançado, quanto isso vale por mês para você?'],
+ ['Preciso falar com meu sócio','Autoridade','55%','Perfeito. Vamos fazer uma call de 15 minutos com ele junto, ainda esta semana? Assim eu respondo as dúvidas direto.'],
+ ['Já tentei e não deu certo','Confiança','51%','Me conta o que você tentou e onde travou. Quero ter certeza de que o que proponho não repete esse caminho.'],
+ ['Agora não tenho tempo','Timing','44%','Entendo. Quanto tempo por semana isso está custando para você hoje sem resolver? Podemos começar com o mínimo possível.'],
+ ['Vou ver com calma e te falo','Decisão','38%','Combinado. Para eu não te incomodar à toa, qual dia e horário eu te chamo para ouvir sua decisão?']
+];
+function vObj(){
+  var q=norm(S.objQ);
+  var ls=OBJ.filter(function(o){return !q||norm(o[0]+o[1]).indexOf(q)>-1;});
+  return head('Banco de objeções','As respostas que funcionam, a um toque da call. A taxa mostra quantas vezes a objeção foi contornada.')
+  +'<section class="card"><div class="field" style="margin-bottom:16px"><label for="oq">Buscar objeção</label><input class="in" id="oq" data-in="objQ" value="'+esc(S.objQ)+'" placeholder="preço, sócio, tempo"></div><div class="grid" style="gap:14px">'
+  +(ls.length?ls.map(function(o){return '<div class="row" style="align-items:flex-start"><div class="grow" style="min-width:220px"><strong>"'+esc(o[0])+'"</strong><div class="opts" style="margin-top:6px"><span class="pill">'+o[1]+'</span><span class="pill ok num">contorno '+o[2]+'</span></div></div><div style="flex:2;min-width:240px" class="say">'+esc(o[3])+'</div><button class="btn" data-act="cpobj" data-v="'+OBJ.indexOf(o)+'">Copiar</button></div>';}).join(''):'<p class="muted">Nenhuma objeção encontrada.</p>')
+  +'</div></section>';
+}
+
+/* --- Perdas (derivado dos leads) --- */
+function vLoss(){
+  var perd=S.leads.filter(function(l){return l.etapa==='loss'||l.etapa==='desqualificado';});
+  var cnt={};perd.forEach(function(l){var m=l.motivo||'Sem motivo';cnt[m]=(cnt[m]||0)+1;});
+  var ml=Object.keys(cnt).map(function(k){return [k,cnt[k]];}).sort(function(a,b){return b[1]-a[1];});
+  if(!S.lossSel||!cnt[S.lossSel])S.lossSel=ml.length?ml[0][0]:'';
+  var ls=perd.filter(function(l){return (l.motivo||'Sem motivo')===S.lossSel;});
+  var mx=ml.length?ml[0][1]:1;
+  var h=head('Perdas e recuperação','Saber por que perdeu vale mais do que saber quanto perdeu. Os motivos vêm dos leads em Loss e Desqualificado.');
+  if(!ml.length)return h+'<section class="card"><p class="muted">Nenhum lead perdido ou desqualificado ainda. Ao mover um lead para Loss ou Desqualificado, o motivo aparece aqui.</p></section>';
+  return h+'<div class="grid g2"><section class="card"><div class="top"><div><h2>Motivos</h2><p class="sub num">'+perd.length+' lead(s) perdidos ou desqualificados</p></div></div>'
+   +ml.map(function(x){return '<button class="hbar" data-act="ls" data-v="'+esc(x[0])+'" aria-pressed="'+(x[0]===S.lossSel)+'"><span class="lab">'+esc(x[0])+'</span><span class="bar"><i style="width:'+(x[1]/mx*100)+'%"></i></span><b class="num">'+x[1]+'</b></button>';}).join('')
+   +'</section><section class="card"><div class="top"><div><h2>Reativar: '+esc(S.lossSel)+'</h2><p class="sub">'+esc(REATIVAR[S.lossSel]||'Defina uma abordagem para este motivo.')+'</p></div></div><div class="list">'
+   +ls.map(function(l){return '<div class="row"><div class="grow"><strong>'+esc(l.nome)+'</strong><span>'+ENOME[l.etapa]+' há '+dias(l)+' dia(s)'+(l.motivoNota?' · '+esc(l.motivoNota):'')+'</span></div><button class="btn sm" data-act="editlead" data-v="'+l.id+'">Abrir</button></div>';}).join('')+'</div></section></div>';
+}
+
+/* --- Ritmo (derivado dos leads) --- */
+function vRitmo(){
+  var y=TODAY.getFullYear(),m=TODAY.getMonth(),from=iso(new Date(y,m,1)),to=iso(new Date(y,m+1,0));
+  var ms=S.leads.filter(function(l){var d=(l.callAt||'').slice(0,10);return d>=from&&d<=to;});
+  var agd=ms.length,nsNow=ms.filter(function(l){return l.etapa==='no_show';}).length,comp=agd-nsNow;
+  var neg=ms.filter(function(l){return l.etapa==='negociacao'||l.etapa==='fechado';}).length,fech=ms.filter(function(l){return l.etapa==='fechado';}).length;
+  var nsAny=ms.filter(function(l){return l.noShows>0;}).length;
+  var F=[['Agendadas',agd],['Compareceram',comp],['Em negociação',neg],['Fechadas',fech]];
+  var dow=(TODAY.getDay()+6)%7,mon=new Date(y,m,TODAY.getDate()-dow),H=[];
+  for(var w=0;w<5;w++){var row=[];for(var k=0;k<5;k++){var d=iso(new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()-(4-w)*7+k));row.push(S.leads.filter(function(l){return (l.callAt||'').slice(0,10)===d;}).length);}H.push(row);}
+  var hm=Math.max.apply(null,[].concat.apply([],H).concat([1]));
+  var D=['Seg','Ter','Qua','Qui','Sex'];
+  return head('Metas e ritmo','O funil do mês e os dias em que você mais conversa, calculados a partir dos seus leads.')
+  +'<div class="grid g4">'+[['Calls agendadas',agd],['Compareceram',comp],['Leads que faltaram',nsAny],['Fechamentos',fech]].map(function(x){return '<section class="card"><div class="eyebrow">'+x[0]+'</div><div class="kpi" style="margin-top:6px"><strong class="num">'+x[1]+'</strong><span>neste mês</span></div></section>';}).join('')+'</div>'
+  +'<div class="grid g2"><section class="card"><div class="top"><div><h2>Funil do mês</h2><p class="sub">Compareceram = agendadas menos quem está em no-show. Em negociação inclui os fechados.</p></div></div><div class="funnel">'
+  +F.map(function(f,i){var p=i&&F[i-1][1]?Math.round(f[1]/F[i-1][1]*100):(i?0:100);return '<div class="fstep"><span>'+f[0]+'</span><div class="bar"><i style="width:'+(F[0][1]?f[1]/F[0][1]*100:0)+'%;opacity:'+(1-i*.18)+'"></i></div><span class="num"><b>'+f[1]+'</b> <span class="muted">'+(i?p+'%':'')+'</span></span></div>';}).join('')
+  +'</div></section><section class="card"><div class="top"><div><h2>Calls por dia</h2><p class="sub">Últimas 5 semanas, por data da call</p></div></div><div class="heat"><span></span>'+D.map(function(d){return '<span class="eyebrow" style="text-align:center">'+d+'</span>';}).join('')
+  +H.map(function(w,wi){return '<span class="eyebrow">S'+(wi+1)+'</span>'+w.map(function(v){var a=v/hm;return '<div class="cell" style="background:rgba(30,215,96,'+(0.08+a*0.8).toFixed(2)+');color:'+(a>0.5?'var(--accent-ink)':'var(--fg)')+'">'+v+'</div>';}).join('');}).join('')
+  +'</div></section></div>';
+}
+
+/* --- Operações --- */
+function vOps(){
+  var ml=S.ops.find?S.ops.filter(function(o){return norm(o.nome).indexOf('mercado')>-1;})[0]:null;
+  var pct=ml?ml.pct:7,fat=800000,cx=200000,com=Math.round(cx*pct/100);
+  var h=head('Operações e comissão','Cada operação tem o seu percentual. A comissão de cada venda usa o percentual da operação no dia em que a venda foi salva.');
+  h+='<div class="grid g2"><section class="card"><div class="top"><div><h2>Operações</h2><p class="sub">Altere o percentual e saia do campo para salvar. Operações com vendas só podem ser arquivadas.</p></div></div>';
+  if(!S.ops.length)h+='<p class="muted" style="margin-bottom:12px">Nenhuma operação cadastrada.</p><button class="btn primary" data-act="mkops">Criar Mercado Livre (7%) e Visagismo masculino (10%)</button>';
+  else h+='<div class="list">'+S.ops.map(function(o){var n=S.sales.filter(function(s){return s.opId===o.id;}).length;
+    return '<div class="row"><div class="grow" style="min-width:180px"><input class="in" id="on-'+o.id+'" data-opn="'+o.id+'" value="'+esc(o.nome)+'" aria-label="Nome da operação"'+(o.arquivada?' disabled':'')+'><span style="margin-top:4px">'+n+' venda(s)'+(o.arquivada?' · arquivada':'')+'</span></div>'
+     +'<div class="field" style="width:110px"><label for="op-'+o.id+'">Comissão %</label><input class="in num" id="op-'+o.id+'" type="number" min="0" max="100" step="0.5" data-opp="'+o.id+'" value="'+o.pct+'"'+(o.arquivada?' disabled':'')+'></div>'
+     +'<button class="btn sm" data-act="oparq" data-v="'+o.id+'">'+(o.arquivada?'Reativar':'Arquivar')+'</button></div>';}).join('')+'</div>';
+  h+='<form id="of" data-form="op" class="filters" style="margin-top:16px;padding-top:16px;border-top:1px solid var(--line)"><div class="field" style="flex:1;min-width:180px"><label for="on-new">Nova operação</label><input class="in" id="on-new" placeholder="Nome"></div><div class="field" style="width:110px"><label for="op-new">Comissão %</label><input class="in num" id="op-new" type="number" min="0" max="100" step="0.5" placeholder="0"></div><button class="btn primary" type="submit">Adicionar</button></form></section>'
+   +'<section class="card"><h2 style="margin-bottom:10px">Como o dinheiro é contado</h2>'
+   +'<div class="list"><div class="row"><div class="grow"><strong>Pix e cartão</strong><span>Faturamento. Entram no caixa quando pagos. No cartão, desconta a taxa do gateway.</span></div></div>'
+   +'<div class="row"><div class="grow"><strong>Boleto e contrato</strong><span>Só faturamento. Sempre pagos, nunca pendentes e nunca entram no caixa.</span></div></div>'
+   +'<div class="row"><div class="grow"><strong>Comissão</strong><span>Caixa líquido × percentual da operação.</span></div></div></div>'
+   +'<div class="say" style="margin-top:14px"><b>Exemplo.</b> Venda de '+brl(fat)+' em Mercado Livre: Pix de '+brl(cx)+' pago + boleto de '+brl(600000)+'. Faturamento '+brl(fat)+', caixa '+brl(cx)+', comissão de '+pct+'% = '+brl(com)+'.</div></section></div>';
+  return h;
+}
+
+/* --- Prompt --- */
+function vPrompt(){
+  return head('Prompt do agente','Cole no seu agente de código para criar o monorepo com Laravel (backend) e React com Vite (frontend).','<button class="btn primary" data-act="cpprompt">Copiar prompt</button>')
+  +'<section class="card"><div class="prompt" tabindex="0" role="region" aria-label="Texto do prompt">'+esc(PROMPT_MD)+'</div></section>';
+}
+
+/* ---------- modais ---------- */
+function openModal(m){S.modal=m;document.body.style.overflow='hidden';renderModal();}
+function closeModal(){S.modal=null;document.getElementById('modal').innerHTML='';document.body.style.overflow='';render();}
+function emptyPay(){return {metodo:'pix',valor:'',parcelas:'1',taxa:'',status:'pago',recebidoEm:iso(TODAY)};}
+function openLead(id){
+  var l=id?lead(id):null;
+  openModal({type:'lead',id:id||'',form:{nome:l?l.nome:'',telefone:l?l.telefone||'':'',email:l?l.email||'':'',descricao:l?l.descricao||'':'',callAt:l?l.callAt||'':''},err:'',delArm:false});
+}
+function openSale(leadId,saleId){
+  var l=lead(leadId),s=saleId?sale(saleId):null;
+  var ops=activeOps();
+  var f={opId:s?s.opId:(ops[0]?ops[0].id:''),fechadoEm:s?s.fechadoEm:iso(TODAY),descricao:s?s.descricao||'':'',
+    pags:s?s.pagamentos.map(function(p){return {metodo:p.metodo,valor:fromCents(p.valor),parcelas:String(p.parcelas||1),taxa:fromCents(p.taxa),status:p.status,recebidoEm:p.recebidoEm||iso(TODAY)};}):[emptyPay()]};
+  openModal({type:'sale',leadId:leadId,leadNome:l?l.nome:'',saleId:saleId||'',form:f,err:''});
+}
+function modalBox(title,sub,body,foot){
+  return '<div class="mback" id="mb"><div class="mdlg" role="dialog" aria-modal="true" aria-labelledby="mt"><div class="mh"><div><h2 id="mt">'+title+'</h2><p class="sub">'+sub+'</p></div><button class="btn sm" data-act="mclose" aria-label="Fechar">Fechar</button></div><div class="mb">'+body+'</div><div class="mf">'+foot+'</div></div></div>';
+}
+function mLead(m){
+  var f=m.form,l=m.id?lead(m.id):null,s=l?saleOfLead(l.id):null;
+  var b='<div class="field"><label for="lf-nome">Nome</label><input class="in'+(m.err?' err':'')+'" id="lf-nome" data-lf="nome" value="'+esc(f.nome)+'" placeholder="Nome do lead" autocomplete="off"></div>'
+   +'<div class="two"><div class="field"><label for="lf-tel">Telefone</label><input class="in" id="lf-tel" data-lf="telefone" inputmode="tel" value="'+esc(f.telefone)+'" placeholder="(62) 99999-9999"></div>'
+   +'<div class="field"><label for="lf-email">E-mail</label><input class="in" id="lf-email" data-lf="email" type="email" value="'+esc(f.email)+'" placeholder="nome@email.com"></div></div>'
+   +'<div class="field"><label for="lf-call">Data e hora da call</label><input class="in" id="lf-call" data-lf="callAt" type="datetime-local" value="'+esc(f.callAt)+'"></div>'
+   +'<div class="field"><label for="lf-desc">Descrição pessoal</label><textarea class="in" id="lf-desc" data-lf="descricao" rows="4" placeholder="Quem é, contexto e o que busca">'+esc(f.descricao)+'</textarea></div>';
+  if(s){var c=calc(s.pagamentos),com=Math.round(c.caixa*(s.pct||0)/100);
+    b+='<div class="card" style="background:var(--bg)"><div class="top" style="margin-bottom:10px"><div><h3>Venda deste lead</h3><p class="sub">'+esc(s.opNome)+' · '+(s.pct||0)+'% de comissão</p></div><button class="btn sm" data-act="editsale-m" data-v="'+s.id+'">Editar venda</button></div>'
+     +'<div class="tot"><div class="card"><span class="eyebrow">Faturamento</span><strong class="num">'+brl(c.fat)+'</strong></div><div class="card cx"><span class="eyebrow">Caixa líquido</span><strong class="num">'+brl(c.caixa)+'</strong></div><div class="card"><span class="eyebrow">Comissão</span><strong class="num">'+brl(com)+'</strong></div></div></div>';}
+  var foot=(l?'<span class="sp"><button class="btn danger" data-act="ldel">'+(m.delArm?'Confirmar exclusão':'Excluir lead')+'</button> <button class="btn" data-act="l360">Abrir Lead 360</button></span>':'')
+   +'<button class="btn" data-act="mclose">Cancelar</button><button class="btn primary" data-act="lsave">'+(l?'Salvar':'Criar lead')+'</button>';
+  return modalBox(l?'Editar lead':'Novo lead','Nome, contato, descrição e data da call.',b+'<div class="msg" id="merr" role="alert">'+esc(m.err)+'</div>',foot);
+}
+function payCard(p,i,n){
+  var cash=isCash(p),car=p.metodo==='cartao';
+  var h='<div class="pcard"><div class="ph"><span class="eyebrow">Pagamento '+(i+1)+'</span><div><span class="pill '+(cash?'ok':'')+'">'+(cash?'Entra no caixa':'Só faturamento')+'</span>'+(n>1?'<button class="btn sm danger" data-act="pdel" data-v="'+i+'" aria-label="Remover pagamento '+(i+1)+'">Remover</button>':'')+'</div></div>'
+   +'<div class="two"><div class="field"><label for="p'+i+'-m">Forma de pagamento</label><select class="in" id="p'+i+'-m" data-pm="'+i+'">'+METODOS.map(function(x){return '<option value="'+x[0]+'"'+(x[0]===p.metodo?' selected':'')+'>'+x[1]+'</option>';}).join('')+'</select></div>'
+   +'<div class="field"><label for="p'+i+'-v">Valor do pagamento (R$)</label><input class="in" id="p'+i+'-v" data-pf="'+i+':valor" inputmode="decimal" value="'+esc(p.valor)+'" placeholder="0,00"></div></div>';
+  if(car)h+='<div class="two"><div class="field"><label for="p'+i+'-p">Parcelas</label><select class="in" id="p'+i+'-p" data-pf="'+i+':parcelas">'+[1,2,3,4,5,6,7,8,9,10,11,12].map(function(n){return '<option value="'+n+'"'+(String(n)===String(p.parcelas)?' selected':'')+'>'+n+'x</option>';}).join('')+'</select></div>'
+   +'<div class="field"><label for="p'+i+'-t">Taxa do gateway (R$)</label><input class="in" id="p'+i+'-t" data-pf="'+i+':taxa" inputmode="decimal" value="'+esc(p.taxa)+'" placeholder="0,00"></div></div>';
+  if(cash){h+='<div class="filters"><div class="field"><label>Status do recebimento</label><div class="seg"><button data-act="pst" data-v="'+i+':pago" aria-pressed="'+(p.status==='pago')+'">Pago</button><button data-act="pst" data-v="'+i+':pendente" aria-pressed="'+(p.status==='pendente')+'">Pendente</button></div></div>';
+    if(p.status==='pago')h+='<div class="field"><label for="p'+i+'-d">Data de recebimento</label><input class="in" type="date" id="p'+i+'-d" data-pf="'+i+':recebidoEm" value="'+p.recebidoEm+'"></div>';
+    h+='</div>';}
+  else h+='<p class="sub">Conta como faturamento. Não entra no caixa. Sempre pago, sem acompanhamento de recebimento.</p>';
+  return h+'</div>';
+}
+function mSale(m){
+  var f=m.form,ops=activeOps(),cur=op(f.opId);
+  if(!cur&&f.opId){cur=op(f.opId);}
+  var optList=ops.slice();if(cur&&cur.arquivada)optList.push(cur);
+  var b='<div class="two"><div class="field"><label for="sf-op">Operação</label><select class="in" id="sf-op" data-sf="opId">'+(optList.length?'':'<option value="">Cadastre uma operação em Configurações</option>')+optList.map(function(o){return '<option value="'+o.id+'"'+(o.id===f.opId?' selected':'')+'>'+esc(o.nome)+' ('+o.pct+'%)</option>';}).join('')+'</select></div>'
+   +'<div class="field"><label for="sf-data">Data de fechamento</label><input class="in" type="date" id="sf-data" data-sf="fechadoEm" value="'+f.fechadoEm+'"></div></div>'
+   +f.pags.map(function(p,i){return payCard(p,i,f.pags.length);}).join('')
+   +'<button class="btn" data-act="padd" style="border-style:dashed">Adicionar pagamento</button>'
+   +'<div class="field"><label for="sf-desc">Descrição da venda</label><textarea class="in" id="sf-desc" data-sf="descricao" rows="4" placeholder="O que foi vendido, condições combinadas, observações. Fica separada da descrição pessoal do lead.">'+esc(f.descricao)+'</textarea></div>'
+   +'<div class="tot"><div class="card"><span class="eyebrow">Faturamento (total da venda)</span><strong class="num" id="t-fat">R$ 0,00</strong></div><div class="card cx"><span class="eyebrow">Caixa gerado (líquido)</span><strong class="num" id="t-cx">R$ 0,00</strong></div><div class="card"><span class="eyebrow">A receber</span><strong class="num" id="t-ab">R$ 0,00</strong></div><div class="card"><span class="eyebrow" id="t-cl">Comissão</span><strong class="num" id="t-com">R$ 0,00</strong></div></div>'
+   +'<div class="msg" id="merr" role="alert">'+esc(m.err)+'</div>';
+  var foot=(m.saleId?'<span class="sp"><button class="btn danger" data-act="sdel">'+(m.delArm?'Confirmar exclusão':'Excluir venda')+'</button></span>':'')
+   +'<button class="btn" data-act="mclose">Cancelar</button><button class="btn primary" data-act="ssave">Salvar venda</button>';
+  return modalBox(m.saleId?'Editar venda':'Registrar venda','Lead: '+esc(m.leadNome),b,foot);
+}
+function mMotivo(m){
+  var b='<div class="field"><label for="mo-m">Motivo</label><select class="in" id="mo-m" data-mf="motivo">'+MOTIVOS.map(function(x){return '<option'+(x===m.motivo?' selected':'')+'>'+x+'</option>';}).join('')+'</select></div>'
+   +'<div class="field"><label for="mo-n">Nota (opcional)</label><textarea class="in" id="mo-n" data-mf="nota" rows="3" placeholder="O que o lead disse">'+esc(m.nota)+'</textarea></div>';
+  return modalBox(m.etapa==='loss'?'Marcar como Loss':'Desqualificar lead','Informe o motivo para alimentar a análise de perdas.',b,'<button class="btn" data-act="mclose">Cancelar</button><button class="btn primary" data-act="msave">Confirmar</button>');
+}
+function renderModal(){
+  var m=S.modal,el=document.getElementById('modal');if(!m){el.innerHTML='';return;}
+  var ae=document.activeElement,aid=ae&&ae.id&&el.contains(ae)?ae.id:'',ss=null,se=null;
+  try{ss=ae.selectionStart;se=ae.selectionEnd;}catch(e){}
+  var sc=el.querySelector('.mback'),top=sc?sc.scrollTop:0;
+  el.innerHTML=m.type==='lead'?mLead(m):m.type==='sale'?mSale(m):mMotivo(m);
+  var nb=el.querySelector('.mback');if(nb)nb.scrollTop=top;
+  if(m.type==='sale')updTotals();
+  var n=aid&&document.getElementById(aid);
+  if(n){n.focus();try{if(ss!=null)n.setSelectionRange(ss,se);}catch(e){}}
+  else if(!sc){var first=el.querySelector('input,select,textarea');if(first&&m.type!=='sale')first.focus();}
+}
+function updTotals(){
+  var m=S.modal;if(!m||m.type!=='sale')return;
+  var c=calc(m.form.pags.map(normPay)),o=op(m.form.opId),pct=o?o.pct:0;
+  var ex=m.saleId?sale(m.saleId):null;if(ex&&ex.opId===m.form.opId)pct=ex.pct;
+  function set(id,t){var e=document.getElementById(id);if(e)e.textContent=t;}
+  set('t-fat',brl(c.fat));set('t-cx',brl(c.caixa));set('t-ab',brl(c.aberto));set('t-com',brl(Math.round(c.caixa*pct/100)));set('t-cl','Comissão ('+pct+'%)');
+}
+function saveLeadModal(m){
+  var f=m.form,nome=f.nome.trim();
+  if(!nome){m.err='Informe o nome do lead.';renderModal();return;}
+  var l=m.id?lead(m.id):null,now=Date.now();
+  if(l){
+    var p={nome:nome,telefone:f.telefone.trim(),email:f.email.trim(),descricao:f.descricao.trim(),callAt:f.callAt};
+    if(f.callAt!==(l.callAt||''))p.timeline=addEvt(l,f.callAt?'Call marcada para '+fcall(f.callAt):'Call removida');
+    patch('leads',l.id,p);
+  }else{
+    var dup=S.leads.filter(function(x){return f.telefone.trim()&&x.telefone===f.telefone.trim();})[0];
+    put('leads',{nome:nome,telefone:f.telefone.trim(),email:f.email.trim(),descricao:f.descricao.trim(),callAt:f.callAt,etapa:'lead_agendado',etapaDesde:now,noShows:0,bant:[0,0,0,0],timeline:[{t:now,x:'Lead criado'+(f.callAt?'. Call em '+fcall(f.callAt):'')}],criadoEm:now});
+    if(dup)toast('Atenção: já existe um lead com este telefone');
+  }
+  closeModal();if(!(S.leads.length&&dup))toast('Lead salvo');
+}
+function saveSaleModal(m){
+  var f=m.form,o=op(f.opId);
+  if(!o){m.err='Escolha a operação da venda.';renderModal();return;}
+  if(!f.pags.length){m.err='Adicione ao menos um pagamento.';renderModal();return;}
+  var pags=f.pags.map(normPay);
+  for(var i=0;i<pags.length;i++){
+    if(pags[i].valor<=0){m.err='Informe o valor do pagamento '+(i+1)+'.';renderModal();return;}
+    if(isCash(pags[i])&&pags[i].status==='pago'&&!pags[i].recebidoEm){m.err='Informe a data de recebimento do pagamento '+(i+1)+'.';renderModal();return;}
+  }
+  var l=lead(m.leadId),ex=m.saleId?sale(m.saleId):null;
+  var pct=ex&&ex.opId===o.id?ex.pct:o.pct;
+  var s={id:ex?ex.id:newId(),leadId:m.leadId,leadNome:l?l.nome:m.leadNome,opId:o.id,opNome:o.nome,pct:pct,descricao:f.descricao.trim(),fechadoEm:f.fechadoEm||iso(TODAY),pagamentos:pags};
+  if(ex&&ex.exemplo)s.exemplo=true;
+  var c=calc(pags);
+  put('sales',s).then(function(){
+    if(!ex&&l)return patch('leads',l.id,{etapa:'fechado',etapaDesde:Date.now(),timeline:addEvt(l,'Venda fechada: '+brl(c.fat)+' (caixa '+brl(c.caixa)+')')});
+    if(l)return patch('leads',l.id,{timeline:addEvt(l,'Venda editada')});
+  }).then(function(){render();});
+  closeModal();toast(ex?'Venda atualizada':'Venda registrada');
+}
+
+/* ---------- eventos ---------- */
+function onClick(e){
+  if(e.target.closest('select,input,textarea'))return;
+  var b=e.target.closest('[data-act]');if(!b)return;
+  var a=b.dataset.act,v=b.dataset.v;
+  switch(a){
+    case 'newlead':openLead('');break;
+    case 'editlead':openLead(v);break;
+    case 'editsale':{var s=sale(v);if(s)openSale(s.leadId,s.id);break;}
+    case 'newsale':if(!S.nsl){toast('Escolha um lead');break;}openSale(S.nsl,null);break;
+    case 'noshow':moveLead(v,'no_show');break;
+    case 'fechou':moveLead(v,'fechado');break;
+    case 'sel':S.leadId=v;render();break;
+    case 'bant':{var l=lead(S.leadId)||S.leads[0];if(!l)break;var bt=(l.bant||[0,0,0,0]).slice();bt[+v]=bt[+v]?0:1;patch('leads',l.id,{bant:bt});render();break;}
+    case 'pre':setPreset(v);render();break;
+    case 'pclear':S.pq='';S.pFrom='';S.pTo='';render();break;
+    case 'sit':S.cadSit=v;render();break;
+    case 'cpcad':copy(CAD[S.cadSit][1][+v][1].replace(/\{nome\}/g,S.cadName||'[nome]'));break;
+    case 'cpobj':copy(OBJ[+v][3]);break;
+    case 'ck':S.calls[+v]=!S.calls[+v];render();break;
+    case 'ls':S.lossSel=v;render();break;
+    case 'cpprompt':copy(PROMPT_MD);break;
+    case 'mkops':defaultOps();break;
+    case 'oparq':{var o=op(v);if(o)patch('ops',v,{arquivada:!o.arquivada}).then(render);render();break;}
+    case 'rmex':removeExamples();break;
+  }
+}
+function onModalClick(e){
+  if(e.target.id==='mb'){closeModal();return;}
+  var b=e.target.closest('[data-act]');if(!b)return;
+  var m=S.modal;if(!m)return;var a=b.dataset.act,v=b.dataset.v;
+  switch(a){
+    case 'mclose':closeModal();break;
+    case 'lsave':saveLeadModal(m);break;
+    case 'ldel':if(!m.delArm){m.delArm=true;renderModal();break;}
+      {var id=m.id,s=saleOfLead(id);if(s)del('sales',s.id);del('leads',id).then(render);S.leadId=S.leadId===id?'':S.leadId;closeModal();toast('Lead excluído');}break;
+    case 'l360':S.leadId=m.id;S.modal=null;document.getElementById('modal').innerHTML='';document.body.style.overflow='';location.hash='lead';render();break;
+    case 'editsale-m':{var sl=sale(v);if(sl)openSale(sl.leadId,sl.id);break;}
+    case 'padd':m.form.pags.push(emptyPay());renderModal();break;
+    case 'pdel':m.form.pags.splice(+v,1);renderModal();break;
+    case 'pst':{var p=v.split(':'),pg=m.form.pags[+p[0]];pg.status=p[1];if(p[1]==='pago'&&!pg.recebidoEm)pg.recebidoEm=iso(TODAY);renderModal();break;}
+    case 'ssave':saveSaleModal(m);break;
+    case 'sdel':if(!m.delArm){m.delArm=true;renderModal();break;}
+      {var sid=m.saleId,lid=m.leadId,lx=lead(lid);del('sales',sid).then(function(){if(lx)return patch('leads',lid,{etapa:'negociacao',etapaDesde:Date.now(),timeline:addEvt(lx,'Venda excluída. Lead reaberto em Negociação')});}).then(render);closeModal();toast('Venda excluída');}break;
+    case 'msave':{var lm=lead(m.leadId);if(lm){patch('leads',lm.id,{etapa:m.etapa,etapaDesde:Date.now(),motivo:m.motivo,motivoNota:m.nota.trim(),timeline:addEvt(lm,ENOME[m.etapa]+': '+m.motivo)}).then(render);}closeModal();toast(ENOME[m.etapa]);break;}
+  }
+}
+function onModalInput(e){
+  var t=e.target,m=S.modal;if(!m)return;
+  if(t.dataset.lf){m.form[t.dataset.lf]=t.value;}
+  else if(t.dataset.sf){m.form[t.dataset.sf]=t.value;if(t.dataset.sf==='opId')updTotals();}
+  else if(t.dataset.pf){var a=t.dataset.pf.split(':');m.form.pags[+a[0]][a[1]]=t.value;updTotals();}
+  else if(t.dataset.mf){m[t.dataset.mf]=t.value;}
+}
+function onModalChange(e){
+  var t=e.target,m=S.modal;if(!m)return;
+  if(t.dataset.pm!==undefined){var p=m.form.pags[+t.dataset.pm];p.metodo=t.value;if(isCash(p)&&!p.recebidoEm)p.recebidoEm=iso(TODAY);renderModal();}
+}
+function onViewInput(e){
+  var t=e.target;
+  if(t.dataset.in){var k=t.dataset.in;
+    if(k==='ratio'){S.ratio=+t.value;var rv=document.getElementById('rtv');if(rv)rv.textContent=t.value+'%';return;}
+    S[k]=t.value;if(k==='fFrom'||k==='fTo')S.preset='';render();return;}
+}
+function onViewChange(e){
+  var t=e.target;
+  if(t.dataset.in==='ratio'){render();return;}
+  if(t.dataset.mv){moveLead(t.dataset.mv,t.value);return;}
+  if(t.dataset.opn){var n=t.value.trim();if(n)patch('ops',t.dataset.opn,{nome:n});return;}
+  if(t.dataset.opp){var v=Math.max(0,Math.min(100,parseFloat(t.value)||0));patch('ops',t.dataset.opp,{pct:v}).then(function(){toast('Comissão atualizada');render();});render();return;}
+}
+function onViewSubmit(e){
+  var f=e.target;if(!f.dataset.form)return;e.preventDefault();
+  if(f.dataset.form==='note'){
+    var l=lead(S.leadId)||S.leads[0],v=document.getElementById('nt').value.trim();if(!l||!v)return;
+    patch('leads',l.id,{timeline:addEvt(l,v)}).then(render);render();
+  }
+  if(f.dataset.form==='op'){
+    var n=document.getElementById('on-new').value.trim(),p=Math.max(0,Math.min(100,parseFloat(document.getElementById('op-new').value)||0));
+    if(!n){toast('Informe o nome da operação');return;}
+    put('ops',{nome:n,pct:p,arquivada:false}).then(render);render();toast('Operação adicionada');
+  }
+}
+var dragId='';
+function onDragStart(e){var c=e.target.closest&&e.target.closest('[data-drag]');if(!c)return;dragId=c.dataset.drag;try{e.dataTransfer.setData('text/plain',dragId);e.dataTransfer.effectAllowed='move';}catch(x){}}
+function onDragOver(e){var c=e.target.closest&&e.target.closest('.col');if(!c||!dragId)return;e.preventDefault();each('.col.over',function(x){if(x!==c)x.classList.remove('over');});c.classList.add('over');}
+function onDrop(e){var c=e.target.closest&&e.target.closest('.col');if(!c||!dragId)return;e.preventDefault();var id=dragId;dragId='';each('.col.over',function(x){x.classList.remove('over');});moveLead(id,c.dataset.stage);}
+function onKey(e){
+  if(e.key==='Escape'&&S.modal){closeModal();return;}
+  if((e.key==='Enter'||e.key===' ')&&e.target.classList&&e.target.classList.contains('kc')){e.preventDefault();openLead(e.target.dataset.v);}
+}
+
+function defaultOps(){
+  put('ops',{nome:'Mercado Livre',pct:7,arquivada:false}).then(function(){return put('ops',{nome:'Visagismo masculino',pct:10,arquivada:false});}).then(render);render();
+}
+function removeExamples(){
+  var jobs=[];
+  S.sales.filter(function(s){return s.exemplo;}).forEach(function(s){jobs.push(del('sales',s.id));});
+  S.leads.filter(function(l){return l.exemplo;}).forEach(function(l){jobs.push(del('leads',l.id));});
+  Promise.all(jobs).then(function(){toast('Exemplos removidos');render();});render();
+}
+
+/* ---------- shell ---------- */
+var VIEWS={hoje:vHoje,faturamento:vFat,pipeline:vPipeline,lead:vLead,cadencia:vCad,calls:vCalls,objecoes:vObj,perdas:vLoss,ritmo:vRitmo,operacoes:vOps,prompt:vPrompt};
+function cur(){var h=(location.hash||'').replace('#','');return VIEWS[h]?h:'hoje';}
+function nav(){
+  var id=cur(),h='';
+  MODS.forEach(function(m){
+    if(m.g)h+='<span class="eyebrow grp">'+m.g+'</span>';
+    h+='<a href="#'+m.id+'"'+(m.id===id?' aria-current="page"':'')+'><svg viewBox="0 0 24 24" aria-hidden="true">'+ICON[m.id]+'</svg>'+m.t+(m.tag?'<span class="tag">'+m.tag+'</span>':'')+'</a>';
+  });
+  document.getElementById('nav').innerHTML=h;
+}
+function render(){
+  var y=window.scrollY,ae=document.activeElement,aid=ae&&ae.id&&!document.getElementById('modal').contains(ae)?ae.id:'',ss=null,se=null;
+  try{ss=ae.selectionStart;se=ae.selectionEnd;}catch(e){}
+  nav();
+  var v=document.getElementById('view'),kb=v.querySelector('.kanban'),kx=kb?kb.scrollLeft:0;
+  v.innerHTML=VIEWS[cur()]();
+  var nk=v.querySelector('.kanban');if(nk)nk.scrollLeft=kx;
+  window.scrollTo(0,y);
+  if(aid){var n=document.getElementById(aid);if(n){n.focus();try{if(ss!=null)n.setSelectionRange(ss,se);}catch(e){}}}
+}
+window.addEventListener('hashchange',function(){render();window.scrollTo(0,0);});
+
+var viewEl=document.getElementById('view'),modalEl=document.getElementById('modal');
+viewEl.addEventListener('click',onClick);
+viewEl.addEventListener('input',onViewInput);
+viewEl.addEventListener('change',onViewChange);
+viewEl.addEventListener('submit',onViewSubmit);
+viewEl.addEventListener('dragstart',onDragStart);
+viewEl.addEventListener('dragover',onDragOver);
+viewEl.addEventListener('drop',onDrop);
+viewEl.addEventListener('dragend',function(){dragId='';each('.col.over',function(x){x.classList.remove('over');});});
+modalEl.addEventListener('click',onModalClick);
+modalEl.addEventListener('input',onModalInput);
+modalEl.addEventListener('change',function(e){onModalInput(e);onModalChange(e);});
+document.addEventListener('keydown',onKey);
+
+function initDb(){
+  var timer=setTimeout(function(){if(S.mode==='loading'){S.slow=true;render();}},10000);
+  function local(){S.mode='local';S.slow=false;if(!S.ops.length)S.ops=[{id:'op1',nome:'Mercado Livre',pct:7,arquivada:false},{id:'op2',nome:'Visagismo masculino',pct:10,arquivada:false}];render();}
+  if(!(window.claude&&window.claude.use)){clearTimeout(timer);local();return;}
+  window.claude.use('db').then(function(d){
+    clearTimeout(timer);
+    if(!d){local();return;}
+    DB=d;S.mode='db';
+    function sub(col,key,after){
+      DB.collection(col).onSnapshot(function(snap){
+        S[key]=snap.docs.map(function(x){var o=x.data()||{};o.id=x.id;return o;});
+        if(after)after();
+        if(!S.modal)render();
+      },function(){S.mode='local';DB=null;render();});
+    }
+    sub('operacoes','ops');
+    sub('leads','leads',function(){if(!S.leadId&&S.leads.length)S.leadId=S.leads[0].id;});
+    sub('vendas','sales');
+  }).catch(function(){clearTimeout(timer);local();});
+}
+render();
+initDb();
+})();
+</script>
+
+</body></html>
