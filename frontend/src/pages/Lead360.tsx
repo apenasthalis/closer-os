@@ -89,6 +89,10 @@ export default function Lead360() {
           const c = s ? saleCalc(s.payments || []) : null
           const com = s && c ? Math.round(c.caixa * Number(s.commission_percent || 0) / 100) : 0
           const events = [...(lead.events || [])].reverse()
+          const bantCount = BANT_KEYS.filter(k => b[k]).length
+          const bantPts = bantCount * 20
+          const engPts = Math.min(20, Math.max(0, ((lead.events?.length ?? 0) - 1) * 4))
+          const engPct = Math.round((engPts / 20) * 100)
           const days = lead.stage_changed_at ? Math.max(0, Math.floor((Date.now() - new Date(lead.stage_changed_at).getTime()) / 86400000)) : 0
           const open = !['fechado','loss','desqualificado','reembolso'].includes(lead.stage)
           return <div className="grid" style={{ minWidth: 0 }}>
@@ -109,12 +113,30 @@ export default function Lead360() {
                 </div>
                 <button className="btn" onClick={() => setEditing(true)}>Editar lead</button>
               </div>
+              <div className="grid g2" style={{ marginTop: 14 }}>
+                <div className="card" style={{ background: 'var(--bg)', padding: 12 }}>
+                  <span className="eyebrow">Pontuação (BANT)</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 6 }}>
+                    <strong className="num" style={{ fontSize: 22 }}>{bantPts}</strong>
+                    <span className="sub">de 80 · {bantCount}/4 critérios</span>
+                  </div>
+                  <div className="bar" style={{ marginTop: 8 }}><i style={{ width: `${(bantPts / 80) * 100}%` }} /></div>
+                </div>
+                <div className="card" style={{ background: 'var(--bg)', padding: 12 }}>
+                  <span className="eyebrow">Engajamento</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 6 }}>
+                    <strong className="num" style={{ fontSize: 22 }}>{engPct}%</strong>
+                    <span className="sub">{engPts} de 20 pts · {Math.max(0, (lead.events?.length ?? 0) - 1)} interações</span>
+                  </div>
+                  <div className="bar" style={{ marginTop: 8 }}><i style={{ width: `${engPct}%` }} /></div>
+                </div>
+              </div>
             </section>
 
             <div className="grid g2">
               <section className="card">
                 <h3 style={{ marginBottom: 4 }}>Qualificação BANT</h3>
-                <p className="sub" style={{ marginBottom: 12 }}>20 pontos por critério, mais até 20 por engajamento.</p>
+                <p className="sub" style={{ marginBottom: 12 }}>20 pontos por critério (80 pts) e engajamento até 20 pts.</p>
                 <div className="leadlist">
                   {BANT.map((n, i) => (
                     <button key={i} className="tog" aria-pressed={Boolean(b[BANT_KEYS[i]])} onClick={() => bantMut.mutate({ key: BANT_KEYS[i], value: !b[BANT_KEYS[i]] })}>
