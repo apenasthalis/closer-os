@@ -37,7 +37,7 @@ export default function Objecoes() {
   })
 
   return (
-    <div className="flex flex-col gap-4">
+    <>
       <div className="head">
         <div><h1>Objeções</h1><p>O que trava a venda, como contornar e qual objeção mais derruba conversão.</p></div>
         <div className="acts">{user?.role === 'admin' && <button className="btn" onClick={() => setEditing({})}>Nova objeção</button>}<button className="btn primary" onClick={() => setOccurrence({})}>Registrar objeção</button></div>
@@ -120,7 +120,7 @@ export default function Objecoes() {
       {editing && <ObjectionModal initial={editing} busy={save.isPending} onClose={() => setEditing(null)} onSave={(f: any) => save.mutate(f)} />}
       {occurrence && <ObjectionOccurrenceModal objection={(objections || []).find((o: any) => o.id === occurrence.objection_id)} onClose={() => setOccurrence(null)} onSaved={() => { qc.invalidateQueries({ queryKey: ['objection-stats'] }); qc.invalidateQueries({ queryKey: ['objection-occurrences'] }); qc.invalidateQueries({ queryKey: ['objections'] }) }} />}
       {removing && <ConfirmDialog title="Excluir objeção?" message={`"${removing.name}" será removida ou arquivada se tiver ocorrências.`} confirmLabel="Excluir" danger busy={remove.isPending} onClose={() => setRemoving(null)} onConfirm={() => remove.mutate(removing.id)} />}
-    </div>
+    </>
   )
 }
 
