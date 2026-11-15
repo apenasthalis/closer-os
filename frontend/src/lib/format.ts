@@ -110,8 +110,12 @@ export const GOAL_LABEL: Record<string, string> = {
 }
 
 export function scoreLead(lead: any): number {
-  const bant = Object.values(lead?.qualification ?? {}).filter(Boolean).length * 20
-  const engagement = Math.min(20, Math.max(0, ((lead?.events?.length ?? 0) - 1) * 4))
+  const q = lead?.qualification ?? {}
+  const bant = (['budget','authority','need','timing'] as const).filter(k => q[k]).length * 20
+  const raw = q.engagement
+  const engagement = raw !== undefined && raw !== null && raw !== ''
+    ? Math.round(Math.max(0, Math.min(100, Number(raw))) / 100 * 20)
+    : Math.min(20, Math.max(0, ((lead?.events?.length ?? 0) - 1) * 4))
   return Math.min(100, bant + engagement)
 }
 

@@ -30,8 +30,13 @@ class Lead extends Model
 
     public function score(): int
     {
-        $bant = collect($this->qualification ?? [])->filter()->count() * 20;
-        $engagement = min(20, max(0, ($this->events->count() - 1) * 4));
+        $q = $this->qualification ?? [];
+        $bant = collect($q)->only(['budget','authority','need','timing'])->filter()->count() * 20;
+        if (array_key_exists('engagement', $q) && $q['engagement'] !== null && $q['engagement'] !== '') {
+            $engagement = (int) round(max(0, min(100, (int) $q['engagement'])) / 100 * 20);
+        } else {
+            $engagement = min(20, max(0, ($this->events->count() - 1) * 4));
+        }
         return min(100, $bant + $engagement);
     }
 

@@ -216,6 +216,7 @@ class LeadController extends Controller
             'authority' => ['sometimes','boolean'],
             'need' => ['sometimes','boolean'],
             'timing' => ['sometimes','boolean'],
+            'engagement' => ['sometimes','nullable','integer','min:0','max:100'],
         ]);
         $lead->update(['qualification' => array_merge($lead->qualification ?? [], $data)]);
         $lead->load('events');

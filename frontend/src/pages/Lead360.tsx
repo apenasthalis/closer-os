@@ -61,6 +61,8 @@ export default function Lead360() {
 
   const score = useMemo(() => scoreLead(lead), [lead])
   const [tlabel, tcls] = temp(score)
+  const [engDraft, setEngDraft] = useState<number | null>(null)
+  useEffect(() => { setEngDraft(null) }, [leadId, lead?.qualification?.engagement])
 
   return (
     <div>
@@ -73,8 +75,10 @@ export default function Lead360() {
           <input className="in" value={lq} onChange={e => setLq(e.target.value)} placeholder="Buscar por nome" aria-label="Buscar lead por nome" style={{ marginBottom: 10 }} />
           <div className="leadlist">
             {filtered.length ? filtered.map(x => {
-              const sc = scoreLead(x); const [, tc] = temp(sc)
-              return <button className="lbtn" key={x.id} onClick={() => navigate(`/lead/${x.id}`)} aria-pressed={x.id === leadId}><div><strong>{x.name}</strong><span>{STAGE_LABEL[x.stage] || x.stage}</span></div><span className={`pill ${tc} num`}>{sc}</span></button>
+              const qx = x.qualification || {}
+              const bc = BANT_KEYS.filter(k => qx[k]).length
+              const bp = bc * 20
+              return <button className="lbtn" key={x.id} onClick={() => navigate(`/lead/${x.id}`)} aria-pressed={x.id === leadId}><div><strong>{x.name}</strong><span>{STAGE_LABEL[x.stage] || x.stage}</span></div><span className="num" title={`BANT ${bc}/4`} style={{width:34,height:34,borderRadius:'50%',display:'grid',placeItems:'center',fontSize:12,fontWeight:700,background:`conic-gradient(var(--accent) ${bc*90}deg, var(--raise) 0deg)`}}><span style={{width:26,height:26,borderRadius:'50%',background:'var(--surface)',display:'grid',placeItems:'center'}}>{bp}</span></span></button>
             }) : <p className="muted">Nenhum lead encontrado.</p>}
           </div>
         </section>
@@ -91,8 +95,12 @@ export default function Lead360() {
           const events = [...(lead.events || [])].reverse()
           const bantCount = BANT_KEYS.filter(k => b[k]).length
           const bantPts = bantCount * 20
-          const engPts = Math.min(20, Math.max(0, ((lead.events?.length ?? 0) - 1) * 4))
-          const engPct = Math.round((engPts / 20) * 100)
+          const autoEngPts = Math.min(20, Math.max(0, ((lead.events?.length ?? 0) - 1) * 4))
+          const autoEngPct = Math.round((autoEngPts / 20) * 100)
+          const storedEng = b.engagement
+          const baseEngPct = storedEng !== undefined && storedEng !== null && storedEng !== '' ? Math.max(0, Math.min(100, Number(storedEng))) : autoEngPct
+          const engPct = engDraft !== null ? engDraft : baseEngPct
+          const engPts = Math.round((engPct / 100) * 20)
           const days = lead.stage_changed_at ? Math.max(0, Math.floor((Date.now() - new Date(lead.stage_changed_at).getTime()) / 86400000)) : 0
           const open = !['fechado','loss','desqualificado','reembolso'].includes(lead.stage)
           return <div className="grid" style={{ minWidth: 0 }}>
@@ -101,7 +109,7 @@ export default function Lead360() {
                 <div style={{ display: 'flex', gap: 14, alignItems: 'center', flexWrap: 'wrap' }}>
                   <div className="ring" style={{ ['--v' as any]: score, width: 72, height: 72 }} aria-label="Score do lead"><span>{score}</span></div>
                   <div>
-                    <h2>{lead.name}</h2>
+                    <h2 style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>{lead.name} <span className="num" title={`BANT ${bantCount}/4`} style={{width:38,height:38,borderRadius:'50%',display:'inline-grid',placeItems:'center',fontSize:13,fontWeight:700,background:`conic-gradient(var(--accent) ${bantCount*90}deg, var(--raise) 0deg)`,flex:'none'}}><span style={{width:30,height:30,borderRadius:'50%',background:'var(--surface)',display:'grid',placeItems:'center'}}>{bantPts}</span></span></h2>
                     <p className="sub">{lead.phone || 'Sem telefone'} · {lead.email || 'Sem e-mail'}</p>
                     <div className="opts" style={{ marginTop: 8 }}>
                       <span className={`pill ${tcls}`}>{tlabel}</span>
@@ -113,22 +121,16 @@ export default function Lead360() {
                 </div>
                 <button className="btn" onClick={() => setEditing(true)}>Editar lead</button>
               </div>
-              <div className="grid g2" style={{ marginTop: 14 }}>
-                <div className="card" style={{ background: 'var(--bg)', padding: 12 }}>
-                  <span className="eyebrow">Pontuação (BANT)</span>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 6 }}>
-                    <strong className="num" style={{ fontSize: 22 }}>{bantPts}</strong>
-                    <span className="sub">de 80 · {bantCount}/4 critérios</span>
-                  </div>
-                  <div className="bar" style={{ marginTop: 8 }}><i style={{ width: `${(bantPts / 80) * 100}%` }} /></div>
-                </div>
+              <div style={{ marginTop: 14 }}>
                 <div className="card" style={{ background: 'var(--bg)', padding: 12 }}>
                   <span className="eyebrow">Engajamento</span>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 6 }}>
                     <strong className="num" style={{ fontSize: 22 }}>{engPct}%</strong>
-                    <span className="sub">{engPts} de 20 pts · {Math.max(0, (lead.events?.length ?? 0) - 1)} interações</span>
+                    <span className="sub">{engPts} de 20 pts</span>
                   </div>
-                  <div className="bar" style={{ marginTop: 8 }}><i style={{ width: `${engPct}%` }} /></div>
+                  <input className="in" type="range" min={0} max={100} value={engPct} onChange={e => setEngDraft(Number(e.target.value))} onMouseUp={() => bantMut.mutate({ engagement: engPct })} onTouchEnd={() => bantMut.mutate({ engagement: engPct })} style={{ marginTop: 8, padding: 0, border: 0, background: 'transparent' }} aria-label="Engajamento" />
+                  <div className="bar" style={{ marginTop: 6 }}><i style={{ width: `${engPct}%` }} /></div>
+                  <p className="sub" style={{ marginTop: 4 }}>Ajuste de 0 a 100% (conta nos 20 pts finais do score).</p>
                 </div>
               </div>
             </section>
