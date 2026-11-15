@@ -62,6 +62,18 @@ export default function Lead360() {
   const [engDraft, setEngDraft] = useState<number | null>(null)
   useEffect(() => { setEngDraft(null) }, [leadId, lead?.qualification?.engagement])
 
+  const selectedDisplayScore = (() => {
+    if (!lead || lead.id !== leadId) return null
+    const b = lead.qualification || {}
+    const bantPts = BANT_KEYS.filter(k => b[k]).length * 20
+    const autoEngPts = Math.min(20, Math.max(0, ((lead.events?.length ?? 0) - 1) * 4))
+    const autoEngPct = Math.round((autoEngPts / 20) * 100)
+    const storedEng = b.engagement
+    const baseEngPct = storedEng !== undefined && storedEng !== null && storedEng !== '' ? Math.max(0, Math.min(100, Number(storedEng))) : autoEngPct
+    const engPct = engDraft !== null ? engDraft : baseEngPct
+    return Math.min(100, bantPts + Math.round((engPct / 100) * 20))
+  })()
+
   return (
     <div>
       <div className="head">
@@ -73,7 +85,7 @@ export default function Lead360() {
           <input className="in" value={lq} onChange={e => setLq(e.target.value)} placeholder="Buscar por nome" aria-label="Buscar lead por nome" style={{ marginBottom: 10 }} />
           <div className="leadlist">
             {filtered.length ? filtered.map(x => {
-              const sc = scoreLead(x)
+              const sc = x.id === leadId && selectedDisplayScore !== null ? selectedDisplayScore : scoreLead(x)
               return <button className="lbtn" key={x.id} onClick={() => navigate(`/lead/${x.id}`)} aria-pressed={x.id === leadId} style={{justifyContent:'flex-start'}}>
                 <span className="num" title={`Score ${sc}`} style={{width:34,height:34,borderRadius:'50%',display:'grid',placeItems:'center',fontSize:12,fontWeight:700,flex:'none',background:`conic-gradient(var(--accent) ${sc*3.6}deg, var(--raise) 0deg)`}}><span style={{width:26,height:26,borderRadius:'50%',background:'var(--surface)',display:'grid',placeItems:'center'}}>{sc}</span></span>
                 <div><strong>{x.name}</strong><span>{STAGE_LABEL[x.stage] || x.stage}</span></div>
@@ -107,20 +119,17 @@ export default function Lead360() {
           return <div className="grid" style={{ minWidth: 0 }}>
             <section className="card">
               <div className="top" style={{ marginBottom: 0 }}>
-                <div style={{ display: 'flex', gap: 14, alignItems: 'center', flexWrap: 'wrap' }}>
-                  <div className="ring" style={{ ['--v' as any]: displayScore, width: 72, height: 72 }} aria-label="Score do lead"><span>{displayScore}</span></div>
-                  <div>
-                    <h2 style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-                      <span className="num" title={`Score ${displayScore}`} style={{width:38,height:38,borderRadius:'50%',display:'inline-grid',placeItems:'center',fontSize:13,fontWeight:700,background:`conic-gradient(var(--accent) ${displayScore*3.6}deg, var(--raise) 0deg)`,flex:'none'}}><span style={{width:30,height:30,borderRadius:'50%',background:'var(--surface)',display:'grid',placeItems:'center'}}>{displayScore}</span></span>
-                      {lead.name}
-                    </h2>
-                    <p className="sub">{lead.phone || 'Sem telefone'} · {lead.email || 'Sem e-mail'}</p>
-                    <div className="opts" style={{ marginTop: 8 }}>
-                      <span className={`pill ${dCls}`}>{dLabel}</span>
-                      <span className="pill">{STAGE_LABEL[lead.stage] || lead.stage}</span>
-                      {open && <span className="pill num">{days} dias na etapa</span>}
-                      {lead.no_show_count ? <span className="pill hot">{lead.no_show_count} no-show</span> : null}
-                    </div>
+                <div>
+                  <h2 style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                    <span className="num" title={`Score ${displayScore}`} style={{width:38,height:38,borderRadius:'50%',display:'inline-grid',placeItems:'center',fontSize:13,fontWeight:700,background:`conic-gradient(var(--accent) ${displayScore*3.6}deg, var(--raise) 0deg)`,flex:'none'}}><span style={{width:30,height:30,borderRadius:'50%',background:'var(--surface)',display:'grid',placeItems:'center'}}>{displayScore}</span></span>
+                    {lead.name}
+                  </h2>
+                  <p className="sub">{lead.phone || 'Sem telefone'} · {lead.email || 'Sem e-mail'}</p>
+                  <div className="opts" style={{ marginTop: 8 }}>
+                    <span className={`pill ${dCls}`}>{dLabel}</span>
+                    <span className="pill">{STAGE_LABEL[lead.stage] || lead.stage}</span>
+                    {open && <span className="pill num">{days} dias na etapa</span>}
+                    {lead.no_show_count ? <span className="pill hot">{lead.no_show_count} no-show</span> : null}
                   </div>
                 </div>
                 <button className="btn" onClick={() => setEditing(true)}>Editar lead</button>
