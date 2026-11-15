@@ -1,276 +1,548 @@
-# PROMPT MASTER — CONSTRUÇÃO DO CLOSER OS PRO
+# PROMPT MASTER — CLOSER OS PRO
+## Reprodução fiel do HTML + aplicação completa com React, Vite, Laravel e MySQL
 
-## 1. Seu papel
+Você é um engenheiro de software sênior, arquiteto full-stack e especialista em reprodução fiel de interfaces web.
 
-Você é um engenheiro de software sênior, arquiteto full-stack e especialista em sistemas de CRM, gestão comercial e controle financeiro.
+Sua missão é desenvolver o **Closer OS Pro**, transformando o arquivo HTML de referência anexado em uma aplicação web real, completa, funcional, persistente e pronta para uso.
 
-Sua missão é construir uma aplicação completa chamada **Closer OS Pro**, reproduzindo fielmente o sistema apresentado no arquivo HTML de referência anexado.
+O projeto deve ter frontend e backend separados:
 
-O projeto deverá ser desenvolvido do zero utilizando:
+- `frontend/`: React + Vite + TypeScript.
+- `backend/`: Laravel 12 + PHP 8.3.
+- Banco de dados: MySQL 8.
+- Comunicação: API REST.
+- Autenticação: Laravel Sanctum.
 
-- **Frontend:** React + Vite + TypeScript.
-- **Backend:** Laravel + PHP.
-- **Banco de dados:** MySQL.
-- **Arquitetura:** API REST, com frontend e backend em pastas separadas.
+**REGRA PRINCIPAL: A INTERFACE PRECISA SER VISUALMENTE FIEL AO HTML ANEXADO.**
 
-Não quero apenas uma demonstração visual, protótipo ou conjunto de telas estáticas. Quero uma aplicação funcional, com autenticação, persistência real, regras de negócio, cálculos financeiros, histórico, permissões e testes.
+Não quero uma releitura, uma versão modernizada, uma inspiração ou uma interface parecida. Quero a reprodução mais próxima possível do HTML original, respeitando todos os detalhes visuais e comportamentais.
 
 ---
 
-# 2. REGRA MAIS IMPORTANTE: O HTML É A REFERÊNCIA OBRIGATÓRIA
+# 1. REGRA INEGOCIÁVEL: LEITURA E AUDITORIA DO HTML
 
-O arquivo `Closer OS Pro.html` está anexado a esta tarefa.
+Antes de escrever qualquer código:
 
-**Antes de escrever qualquer código, leia e analise integralmente esse arquivo.**
-
-Ele representa a referência visual e funcional do produto que quero construir.
-
-Não crie uma interface genérica de CRM. Não substitua o design por um template administrativo pronto. Não simplifique os módulos sem autorização.
-
-Você deverá preservar, tanto quanto possível:
-
-- A identidade visual.
-- A estrutura de navegação.
-- A organização dos módulos.
-- A disposição dos cards.
-- Os títulos, textos e nomenclaturas.
-- As cores, tipografia, bordas e espaçamentos.
-- Os componentes e suas interações.
-- Os modais e formulários.
-- Os gráficos, indicadores e tabelas.
-- Os filtros e seletores.
-- A experiência de navegação.
-- A responsividade para desktop e dispositivos móveis.
-
-### Identidade visual
-
-A referência utiliza uma identidade escura, com:
-
-- Fundo predominantemente preto/esverdeado.
-- Superfícies em tons escuros.
-- Verde como cor principal de destaque.
-- Indicadores de alerta em amarelo, vermelho e azul.
-- Tipografia Inter e Space Grotesk.
-- Cards com bordas discretas e cantos arredondados.
-- Interface organizada, compacta e orientada à produtividade.
-
-Preserve essa identidade.
-
-O HTML original serve como especificação visual e funcional. Entretanto, não copie sua implementação técnica de JavaScript ou sua estrutura de armazenamento. Reconstrua o comportamento utilizando React, Laravel e banco de dados.
-
-### Hierarquia de regras
-
-Quando houver divergência:
-
-1. As regras de negócio descritas neste prompt prevalecem.
-2. Os comportamentos e a interface do HTML devem ser preservados quando não houver conflito.
-3. Nenhuma regra financeira ou comercial poderá ser inventada para preencher lacunas.
-
-Antes de implementar, faça uma auditoria do HTML e produza `docs/REFERENCE_AUDIT.md`, contendo:
-- Todos os módulos identificados.
-- Todas as telas e componentes.
-- Todos os formulários e campos.
-- Todos os comportamentos e interações.
-- Todas as regras de negócio encontradas.
-- Todas as diferenças entre o HTML e este prompt.
-- Como cada funcionalidade será reproduzida no novo sistema.
+1. Leia integralmente o arquivo `Closer OS Pro completo.html`.
+2. Analise todo o CSS, HTML, JavaScript, textos, componentes, estados, funções, eventos e comportamentos.
+3. Identifique todos os módulos, telas, modais, botões, filtros, formulários, gráficos, indicadores e interações.
+4. Identifique as dimensões, espaçamentos, cores, tipografia, bordas, raios, sombras, alinhamentos e breakpoints responsivos.
+5. Crie o documento `docs/REFERENCE_AUDIT.md`, registrando a estrutura original e como cada elemento será reproduzido no React.
 
 Não comece a implementação sem concluir essa auditoria.
 
+O HTML anexado é a referência visual e funcional principal. Você deve utilizá-lo durante todo o desenvolvimento, consultando-o sempre que houver dúvida sobre aparência, estrutura ou comportamento.
+
+**Não descarte elementos do HTML por considerar que são pequenos, secundários ou desnecessários.**
+
+Não simplifique a interface.
+
+Não substitua componentes por versões genéricas.
+
+Não troque os textos por textos inventados.
+
+Não reorganize as telas por preferência pessoal.
+
+Não altere a identidade visual.
+
+Se uma biblioteca gerar um componente visual diferente do original, personalize-o até reproduzir o padrão do HTML.
+
+## 1.1 Hierarquia de decisões
+
+Existem duas fontes de referência:
+
+- O HTML anexado determina a aparência, a estrutura visual, os textos, a organização e os comportamentos de interface.
+- As regras de negócio descritas neste prompt determinam o funcionamento financeiro, comercial, administrativo e operacional.
+
+Quando houver conflito entre uma regra antiga embutida no JavaScript do HTML e uma regra de negócio deste prompt, siga este prompt.
+
+Exemplos de regras antigas do protótipo que não devem ser preservadas:
+- O login simulado deve ser substituído por autenticação Laravel real.
+- O armazenamento local ou Firebase do protótipo deve ser substituído pela API Laravel e pelo MySQL.
+- A modalidade Contrato não deve existir na versão final.
+- A taxa de gateway do cartão não deve ser calculada nem descontada.
+- Os dados de demonstração não devem ser confundidos com dados reais.
+
+A aparência original, porém, deve permanecer fiel.
+
 ---
 
-# 3. ARQUITETURA E ORGANIZAÇÃO DO PROJETO
+# 2. FIDELIDADE VISUAL: REPRODUZIR O HTML, NÃO REDESENHAR
 
-Utilize um único repositório com esta estrutura:
+Esta é uma das partes mais importantes do projeto.
+
+A interface precisa preservar o mesmo design do arquivo de referência.
+
+## 2.1 Cores oficiais
+
+Utilize os tokens originais do HTML:
+
+```css
+:root {
+  --bg: #070a08;
+  --surface: #0e1311;
+  --raise: #151c18;
+  --line: #212b26;
+
+  --fg: #f1f6f3;
+  --muted: #8c9a92;
+
+  --accent: #1ed760;
+  --accent-text: #1ed760;
+  --accent-ink: #03130a;
+  --accent-soft: rgba(30, 215, 96, .12);
+
+  --warn: #f2b441;
+  --crit: #ff6159;
+  --info: #58b4ff;
+
+  --warn-soft: rgba(242, 180, 65, .14);
+  --crit-soft: rgba(255, 97, 89, .14);
+  --info-soft: rgba(88, 180, 255, .14);
+
+  --scrim: rgba(0, 0, 0, .66);
+
+  --font-display: 'Space Grotesk', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --u: 1px;
+  --sw: calc(var(--u) * 248);
+
+  color-scheme: dark;
+}
+```
+
+Não escolha outras tonalidades de verde.
+
+Não substitua o fundo por preto absoluto.
+
+Não transforme os cards em superfícies claras.
+
+Não use gradientes novos ou efeitos decorativos que não existam no original.
+
+Preserve o contraste, as cores de status e as variações de superfície.
+
+## 2.2 Tipografia
+
+Utilize exatamente:
+
+- **Space Grotesk:** títulos, indicadores numéricos e elementos de destaque.
+- **Inter:** textos, descrições, formulários, tabelas, botões e navegação.
+
+Carregue as fontes do Google Fonts, respeitando os pesos utilizados no HTML.
+
+Não substitua por Arial, Roboto ou outra fonte.
+
+Preserve:
+- Pesos tipográficos.
+- Tamanhos.
+- Altura de linha.
+- Espaçamento entre letras.
+- Transformações em maiúsculas.
+- Alinhamentos.
+- Números tabulares (`tabular-nums`).
+
+## 2.3 Layout e dimensões
+
+Reproduza a estrutura original:
+
+- Sidebar fixa à esquerda em telas grandes.
+- Largura original de 248px, respeitando o sistema de escala do HTML.
+- Área principal à direita.
+- Largura máxima de conteúdo.
+- Padding externo.
+- Espaçamento entre seções.
+- Cards com bordas discretas.
+- Bordas e raios originais.
+- Botões primários e secundários.
+- Campos de formulário.
+- Badges e indicadores.
+- Tabelas e gráficos.
+- Modais sobrepostos à aplicação.
+
+Preserve a hierarquia e as proporções entre os elementos.
+
+## 2.4 Componentes visuais
+
+Reproduza fielmente:
+
+- Logo CO e identificação Closer OS PRO.
+- Ícones SVG e seus traços.
+- Navegação lateral.
+- Item ativo da navegação.
+- Grupos e separadores.
+- Cards de indicadores.
+- Cards do Kanban.
+- Colunas e títulos do pipeline.
+- Barras de progresso.
+- Chips e pills.
+- Estados de alerta.
+- Campos e selects.
+- Botões.
+- Tabelas.
+- Gráficos.
+- Anéis de pontuação.
+- Heatmap de calls.
+- Timeline.
+- Modais.
+- Toasts.
+- Tela de login.
+- Estados vazios.
+- Estados de carregamento.
+
+Não use emojis no lugar dos ícones SVG originais.
+
+Não substitua o design por componentes prontos do shadcn/ui sem personalização. Você pode utilizar Radix ou outras bibliotecas internamente, mas o resultado visual precisa corresponder ao HTML.
+
+## 2.5 Responsividade
+
+Reproduza os breakpoints do HTML:
+
+- Acima de 2000px: escala de interface `1.1`.
+- Acima de 2400px: escala `1.25`.
+- Acima de 3000px: escala `1.6`.
+- Até 1179px: sidebar compacta, conforme o original.
+- Até 860px: sidebar horizontal com abas roláveis, conteúdo adaptado e Kanban com rolagem horizontal.
+
+Preserve também:
+- Safe areas em dispositivos móveis.
+- Navegação adaptada.
+- Cards reorganizados.
+- Formulários sem estouro.
+- Modais responsivos.
+- Rolagem horizontal apenas onde o original prevê.
+- Área de conteúdo sem rolagem horizontal indevida.
+
+A interface deve funcionar em desktop, notebook, tablet e celular.
+
+## 2.6 Tema
+
+Preserve o tema escuro original e o suporte ao tema claro.
+
+Utilize os tokens de tema do HTML, incluindo a adaptação ao esquema de cores do sistema e a possibilidade de definir explicitamente o tema.
+
+Não invente uma terceira identidade visual.
+
+---
+
+# 3. VALIDAÇÃO VISUAL OBRIGATÓRIA
+
+Não basta dizer que a interface está parecida.
+
+Você precisa testar visualmente.
+
+Crie screenshots da aplicação implementada e compare com o HTML de referência.
+
+Faça as comparações, no mínimo, nestas resoluções:
+
+- Desktop: 1440 × 900.
+- Notebook: 1280 × 800.
+- Tablet: 860 × 1100.
+- Celular: 390 × 844.
+
+Compare as telas:
+1. Login.
+2. Hoje.
+3. Faturamento e caixa.
+4. Pipeline.
+5. Lead 360.
+6. Cadência de FUP.
+7. Scorecard de calls.
+8. Banco de objeções.
+9. Perdas e recuperação.
+10. Metas e ritmo.
+11. Operações e comissão.
+12. Modais de lead e venda.
+
+Corrija diferenças de:
+- Posição.
+- Tamanho.
+- Espaçamento.
+- Tipografia.
+- Cor.
+- Bordas.
+- Altura.
+- Largura.
+- Alinhamento.
+- Quebra de linhas.
+- Rolagem.
+- Comportamento responsivo.
+
+Repita o processo até atingir uma reprodução visual de alta fidelidade.
+
+Não considere a tarefa concluída apenas porque os componentes existem.
+
+---
+
+# 4. ARQUITETURA DO PROJETO
+
+Estruture o repositório desta maneira:
 
 ```text
 closer-os-pro/
-│
-├── frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   ├── layouts/
-│   │   ├── pages/
-│   │   ├── modules/
-│   │   ├── hooks/
-│   │   ├── services/
-│   │   ├── stores/
-│   │   ├── schemas/
-│   │   ├── types/
-│   │   ├── utils/
-│   │   └── routes/
-│   ├── public/
-│   ├── tests/
-│   └── package.json
-│
 ├── backend/
 │   ├── app/
-│   │   ├── Models/
-│   │   ├── Http/
-│   │   ├── Services/
+│   │   ├── Domain/
+│   │   │   ├── Finance/
+│   │   │   ├── Pipeline/
+│   │   │   ├── Commission/
+│   │   │   └── Goals/
 │   │   ├── Enums/
+│   │   ├── Http/
+│   │   │   ├── Controllers/
+│   │   │   ├── Requests/
+│   │   │   └── Resources/
+│   │   ├── Models/
 │   │   ├── Policies/
-│   │   └── Domain/
+│   │   └── Services/
 │   ├── database/
 │   │   ├── migrations/
-│   │   ├── seeders/
-│   │   └── factories/
+│   │   ├── factories/
+│   │   └── seeders/
 │   ├── routes/
 │   └── tests/
 │
+├── frontend/
+│   ├── src/
+│   │   ├── app/
+│   │   ├── components/
+│   │   ├── features/
+│   │   │   ├── today/
+│   │   │   ├── finance/
+│   │   │   ├── pipeline/
+│   │   │   ├── leads/
+│   │   │   ├── follow-ups/
+│   │   │   ├── scorecard/
+│   │   │   ├── objections/
+│   │   │   ├── losses/
+│   │   │   ├── goals/
+│   │   │   ├── operations/
+│   │   │   └── settings/
+│   │   ├── hooks/
+│   │   ├── lib/
+│   │   ├── services/
+│   │   ├── styles/
+│   │   └── types/
+│   ├── public/
+│   └── package.json
+│
 ├── docs/
 │   ├── REFERENCE_AUDIT.md
-│   ├── BUSINESS_RULES.md
-│   ├── DATA_MODEL.md
-│   ├── API.md
-│   └── DECISIONS.md
+│   ├── DECISIONS.md
+│   └── API.md
 │
-└── README.md
+├── docker-compose.yml
+├── README.md
+└── .env.example
 ```
 
-### Frontend
+## 4.1 Frontend
 
-- React.
+- React 18 ou versão estável compatível.
 - Vite.
 - TypeScript.
 - React Router.
-- TanStack Query para dados da API.
-- Zustand apenas para estados locais de interface.
-- Tailwind CSS e componentes próprios.
-- Radix UI quando necessário.
+- TanStack Query.
+- Zustand apenas para estado local de interface.
 - React Hook Form.
 - Zod.
 - date-fns.
 - @dnd-kit para o Kanban.
-- Vitest e Testing Library.
-- Playwright para testes de fluxos completos.
+- Vitest.
+- Testing Library.
+- Playwright.
 
-### Backend
+A implementação visual deve utilizar CSS próprio e tokens extraídos do HTML. Não permita que o framework de estilização altere a aparência original.
+
+## 4.2 Backend
 
 - Laravel 12.
-- PHP 8.3 ou superior compatível.
+- PHP 8.3.
 - MySQL 8.
-- Laravel Sanctum para autenticação SPA.
-- API REST versionada em `/api/v1`.
-- Form Requests para validação.
-- API Resources para respostas.
-- Policies para autorização.
-- Enums para estados controlados.
-- Services e classes de domínio para regras comerciais e financeiras.
+- Laravel Sanctum.
+- API REST JSON versionada em `/api/v1`.
+- Form Requests.
+- API Resources.
+- Policies e autorização por perfil.
+- Pest para testes.
+- Laravel Pint.
+- Larastan.
 
-### Regras técnicas obrigatórias
+## 4.3 Regras técnicas
 
-1. Toda regra de negócio deverá ser executada e validada no Laravel.
-2. O React não poderá ser a fonte da verdade de nenhum cálculo financeiro.
-3. O frontend deverá consumir a API.
-4. Não armazenar informações financeiras apenas em localStorage.
-5. Não utilizar dados simulados como se fossem dados reais.
-6. Utilizar transações de banco em operações financeiras.
-7. Utilizar valores monetários em centavos, com inteiros (`BIGINT`), nunca `float`.
-8. Armazenar datas de maneira consistente e apresentar no fuso `America/Sao_Paulo`.
-9. Implementar validação no backend mesmo quando já existir validação no frontend.
-10. Garantir integridade referencial e consistência dos registros.
-
----
-
-# 4. USUÁRIOS, AUTENTICAÇÃO E PERMISSÕES
-
-O sistema terá dois perfis principais:
-
-### Administrador
-
-- Visualiza todos os closers.
-- Visualiza todos os leads.
-- Visualiza todas as vendas.
-- Visualiza faturamento e caixa consolidados.
-- Visualiza comissões.
-- Gerencia empresas e gerências.
-- Gerencia usuários.
-- Configura metas.
-- Visualiza relatórios gerais.
-- Pode editar e administrar os registros conforme permissões.
-
-### Closer
-
-- Visualiza seus próprios leads.
-- Visualiza suas próprias calls.
-- Visualiza suas vendas.
-- Visualiza seu faturamento e caixa.
-- Visualiza suas comissões.
-- Visualiza suas metas.
-- Gerencia seus follow-ups.
-- Registra suas avaliações de calls.
-- Não acessa os dados privados de outros closers.
-
-Cada lead deverá estar associado a um responsável.
-
-O administrador poderá atribuir leads a closers e visualizar os resultados consolidados.
-
-Todas as consultas e alterações deverão respeitar as permissões no backend. Não basta esconder botões na interface.
+- Laravel é a fonte oficial dos dados.
+- O frontend não é responsável por calcular valores financeiros oficiais.
+- Todas as operações financeiras são processadas no backend.
+- Dinheiro deve ser armazenado em centavos como inteiro.
+- Nunca utilizar float para cálculos financeiros.
+- Datas devem ser armazenadas em UTC e apresentadas no fuso `America/Sao_Paulo`.
+- Todos os dados devem persistir no MySQL.
+- Não usar localStorage como banco de dados.
+- Não usar Firebase.
+- Não deixar funcionalidades simuladas.
+- Não criar botões sem ação real.
 
 ---
 
-# 5. MÓDULOS DO SISTEMA
+# 5. USUÁRIO ADMINISTRADOR INICIAL — OBRIGATÓRIO
 
-Reproduza os módulos existentes no HTML, preservando a organização visual e os nomes:
+Crie um usuário administrador inicial por meio de Seeder do Laravel.
+
+Dados exatos:
+
+```text
+Nome: Thalis Gomes
+E-mail: 1thalisgabriel1@gmail.com
+Senha inicial: 123456
+Perfil: admin
+```
+
+Requisitos:
+
+1. O usuário deve ser criado no banco de dados pelo seeder.
+2. O seeder deve ser idempotente: executá-lo novamente não pode criar usuários duplicados.
+3. A senha deve ser armazenada usando o hash seguro do Laravel.
+4. Nunca armazenar senha em texto puro.
+5. Não colocar credenciais fixas no código do frontend.
+6. O login deve autenticar de verdade pela API Laravel/Sanctum.
+7. O administrador deve conseguir acessar todas as áreas administrativas.
+8. O nome exibido no perfil deve ser Thalis Gomes.
+9. A conta inicial deve exigir a troca da senha no primeiro acesso, sem impedir o login inicial com a senha informada.
+
+A tela de login deve reproduzir fielmente o HTML, incluindo:
+- Divisão visual em duas áreas.
+- Logo.
+- Texto principal.
+- Quadro ilustrativo.
+- Lista de benefícios.
+- Campos de e-mail e senha.
+- Botão de mostrar/ocultar senha.
+- Lembrar de mim.
+- Esqueci minha senha.
+- Botão Entrar.
+- Responsividade original.
+
+Não utilize o login simulado do protótipo. A autenticação deve ser real.
+
+---
+
+# 6. USUÁRIOS, PERMISSÕES E ESTRUTURA COMERCIAL
+
+O sistema deve suportar dois perfis:
+
+## Administrador
+
+Pode:
+- Visualizar todos os leads.
+- Visualizar todos os closers.
+- Visualizar o financeiro consolidado.
+- Gerenciar usuários.
+- Criar e editar empresas.
+- Criar e editar gerências/unidades.
+- Configurar metas.
+- Configurar remuneração.
+- Configurar comissões.
+- Gerenciar objeções.
+- Gerenciar operações.
+- Consultar todos os indicadores.
+- Consultar históricos e relatórios.
+
+## Closer
+
+Pode:
+- Visualizar os próprios leads.
+- Gerenciar seus próprios leads.
+- Registrar calls.
+- Preencher Scorecard.
+- Criar tarefas de FUP.
+- Registrar vendas.
+- Consultar o próprio faturamento.
+- Consultar o próprio caixa.
+- Consultar a própria comissão.
+- Acompanhar suas metas.
+
+Um closer nunca deve acessar os dados privados de outro closer.
+
+## Estrutura inicial
+
+Criar a estrutura inicial:
+
+- Empresa: TZN Legacy.
+- Gerência/unidade: Mercado Livre.
+- Gerência/unidade: Visagismo.
+
+A estrutura deve permitir que o administrador crie outras empresas e gerências futuramente.
+
+A palavra "operação" também pode ser usada para identificar a frente comercial e seu percentual de comissão, mas empresa, gerência e operação devem ter entidades distintas quando necessário para não misturar conceitos.
+
+---
+
+# 7. MÓDULOS DO SISTEMA
+
+Reproduza os módulos do HTML, preservando nomes, organização, navegação, hierarquia e aparência.
+
+A navegação principal deve conter:
 
 1. Hoje.
-2. Faturamento.
+2. Faturamento e caixa.
 3. Pipeline.
 4. Lead 360.
-5. Cadência.
-6. Calls.
-7. Objeções.
-8. Perdas.
-9. Ritmo.
-10. Operações.
+5. Cadência de FUP.
+6. Scorecard de calls.
+7. Banco de objeções.
+8. Perdas e recuperação.
+9. Metas e ritmo.
+10. Operações e comissão.
+11. Prompt do agente.
 
-Além desses módulos, implemente autenticação, administração de usuários, empresas, gerências e metas, integrando-os à estrutura existente sem descaracterizar o design.
+As funcionalidades administrativas adicionais devem ser acessadas de maneira coerente com o design existente, sem descaracterizar a navegação.
 
-## 5.1. Hoje
+## 7.1 Hoje
 
-Dashboard com visão do dia.
+Reproduzir a tela original com:
 
-Deverá apresentar:
+- Saudação.
+- Agenda de calls do dia.
+- Horário de cada call.
+- Nome do lead.
+- Etapa atual.
+- Contador de no-shows.
+- Botão para abrir lead.
+- Botão para marcar no-show.
+- Botão para registrar fechamento.
+- Alerta de leads que precisam de nova data.
+- Resumo de faturamento do mês.
+- Resumo de caixa do mês.
+- Quantidade de calls hoje.
+- Quantidade de leads que precisam de nova data.
+- Botão Novo lead.
 
-- Calls agendadas.
-- Calls realizadas.
-- Próximos compromissos.
-- Leads que precisam de acompanhamento.
-- Follow-ups atrasados.
-- Indicadores de vendas.
-- Resumo de faturamento e caixa.
-- Indicadores de metas.
-- Informações relevantes da operação.
+Os indicadores precisam vir da API.
 
-Os indicadores deverão respeitar o usuário logado e o período selecionado.
+## 7.2 Faturamento e caixa
 
-## 5.2. Faturamento
+Reproduzir:
 
-Painel financeiro com separação rigorosa entre:
+- Filtro por nome do cliente.
+- Data inicial.
+- Data final.
+- Filtro por operação.
+- Atalhos de período.
+- Faturamento contratado.
+- Caixa líquido.
+- A receber.
+- Ticket médio.
+- Comissão gerada.
+- Gráfico de contratado x caixa dos últimos seis meses.
+- Contratado por operação.
+- Tabela de vendas.
+- Ação para abrir e editar venda.
 
-- Faturamento.
-- Caixa recebido.
-- Valores pendentes.
-- Comissões.
-- Reembolsos.
+Os valores devem ser retornados pelo backend.
 
-Deverá permitir filtros por:
+## 7.3 Pipeline
 
-- Período.
-- Mês.
-- Empresa.
-- Gerência.
-- Closer.
-- Forma de pagamento.
-
-Exibir indicadores, gráficos e histórico de vendas.
-
-**Nunca confundir faturamento com caixa.**
-
-## 5.3. Pipeline
-
-Implementar um Kanban com as etapas:
+Preservar o Kanban horizontal, com as colunas originais:
 
 1. Lead Agendado.
 2. No-show.
@@ -278,786 +550,748 @@ Implementar um Kanban com as etapas:
 4. Remarcado.
 5. Negociação.
 6. Fechado.
-7. Reembolso.
-8. Loss.
-9. Desqualificado.
+7. Loss.
+8. Desqualificado.
+9. Reembolso.
 
-O usuário poderá mover os leads livremente entre as etapas, inclusive arrastando cards.
+A etapa Reembolso deve ser adicionada sem alterar a identidade visual das demais colunas.
 
-No celular, oferecer alternativa por menu de movimentação.
+Cada card deve mostrar:
+- Nome do lead.
+- Data e hora da call.
+- Dias na etapa.
+- Contador de no-show.
+- Valor da venda, quando aplicável.
+- Motivo de perda, quando aplicável.
 
-Ao mover um lead para Loss ou Desqualificado, exigir motivo e permitir uma nota explicativa.
+Manter:
+- Arrastar e soltar.
+- Destaque da coluna de destino.
+- Rolagem horizontal.
+- Rolagem interna das colunas.
+- Busca.
+- Filtros por data.
+- Indicadores de pipeline.
+- Alternativa de movimentação por select no celular.
 
-Ao mover para Reembolso, a origem deverá ser um processo financeiro de reembolso, não uma simples movimentação manual.
+A movimentação deve atualizar o backend e o histórico.
 
-### Regras do histórico
+## 7.4 Lead 360
 
-O histórico do lead deverá acompanhar seu ciclo de vida.
+Reproduzir a estrutura original:
 
-Porém:
+- Lista de leads.
+- Busca.
+- Score circular.
+- Temperatura.
+- Dados de contato.
+- Etapa.
+- Dias na etapa.
+- Contador de no-show.
+- Qualificação BANT.
+- Descrição pessoal.
+- Próxima call.
+- Resumo da venda.
+- Descrição da venda.
+- Faturamento.
+- Caixa.
+- Comissão.
+- Linha do tempo.
+- Campo para anotação rápida.
 
-- Se o lead for excluído, seus dados e histórico serão removidos.
-- Se for cadastrado novamente, será considerado um novo lead.
-- Se for reativado a partir de Loss ou Desqualificado, será criado como novo ciclo, sem preservar o histórico anterior.
-- O contador de no-show será reiniciado no novo ciclo.
+### Pontuação BANT
 
-O pipeline deverá apresentar contadores e indicadores por etapa.
+Manter os quatro critérios:
 
-## 5.4. Lead 360
+- Budget: tem verba.
+- Authority: decide sozinho.
+- Need: dor clara e urgente.
+- Timing: prazo definido.
 
-Tela completa de detalhes do lead.
+Cada critério vale 20 pontos.
 
-### Cadastro básico
+Engajamento pode adicionar até 20 pontos, respeitando a lógica do HTML: 4 pontos por interação registrada, com limite de 20.
 
-Manter um cadastro enxuto:
+Pontuação máxima: 100 pontos.
+
+Temperatura:
+- 70 ou mais: Quente.
+- 40 a 69: Morno.
+- Abaixo de 40: Frio.
+
+Os registros devem persistir.
+
+## 7.5 Cadência de FUP
+
+Preservar a biblioteca de mensagens do HTML, incluindo os grupos:
+
+- Pós-call.
+- Proposta enviada.
+- No-show.
+- Lead frio.
+
+Preservar os textos, intervalos D0, D1, D2, D3, D4, D7, D8 e D10, conforme o HTML original.
+
+Manter:
+- Seleção de situação.
+- Campo de nome do lead.
+- Substituição de `{nome}`.
+- Botão Copiar.
+- Organização visual em etapas.
+
+Além da biblioteca, implementar tarefas reais de follow-up:
+
+- Criar tarefa.
+- Associar ao lead.
+- Associar ao closer.
+- Definir data e hora.
+- Registrar mensagem ou ação planejada.
+- Definir prioridade.
+- Marcar como concluída.
+- Registrar histórico.
+- Exibir tarefas atrasadas.
+- Exibir tarefas do dia.
+- Exibir próximas tarefas.
+
+O histórico deve registrar criação, alteração e conclusão.
+
+## 7.6 Scorecard de calls
+
+Preservar a aparência original, incluindo:
+
+- Checklist.
+- Pontuação por critério.
+- Controle deslizante da proporção de fala.
+- Anel de pontuação.
+- Foco da próxima call.
+- Histórico visual das últimas oito calls.
+
+Os critérios originais são:
+
+| Critério | Pontos |
+|---|---:|
+| Abri com contrato de tempo e objetivo da call | 10 |
+| Mapeei a situação atual do lead | 15 |
+| O lead disse a dor com as próprias palavras | 15 |
+| Quantifiquei o custo de não resolver | 15 |
+| Defini critério e prazo de decisão | 10 |
+| Apresentei a solução ligada à dor | 15 |
+| Pedi o fechamento de forma direta | 10 |
+| Combinei próximo passo com data e hora | 10 |
+
+Pontuação máxima: 100 pontos.
+
+Proporção de fala:
+- Entre 30% e 50%: sem desconto.
+- Entre 20% e 29%, ou entre 51% e 60%: desconto de 5 pontos.
+- Abaixo de 20% ou acima de 60%: desconto de 10 pontos.
+
+O resultado final nunca pode ser inferior a zero.
+
+**Diferentemente do protótipo, as calls devem ser salvas no banco.**
+
+Cada avaliação deve estar associada a:
+- Closer.
+- Lead.
+- Data da call.
+- Checklist.
+- Proporção de fala.
+- Pontuação.
+- Observações.
+- Resultado.
+
+Criar histórico por closer e por call.
+
+Exibir médias, evolução e últimas oito avaliações reais. Não usar dados simulados.
+
+## 7.7 Banco de objeções
+
+Preservar as seis objeções iniciais do HTML, incluindo os textos e respostas:
+
+- Vou pensar.
+- Está caro.
+- Preciso falar com meu sócio.
+- Já tentei e não deu certo.
+- Agora não tenho tempo.
+- Vou ver com calma e te falo.
+
+Manter categorias, respostas, percentuais de referência e botão copiar.
+
+O administrador deve conseguir:
+- Criar objeção.
+- Editar.
+- Excluir.
+- Alterar categoria.
+- Alterar resposta.
+- Consultar ocorrências.
+
+Os percentuais do HTML são apenas referências iniciais, não taxas reais.
+
+Criar registro de ocorrência de objeção por call, incluindo:
+- Closer.
+- Lead.
+- Objeção.
+- Data.
+- Resultado: contornada ou não contornada.
+- Observação.
+
+Calcular a taxa real de contorno com base nos registros.
+
+## 7.8 Perdas e recuperação
+
+Preservar:
+- Distribuição de motivos.
+- Quantidade de leads por motivo.
+- Seleção do motivo.
+- Lista de leads.
+- Dias na etapa.
+- Nota do lead.
+- Orientação de reativação.
+
+Motivos iniciais:
+- Preço.
+- Sem tempo / timing.
+- Decide com terceiro.
+- Concorrente.
+- Sem fit.
+- Sem resposta.
+
+Loss e Desqualificado devem ser tratados como situações diferentes.
+
+O usuário poderá reativar um lead perdido ou desqualificado, mas a reativação deverá iniciar um novo ciclo, sem carregar o histórico anterior para o novo ciclo.
+
+## 7.9 Metas e ritmo
+
+Preservar a estrutura visual do HTML:
+
+- Indicadores.
+- Funil do mês.
+- Calls agendadas.
+- Compareceram.
+- Leads que faltaram.
+- Fechamentos.
+- Calls por dia.
+- Heatmap das últimas cinco semanas.
+
+Adicionar metas configuráveis por:
+- Empresa.
+- Gerência/unidade.
+- Closer.
+- Mês.
+- Indicador.
+
+O administrador poderá definir e editar metas sem alterar código.
+
+Os dados devem ser reais e filtráveis por período.
+
+## 7.10 Operações e comissão
+
+Preservar o layout de gestão de operações do HTML.
+
+Permitir:
+- Criar operação.
+- Renomear.
+- Alterar percentual.
+- Arquivar.
+- Reativar.
+- Visualizar vendas vinculadas.
+
+Percentuais iniciais:
+- Mercado Livre: 7%.
+- Visagismo masculino: 10%.
+
+O percentual utilizado deve ser salvo como snapshot na venda. Alterações futuras não modificam vendas antigas.
+
+A comissão deve ser calculada com base no caixa efetivamente recebido e no percentual congelado da venda.
+
+---
+
+# 8. REGRAS DE LEADS E CICLOS
+
+O cadastro básico de lead deve conter apenas:
 
 - Nome.
 - Telefone.
 - E-mail.
 - Descrição pessoal.
 - Data e hora da call.
-- Closer responsável.
-- Empresa/gerência relacionada.
 
-A qualificação e o histórico deverão ficar separados do formulário básico.
+Não adicionar campos desnecessários ao formulário inicial.
 
-### Qualificação BANT
+A qualificação, o histórico, as anotações e os dados de venda ficam no Lead 360.
 
-Preservar os quatro critérios do HTML:
+Telefone repetido gera aviso, não bloqueio.
 
-- Budget.
-- Authority.
-- Need.
-- Timing.
+A descrição pessoal do lead e a descrição da venda são campos separados.
 
-Cada critério vale 20 pontos.
+## No-show
 
-O engajamento poderá adicionar até 20 pontos.
+Cada ocorrência de no-show deve ser registrada.
 
-Pontuação total: 100 pontos.
+O contador representa o número de ocorrências durante o ciclo atual do lead.
 
-Apresentar visualmente a pontuação, os critérios preenchidos e o nível de qualificação.
+Se o lead for excluído e cadastrado novamente ou reativado em um novo ciclo, o contador começa em zero.
 
-### Histórico
+## Exclusão e reativação
 
-Registrar:
+- Excluir um lead significa excluir seus dados e histórico conforme as permissões administrativas.
+- Recadastrar o lead significa criar um novo registro.
+- Reativar Loss ou Desqualificado cria um novo ciclo, sem transferir o histórico anterior.
+- Não misturar ciclos diferentes nas métricas do ciclo atual.
 
-- Criação do lead.
-- Alterações relevantes.
-- Movimentações no pipeline.
-- Calls agendadas.
-- Calls realizadas.
-- No-shows.
-- Notas.
-- Follow-ups.
-- Vendas.
-- Reembolsos.
+## Conversão
 
-O histórico deverá ser ordenado cronologicamente.
+A conversão comercial deve considerar somente calls efetivamente realizadas.
 
-## 5.5. Cadência de FUP
+Fórmula:
 
-Preservar os cenários e modelos de mensagens existentes no HTML.
+`Conversão = vendas ÷ calls realizadas × 100`
 
-O módulo deverá ter duas funcionalidades:
+Não contar no-shows como calls realizadas.
 
-**A. Biblioteca de mensagens**
+Desqualificados não devem afetar a conversão.
 
-- Modelos de mensagens por situação.
-- Texto pronto para copiar.
-- Personalização com nome do lead.
-- Possibilidade de editar e cadastrar novos modelos.
-- Organização por tipo de abordagem.
-
-**B. Gestão de follow-ups**
-
-- Criar tarefa de acompanhamento.
-- Associar ao lead.
-- Definir data e horário.
-- Registrar mensagem ou ação planejada.
-- Marcar como concluído.
-- Registrar o resultado.
-- Consultar histórico.
-- Identificar tarefas atrasadas.
-- Mostrar próximos acompanhamentos.
-
-Os follow-ups deverão aparecer no dashboard Hoje e no Lead 360.
-
-## 5.6. Calls / Scorecard
-
-Implementar um sistema histórico de avaliação de calls.
-
-Cada avaliação deverá estar associada a:
-
-- Lead.
-- Closer.
-- Data da call.
-- Empresa/gerência, quando aplicável.
-
-Não utilizar apenas avaliações simuladas ou temporárias.
-
-Cada call deverá possuir seu próprio scorecard persistido.
-
-Preservar os critérios e a lógica de avaliação do HTML.
-
-### Regras
-
-- Pontuação total de 100 pontos.
-- Manter os critérios e pesos encontrados na referência.
-- Incluir o ajuste relacionado à proporção de fala do closer e do lead, conforme a lógica do HTML.
-- Permitir consultar avaliações anteriores.
-- Exibir média por closer.
-- Exibir evolução por período.
-- Exibir desempenho por critério.
-- Exibir histórico individual de calls.
-
-O módulo deverá permitir analisar a evolução comercial, e não apenas preencher uma avaliação.
-
-## 5.7. Banco de objeções
-
-Preservar as seis objeções existentes no HTML e suas referências iniciais de conversão.
-
-Entretanto, transforme o banco em um módulo gerenciável.
-
-Permitir:
-
-- Cadastrar objeções.
-- Editar objeções.
-- Cadastrar respostas e argumentos.
-- Registrar quando uma objeção foi apresentada.
-- Associar a objeção a uma call e a um lead.
-- Registrar se a objeção foi contornada.
-- Registrar se a venda aconteceu.
-- Consultar ocorrências.
-
-Os percentuais estáticos encontrados no HTML deverão ser tratados como referências iniciais, não como resultados reais.
-
-O sistema deverá calcular indicadores reais com base nos registros históricos.
-
-Exibir:
-
-- Quantidade de ocorrências.
-- Quantidade de objeções contornadas.
-- Quantidade de vendas.
-- Taxa de conversão.
-- Desempenho por closer.
-
-## 5.8. Perdas
-
-Módulo para analisar leads perdidos e desqualificados.
-
-Preservar os motivos e a organização visual encontrados no HTML.
-
-Apresentar:
-
-- Quantidade de perdas.
-- Motivos.
-- Observações.
-- Empresa/gerência.
-- Closer responsável.
-- Período.
-- Taxas e gráficos.
-
-### Regra fundamental de conversão
-
-**Desqualificados não devem prejudicar a taxa de conversão comercial.**
-
-A conversão deverá considerar somente calls efetivamente realizadas.
-
-Não utilizar a quantidade total de leads cadastrados como denominador da conversão.
-
-Loss e Desqualificado devem ser indicadores separados.
-
-Permitir reativar leads perdidos ou desqualificados, criando um novo ciclo sem histórico anterior.
-
-## 5.9. Ritmo e metas
-
-Implementar um painel de metas mensais.
-
-O sistema deverá permitir cadastrar metas pessoais para cada closer, por empresa e gerência.
-
-Metas configuráveis:
-
-- Calls agendadas.
-- Calls realizadas.
-- Vendas.
-- Faturamento.
-- Caixa.
-- Comissões.
-- Outras metas quantitativas necessárias.
-
-Exibir:
-
-- Meta mensal.
-- Resultado atual.
-- Percentual atingido.
-- Quanto falta.
-- Projeção de resultado.
-- Histórico dos meses anteriores.
-- Comparação entre meta e realizado.
-
-Permitir que o administrador configure metas e que o closer acompanhe suas próprias metas.
-
-### Regra especial de remuneração — TZN Legacy
-
-Existe uma regra de remuneração pessoal que deverá ser configurável e implementada desde o início.
-
-Configuração inicial:
-
-- Empresa: TZN Legacy.
-- Meta mensal de caixa: R$ 18.000.
-- Fixo integral: R$ 1.800.
-- Marco intermediário: 70% da meta.
-
-A regra é:
-
-| Resultado de caixa no mês | Remuneração fixa |
-|---|---:|
-| Abaixo de 70% | R$ 0 |
-| A partir de 70% e abaixo de 100% | R$ 900 |
-| A partir de 100% | R$ 1.800 |
-
-Além do fixo, as comissões devidas deverão ser calculadas normalmente.
-
-Exemplos:
-
-- R$ 10.000 de caixa: não atingiu 70%, recebe comissões, sem fixo.
-- R$ 12.600 de caixa: atingiu 70%, recebe R$ 900 + comissões.
-- R$ 18.000 de caixa: atingiu 100%, recebe R$ 1.800 + comissões.
-
-O cálculo deverá considerar exclusivamente o caixa efetivamente recebido dentro do mês.
-
-Um pagamento pendente não conta como caixa. Quando for pago, passa a contar no mês da data em que efetivamente entrou no caixa.
-
-Não utilizar a data de fechamento da venda para determinar o mês de caixa.
-
-### Painel da remuneração
-
-Criar um espaço visual que mostre:
-
-- Meta de R$ 18.000.
-- Caixa realizado no mês.
-- Percentual atingido.
-- Quanto falta para 70%.
-- Quanto falta para 100%.
-- Status do fixo.
-- Fixo previsto.
-- Comissões acumuladas.
-- Remuneração total prevista.
-
-Os valores de meta e remuneração deverão ser editáveis por configuração administrativa, sem necessidade de alterar código.
-
-O sistema deverá preservar a configuração histórica de cada mês para que alterações futuras não modifiquem meses anteriores.
-
-## 5.10. Operações, empresas e gerências
-
-Este módulo deverá ser adaptado para trabalhar com empresas e gerências, em vez de depender de nomes fixos de operações.
-
-Criar uma estrutura flexível:
-
-- Empresas.
-- Gerências ou unidades de negócio.
-- Closer vinculado à empresa/gerência.
-- Metas por empresa/gerência.
-- Regras de comissão por empresa/gerência.
-
-Configuração inicial sugerida:
-
-- Empresa: TZN Legacy.
-- Gerência/linha de operação: Mercado Livre.
-- Gerência/linha de operação: Visagismo.
-
-Esses cadastros deverão ser editáveis pelo administrador.
-
-O objetivo é permitir que o usuário tenha metas e regras de remuneração diferentes conforme a empresa ou gerência em que trabalha.
-
-Não limitar o sistema a essas duas opções.
+Registrar cada call como evento próprio, evitando contar um lead duas vezes ou confundir quantidade de leads com quantidade de calls.
 
 ---
 
-# 6. REGRAS FINANCEIRAS — PRIORIDADE MÁXIMA
+# 9. REGRAS FINANCEIRAS — INVIOLÁVEIS
 
-As regras financeiras precisam ser implementadas com extremo cuidado.
+Esta parte deve ser implementada no backend, com serviços independentes e testes unitários.
 
-Toda operação financeira deve ser calculada no backend, com testes automatizados.
+Existem somente três formas de pagamento:
 
-## 6.1. Formas de pagamento
+- Pix.
+- Cartão.
+- Boleto.
 
-Existirão apenas três formas de pagamento:
+**Não existe modalidade Contrato. Não criar essa opção em nenhum lugar do sistema.**
 
-1. Pix.
-2. Cartão.
-3. Boleto.
+Uma venda pode ter múltiplos pagamentos.
 
-Não criar modalidade de contrato.
+## 9.1 Pix
 
-Cada venda poderá conter vários pagamentos, inclusive combinações de formas diferentes.
+- Conta como faturamento.
+- Pode estar Pendente ou Pago.
+- Pendente conta no faturamento.
+- Pendente não entra no caixa.
+- Quando pago, entra no caixa pela data efetiva de recebimento.
+- Deve ter data prevista de pagamento.
+- Deve ter data efetiva de recebimento quando pago.
 
-Exemplo:
+## 9.2 Cartão
 
-Venda de R$ 5.000:
+- Conta como faturamento.
+- Pode estar Pendente ou Pago.
+- Pendente conta no faturamento.
+- Pendente não entra no caixa.
+- Quando pago, entra no caixa pela data efetiva de recebimento.
+- Deve ter data prevista.
+- Deve ter data efetiva quando pago.
 
-- R$ 2.000 no Pix.
-- R$ 2.000 no cartão.
-- R$ 1.000 no boleto.
+**Não descontar taxa de gateway.**
 
-Cada pagamento deverá ter seus próprios dados e status.
+O usuário já informará o valor líquido recebido no cartão. O valor informado é a base oficial do caixa.
 
-## 6.2. Status de pagamento
+Não inventar taxas ou aplicar percentuais de gateway.
 
-Pix e cartão poderão ser:
+## 9.3 Boleto
 
-- Pendente.
-- Pago.
+- Conta como faturamento.
+- É considerado pago para fins de faturamento.
+- Não gera caixa.
+- Não pode ficar pendente.
+- Não deve ser contabilizado como dinheiro recebido.
 
-O boleto deverá ser registrado como pago automaticamente, conforme a regra operacional definida para o sistema, sem gerar caixa.
+## 9.4 Fórmulas
 
-Para Pix e cartão, permitir informar:
+Faturamento:
 
-- Valor.
+`Soma de todos os pagamentos da venda.`
+
+Caixa:
+
+`Soma dos pagamentos Pix e Cartão efetivamente pagos.`
+
+A receber:
+
+`Soma dos pagamentos Pix e Cartão pendentes.`
+
+Comissão:
+
+`Caixa recebido × percentual de comissão congelado na venda.`
+
+O boleto nunca entra no caixa.
+
+Pagamento pendente nunca entra no caixa.
+
+O caixa deve ser reconhecido no mês da data efetiva de recebimento, não no mês da venda ou da previsão.
+
+Faturamento deve ser reconhecido no mês do fechamento da venda.
+
+## 9.5 Datas
+
+Todo pagamento Pix ou Cartão deve permitir:
+
 - Data prevista de pagamento.
 - Status.
-- Data efetiva do recebimento.
+- Data efetiva de recebimento, quando pago.
 
-Quando estiver pendente:
-
-- Conta no faturamento.
-- Não entra no caixa.
-- Não conta como caixa para metas.
-- Não conta como caixa para remuneração fixa.
-
-Quando for marcado como pago:
-
-- Deve registrar a data efetiva de recebimento.
-- Entra no caixa do mês dessa data.
-- Passa a contar para metas de caixa.
-- Passa a contar para o cálculo do fixo.
-- Atualiza os indicadores financeiros.
-
-A data prevista não pode ser confundida com a data efetiva de recebimento.
-
-## 6.3. Faturamento
-
-Faturamento representa o valor total das vendas registradas, independentemente de o pagamento já ter sido recebido.
-
-Portanto:
-
-- Pix pago: conta no faturamento.
-- Pix pendente: conta no faturamento.
-- Cartão pago: conta no faturamento.
-- Cartão pendente: conta no faturamento.
-- Boleto: conta no faturamento.
-
-Não descontar taxa de cartão.
-
-O valor informado pelo usuário já será o valor considerado para os cálculos.
-
-## 6.4. Caixa
-
-Caixa representa exclusivamente os valores efetivamente recebidos.
-
-- Pix pago: entra no caixa.
-- Cartão pago: entra no caixa.
-- Pix pendente: não entra no caixa.
-- Cartão pendente: não entra no caixa.
-- Boleto: não entra no caixa.
-
-Quando um Pix ou cartão pendente for marcado como pago, deverá entrar no caixa na data efetiva de recebimento.
-
-O boleto permanece fora do caixa, mesmo sendo considerado pago para fins de faturamento.
-
-## 6.5. Comissões
-
-As comissões deverão ser configuráveis por empresa ou gerência.
-
-A fórmula será:
-
-`Comissão = Caixa recebido elegível × percentual de comissão`
-
-Não utilizar faturamento pendente para calcular comissão.
-
-O percentual de comissão deverá ser congelado na venda no momento do fechamento, como snapshot.
-
-Assim, se o percentual for alterado no futuro, vendas anteriores não serão recalculadas com a nova porcentagem.
-
-O sistema deverá apresentar:
-
-- Comissão total gerada.
-- Comissão por venda.
-- Comissão por empresa.
-- Comissão por gerência.
-- Comissão por período.
-- Comissão por closer.
-
-As regras específicas da remuneração fixa da TZN Legacy deverão ser calculadas separadamente da comissão.
-
-## 6.6. Reembolsos
-
-A exclusão de uma venda deverá obrigatoriamente gerar um processo de reembolso.
-
-Não apagar financeiramente a venda como se ela nunca tivesse existido.
-
-O procedimento deverá:
-
-1. Registrar um reembolso de 100% do valor original da venda.
-2. Preservar o registro original da venda.
-3. Registrar a data do reembolso.
-4. Registrar o valor.
-5. Registrar a empresa e gerência.
-6. Registrar o closer responsável.
-7. Registrar os pagamentos relacionados.
-8. Registrar o usuário que realizou a operação.
-9. Estornar o faturamento correspondente.
-10. Estornar o caixa efetivamente recebido correspondente.
-11. Reverter a comissão associada.
-12. Cancelar os valores que ainda estavam pendentes.
-13. Mover o lead para a etapa Reembolso.
-
-O reembolso deverá ser visível nos relatórios financeiros.
-
-A operação deverá ser atômica: se qualquer etapa falhar, nenhuma alteração parcial poderá permanecer.
-
-Manter auditoria de quem realizou a exclusão e quando.
-
-Não permitir excluir ou alterar um reembolso silenciosamente.
+Quando um pagamento pendente for marcado como pago, o sistema deve:
+1. Registrar a data efetiva.
+2. Atualizar o caixa.
+3. Atualizar a comissão.
+4. Atualizar os indicadores.
+5. Atualizar os relatórios do mês correspondente.
 
 ---
 
-# 7. REGRAS DE CONVERSÃO E INDICADORES
+# 10. REEMBOLSO
 
-A conversão comercial deverá ser calculada considerando apenas calls efetivamente realizadas.
+A etapa Reembolso deve existir no pipeline.
 
-A fórmula deverá ser:
+A exclusão de uma venda significa necessariamente reembolso integral.
 
-`Taxa de conversão = Vendas ÷ Calls realizadas × 100`
+Não implementar exclusão simples de venda como se fosse cancelamento sem impacto financeiro.
+
+Ao registrar um reembolso:
+
+1. Registrar o reembolso integral da venda.
+2. Estornar o faturamento original.
+3. Estornar o caixa efetivamente recebido.
+4. Estornar a comissão relacionada.
+5. Cancelar valores pendentes ainda não recebidos.
+6. Registrar data do reembolso.
+7. Registrar valor.
+8. Registrar motivo.
+9. Registrar responsável.
+10. Preservar o registro original e a trilha de auditoria.
+11. Mover o lead para a etapa Reembolso.
+
+O estorno do caixa deve considerar somente valores efetivamente recebidos. Valores pendentes não devem gerar estorno de caixa porque nunca entraram no caixa.
+
+O sistema deve impedir que o mesmo reembolso seja processado duas vezes.
+
+O reembolso deve atualizar todos os indicadores, relatórios, metas e comissões.
+
+Não apagar fisicamente a venda original para esconder o histórico financeiro.
+
+---
+
+# 11. REMUNERAÇÃO E META DA TZN LEGACY
+
+Criar uma estrutura de remuneração configurável no backend.
+
+Regra inicial da TZN Legacy:
+
+- Meta mensal de caixa: R$ 18.000.
+- Fixo integral: R$ 1.800.
+- Ao atingir 70% da meta: recebe R$ 900 de fixo mais comissões.
+- Ao atingir 100% da meta: recebe R$ 1.800 de fixo mais comissões.
+- Abaixo de 70%: recebe apenas comissões.
+
+Faixas:
+
+| Atingimento da meta | Fixo |
+|---|---:|
+| Abaixo de 70% | R$ 0 |
+| De 70% até abaixo de 100% | R$ 900 |
+| 100% ou mais | R$ 1.800 |
+
+A comissão é adicional ao fixo, não está incluída nele.
+
+**A meta é calculada pelo caixa efetivamente recebido durante o mês.**
 
 Não considerar:
+- Pagamentos pendentes.
+- Valores previstos.
+- Boleto.
+- Valores que não entraram no caixa.
+- Vendas reembolsadas.
 
-- Leads apenas cadastrados.
-- Leads agendados que ainda não realizaram call.
-- No-shows.
-- Leads desqualificados sem call realizada.
+Se um pagamento pendente for recebido em outro mês, ele entra na meta do mês do recebimento.
 
-Um lead poderá ter várias tentativas de agendamento e no-show, mas cada call efetivamente realizada deverá ser registrada corretamente.
+O sistema deve guardar snapshots mensais da meta, atingimento, fixo e comissão, para que mudanças futuras nas regras não alterem meses fechados.
 
-Evitar duplicidade de contagem.
+O administrador deve conseguir configurar:
+- Valor da meta.
+- Valor do fixo.
+- Percentual de cada faixa.
+- Valor de fixo de cada faixa.
+- Comissão.
+- Vigência das regras.
 
-Distinguir:
-
-- Calls agendadas.
-- Calls realizadas.
-- No-shows.
-- Vendas.
-- Reembolsos.
-- Loss.
-- Desqualificados.
-
-Os relatórios deverão permitir filtros por mês, closer, empresa e gerência.
+Não deixar esses valores fixos no código.
 
 ---
 
-# 8. MODELAGEM DE DADOS
+# 12. MODELAGEM DE DADOS
 
-Antes de implementar, desenhe o modelo relacional e documente em `docs/DATA_MODEL.md`.
-
-Considere, no mínimo, as seguintes entidades:
+Crie migrations e relacionamentos adequados para, no mínimo:
 
 - users
 - companies
-- departments ou business_units
-- user_company_assignments
+- departments
+- operations
 - leads
-- lead_qualifications
-- lead_timeline_events
+- lead_cycles
+- lead_events
 - calls
 - call_scorecards
 - call_objections
 - objections
-- sales
-- sale_payments
-- refunds
 - follow_up_templates
 - follow_up_tasks
+- sales
+- payments
+- refunds
 - goals
+- goal_snapshots
 - compensation_rules
-- commissions
-- monthly_compensation_snapshots
-- pipeline_stage_events
+- compensation_snapshots
+- notes
 - audit_logs
 
-Adapte os nomes se necessário, mas preserve a separação conceitual.
+Use chaves estrangeiras, índices e políticas de exclusão adequadas.
 
-### Integridade e histórico
+Registre o responsável por cada operação.
 
-- Relacionar cada lead a um closer.
-- Relacionar vendas a leads.
-- Relacionar pagamentos a vendas.
-- Relacionar reembolsos às vendas originais.
-- Relacionar scorecards às calls.
-- Relacionar follow-ups aos leads.
-- Relacionar metas às empresas, gerências e closers.
-- Preservar snapshots financeiros.
-- Registrar auditoria de operações importantes.
+A modelagem deve suportar múltiplos closers, empresas e gerências sem misturar dados.
 
-A exclusão de lead deverá seguir a regra de ciclo de vida definida neste prompt.
-
-A exclusão de venda, por outro lado, deverá produzir reembolso auditável, sem apagar o registro financeiro original.
+Não concentre tudo em uma única tabela JSON.
 
 ---
 
-# 9. API E SEGURANÇA
+# 13. API
 
-Criar endpoints REST organizados e documentados.
+Crie API REST versionada em `/api/v1`.
 
-Exemplos de recursos:
+Inclua endpoints para:
 
-- `/api/v1/auth`
-- `/api/v1/users`
-- `/api/v1/companies`
-- `/api/v1/departments`
-- `/api/v1/leads`
-- `/api/v1/leads/{id}/qualification`
-- `/api/v1/leads/{id}/timeline`
-- `/api/v1/pipeline`
-- `/api/v1/calls`
-- `/api/v1/scorecards`
-- `/api/v1/objections`
-- `/api/v1/follow-ups`
-- `/api/v1/sales`
-- `/api/v1/sales/{id}/payments`
-- `/api/v1/sales/{id}/refund`
-- `/api/v1/finance`
-- `/api/v1/goals`
-- `/api/v1/commissions`
-- `/api/v1/reports`
-
-Os endpoints deverão validar permissões e propriedade dos registros.
-
-Não confiar em valores enviados pelo frontend para:
-
-- Comissão.
-- Faturamento.
-- Caixa.
-- Reembolso.
-- Metas.
-- Remuneração fixa.
-- Conversão.
-
-O backend deverá recalcular e validar todos esses dados.
-
----
-
-# 10. TESTES OBRIGATÓRIOS
-
-Não considerar o projeto pronto apenas porque as telas estão funcionando.
-
-Criar testes unitários, de integração e de ponta a ponta.
-
-### Cenários financeiros
-
-1. Venda de R$ 5.000 com Pix pago: faturamento de R$ 5.000 e caixa de R$ 5.000.
-2. Venda de R$ 5.000 com Pix pendente: faturamento de R$ 5.000 e caixa zero.
-3. Venda com cartão pendente: faturamento contabilizado e caixa zero.
-4. Pix pendente pago em mês posterior: caixa contabilizado somente no mês do recebimento.
-5. Boleto: faturamento contabilizado, sem geração de caixa.
-6. Venda com múltiplos pagamentos: somas corretas por pagamento.
-7. Comissão calculada apenas sobre caixa elegível.
-8. Alteração de percentual de comissão não modifica vendas anteriores.
-9. Reembolso integral reverte os valores financeiros e a comissão corretamente.
-10. Reembolso cancela pagamentos pendentes.
-11. Reembolso não deixa valores parcialmente contabilizados.
-12. Datas previstas não são confundidas com datas de recebimento.
-
-### Cenários de remuneração
-
-1. Caixa abaixo de 70% da meta: somente comissões.
-2. Caixa igual a 70%: metade do fixo + comissões.
-3. Caixa entre 70% e 99,99%: metade do fixo + comissões.
-4. Caixa igual a 100%: fixo integral + comissões.
-5. Pagamento recebido em mês posterior: conta apenas no mês de recebimento.
-6. Reembolso reduz os indicadores de caixa e remuneração do período correspondente, conforme a regra de estorno.
-
-### Cenários de conversão
-
-1. Lead cadastrado sem call realizada não entra no denominador.
-2. No-show não entra no denominador.
-3. Desqualificado sem call realizada não afeta a conversão.
-4. Call realizada entra no denominador.
-5. Venda associada à call realizada entra no numerador.
-6. Reembolso deve aparecer separadamente e não ser confundido com venda ativa.
-
-### Cenários de permissões
-
-1. Closer não acessa leads de outro closer.
-2. Closer não consulta vendas de outro closer.
-3. Administrador visualiza todos os registros.
-4. Tentativa de acessar registro não autorizado é bloqueada no backend.
-
-### Cenários de ciclo de vida
-
-1. Lead excluído e recadastrado inicia novo ciclo.
-2. Lead reativado não preserva histórico anterior.
-3. No-show é contabilizado por ocorrência dentro do ciclo.
-4. Venda excluída gera reembolso e etapa Reembolso.
-5. Operações financeiras são auditadas.
-
----
-
-# 11. EXPERIÊNCIA E QUALIDADE
-
-A interface deverá ser:
-
-- Responsiva.
-- Rápida.
-- Consistente.
-- Intuitiva.
-- Acessível.
-- Adequada para uso diário.
-
-Preserve o comportamento visual do HTML em telas grandes e pequenas.
-
-Inclua:
-
-- Loading states.
-- Empty states.
-- Mensagens de sucesso e erro.
-- Confirmações para ações destrutivas.
-- Validação clara de formulários.
-- Feedback de operações.
-- Paginação quando necessário.
-- Busca e filtros.
-- Estados de carregamento e falha da API.
-
-Não deixe botões sem funcionalidade.
-
-Não crie telas com dados estáticos fingindo que são registros reais.
-
----
-
-# 12. PLANO DE EXECUÇÃO
-
-Trabalhe em fases.
-
-### Fase 1 — Auditoria e planejamento
-
-- Ler o HTML integralmente.
-- Mapear módulos e comportamentos.
-- Produzir `REFERENCE_AUDIT.md`.
-- Documentar regras de negócio.
-- Desenhar modelo de dados.
-- Apresentar a arquitetura.
-
-### Fase 2 — Estrutura e autenticação
-
-- Criar frontend e backend.
-- Configurar MySQL.
-- Implementar Sanctum.
-- Criar usuários e permissões.
-- Criar estrutura de empresas e gerências.
-
-### Fase 3 — CRM
-
-- Pipeline.
-- Cadastro de leads.
-- Lead 360.
+- Autenticação.
+- Usuário logado.
+- Usuários e permissões.
+- Empresas.
+- Gerências.
+- Operações.
+- Leads.
+- Ciclos de lead.
+- Transições do pipeline.
 - Qualificação BANT.
-- Histórico.
+- Calls.
+- Scorecards.
+- Objeções.
+- Ocorrências de objeção.
+- Biblioteca de FUP.
+- Tarefas de FUP.
+- Vendas.
+- Pagamentos.
+- Reembolsos.
+- Indicadores financeiros.
+- Indicadores comerciais.
+- Metas.
+- Remuneração.
+- Snapshots.
+- Auditoria.
+
+As respostas financeiras devem retornar valores calculados pelo backend.
+
+O frontend não pode ser a fonte oficial dos cálculos.
+
+Utilize Policies para garantir que closers só acessem seus próprios dados e que administradores tenham visão consolidada.
+
+---
+
+# 14. TESTES OBRIGATÓRIOS
+
+Crie testes automatizados para:
+
+## Financeiro
+- Pix pago.
+- Pix pendente.
+- Cartão pago.
+- Cartão pendente.
+- Boleto.
+- Venda com pagamentos mistos.
+- Recebimento em mês diferente da venda.
+- Comissão por operação.
+- Snapshot do percentual.
+- Reembolso integral.
+- Estorno de caixa.
+- Estorno de comissão.
+- Cancelamento de pendências.
+- Proteção contra reembolso duplicado.
+
+## Pipeline
+- Todas as transições.
+- Fechamento exige venda.
+- Loss exige motivo.
+- Desqualificado exige motivo.
+- No-show incrementa contador.
+- Reativação cria novo ciclo.
+- Reembolso move lead para etapa correta.
+
+## Metas e remuneração
+- Abaixo de 70%.
+- Exatamente 70%.
+- Entre 70% e 100%.
+- Exatamente 100%.
+- Acima de 100%.
+- Caixa recebido em outro mês.
+- Pendentes não contam.
+- Reembolso reduz o atingimento.
+
+## Permissões
+- Admin visualiza todos.
+- Closer visualiza somente seus leads e resultados.
+- Closer não acessa dados de outro closer.
+
+## Frontend
+- Login.
+- Criação de lead.
+- Edição de lead.
+- Movimentação no Kanban.
+- Registro de venda.
+- Pagamento pendente para pago.
+- Registro de reembolso.
+- Criação de FUP.
+- Registro de Scorecard.
+- Filtros.
+- Responsividade.
+
+---
+
+# 15. IMPLEMENTAÇÃO POR FASES
+
+Trabalhe nesta ordem:
+
+### Fase 1 — Auditoria e arquitetura
+- Ler o HTML integralmente.
+- Criar `REFERENCE_AUDIT.md`.
+- Criar estrutura do projeto.
+- Criar `DECISIONS.md`.
+- Definir entidades e relacionamentos.
+
+### Fase 2 — Backend e autenticação
+- Laravel.
+- MySQL.
+- Sanctum.
+- Seeder do administrador.
+- Perfis e permissões.
+- Testes de autenticação.
+
+### Fase 3 — Design system e shell visual
+- Tokens CSS.
+- Fontes.
+- Login.
+- Sidebar.
+- Navegação.
+- Layout.
+- Cards.
+- Botões.
+- Inputs.
+- Modais.
+- Toasts.
+- Responsividade.
+
+Nesta fase, faça a primeira comparação visual com o HTML.
+
+### Fase 4 — Leads e pipeline
+- CRUD de leads.
+- Lead 360.
+- BANT.
+- Timeline.
+- Kanban.
 - No-show.
-- Loss e Desqualificado.
+- Loss.
+- Desqualificado.
+- Ciclos.
 
-### Fase 4 — Financeiro
-
-- Empresas e gerências.
+### Fase 5 — Vendas e financeiro
+- Operações.
 - Vendas.
 - Pagamentos.
 - Faturamento.
 - Caixa.
-- Comissões.
-- Reembolsos.
-- Auditoria financeira.
+- Comissão.
+- Reembolso.
 
-Esta fase exige testes específicos antes de avançar.
-
-### Fase 5 — Produtividade comercial
-
-- Cadência.
-- Follow-ups.
+### Fase 6 — Inteligência comercial
 - Scorecard.
-- Objeções.
 - Histórico de calls.
+- Objeções.
+- Taxas reais de contorno.
+- Biblioteca de FUP.
+- Tarefas de FUP.
+- Perdas e recuperação.
 
-### Fase 6 — Metas e dashboards
-
-- Hoje.
-- Ritmo.
-- Metas mensais.
-- Regra de remuneração TZN Legacy.
+### Fase 7 — Metas e remuneração
+- Empresas.
+- Gerências.
+- Metas.
+- Regras de remuneração.
+- Snapshots mensais.
 - Relatórios.
-- Indicadores consolidados.
 
-### Fase 7 — Acabamento e validação
-
-- Revisão visual comparando com o HTML.
-- Testes completos.
-- Correção de bugs.
-- Testes de permissões.
-- Testes financeiros.
-- Revisão de responsividade.
-- Documentação de instalação e operação.
-
-Ao fim de cada fase, executar testes e corrigir os problemas antes de avançar.
-
----
-
-# 13. CRITÉRIOS DE ACEITAÇÃO
-
-O projeto somente poderá ser considerado concluído quando:
-
-1. Todos os módulos do HTML tiverem sido reproduzidos.
-2. A identidade visual estiver fiel à referência.
-3. Frontend e backend estiverem separados.
-4. A autenticação estiver funcionando.
-5. As permissões estiverem funcionando no backend.
-6. Os dados forem persistidos no MySQL.
-7. O pipeline permitir movimentação funcional.
-8. O Lead 360 possuir histórico e qualificação.
-9. As calls e scorecards forem persistidos.
-10. Os follow-ups forem gerenciáveis.
-11. As objeções possuírem indicadores reais.
-12. Faturamento e caixa estiverem separados corretamente.
-13. Pagamentos pendentes puderem ser baixados posteriormente.
-14. A regra de comissão estiver funcionando.
-15. O reembolso estiver funcionando com estorno e auditoria.
-16. A regra de 70% e 100% do fixo estiver funcionando.
-17. As metas mensais estiverem funcionando.
-18. Os indicadores de conversão considerarem somente calls realizadas.
-19. Os testes financeiros e de permissões estiverem aprovados.
-20. A documentação de instalação e uso estiver pronta.
+### Fase 8 — Acabamento
+- Comparação visual de todas as telas.
+- Correção de diferenças.
+- Testes.
+- Permissões.
+- Estados vazios.
+- Loading.
+- Erros.
+- Responsividade.
+- Documentação.
+- Instruções de execução.
 
 ---
 
-# 14. INSTRUÇÃO FINAL AO AGENTE
+# 16. CRITÉRIOS DE ACEITAÇÃO FINAL
 
-Não tente entregar tudo de uma vez de forma superficial.
+O projeto só estará concluído quando:
 
-Construa uma aplicação real, com arquitetura limpa e regras de negócio centralizadas.
+1. O administrador inicial conseguir entrar com o e-mail e a senha definidos neste prompt.
+2. O login estiver conectado ao Laravel.
+3. Os dados forem salvos no MySQL.
+4. O sistema suportar admin e closers.
+5. Todos os módulos estiverem implementados.
+6. Todos os botões tiverem ações funcionais.
+7. O Kanban funcionar.
+8. O Lead 360 estiver persistido.
+9. As calls e Scorecards estiverem salvos.
+10. O banco de objeções calcular taxas reais.
+11. As tarefas de FUP estiverem funcionando.
+12. O financeiro separar corretamente faturamento e caixa.
+13. Os pagamentos pendentes não entrarem no caixa.
+14. O boleto não gerar caixa.
+15. Não existir modalidade Contrato.
+16. Não existir taxa de cartão.
+17. Os reembolsos estornarem os valores corretamente.
+18. As metas e remunerações seguirem as faixas configuradas.
+19. As permissões estiverem corretas.
+20. A interface tiver sido comparada visualmente com o HTML em desktop e celular.
+21. Os testes automatizados estiverem passando.
+22. O README explicar como instalar, configurar, executar e testar.
 
-O HTML anexado é a referência obrigatória de aparência e comportamento. Analise-o integralmente e reproduza o que existe nele, respeitando as alterações e regras deste prompt.
+## REGRA FINAL
 
-**Não simplifique os módulos, não invente regras financeiras e não substitua a interface por um template genérico.**
+Não entregue somente um protótipo.
 
-Se encontrar alguma ambiguidade que altere cálculos, remuneração, conversão, reembolso, permissões ou integridade dos dados, pare e pergunte antes de decidir.
+Não entregue somente o frontend.
 
-Quando terminar, entregue:
+Não entregue somente telas estáticas.
 
-- Aplicação funcional.
-- Código organizado em `frontend/` e `backend/`.
-- Banco de dados e migrations.
-- Seeders iniciais.
-- Testes automatizados.
-- Documentação de instalação.
-- Credenciais de acesso de desenvolvimento.
-- Relatório do que foi implementado.
-- Lista de eventuais pendências.
+Não entregue funcionalidades simuladas.
 
-A prioridade é entregar um **Closer OS Pro fiel à referência, confiável financeiramente e pronto para uso real**.
+Não deixe botões sem ação.
+
+Não use dados fictícios como se fossem dados reais.
+
+Não altere o design por preferência pessoal.
+
+Não considere concluído enquanto houver módulos faltando ou diferenças visuais importantes.
+
+**O resultado esperado é o Closer OS Pro funcionando de verdade, com backend Laravel, frontend React + Vite, MySQL, autenticação, regras comerciais e financeiras completas e uma interface reproduzida fielmente a partir do HTML fornecido.**
+
+Primeiro audite. Depois implemente. Depois teste. Depois compare visualmente. Corrija até ficar fiel ao original.
