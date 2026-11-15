@@ -42,7 +42,7 @@ export default function Faturamento() {
   }
 
   return (
-    <div>
+    <>
       <div className="head">
         <div><h1>Faturamento e caixa</h1><p>Faturamento é tudo que foi contratado. Caixa é só o que entrou por Pix e cartão, já sem a taxa do gateway.</p></div>
       </div>
@@ -111,6 +111,6 @@ export default function Faturamento() {
       </>}
 
       {openSale && <SaleModal leadId={openSale.lead?.id} leadName={openSale.lead?.name} sale={openSale.sale} onClose={()=>setOpenSale(null)} onSaved={()=>{ qc.invalidateQueries({queryKey:['finance']}); qc.invalidateQueries({queryKey:['leads']}); qc.invalidateQueries({queryKey:['pipeline']}) }} />}
-    </div>
+    </>
   )
 }
