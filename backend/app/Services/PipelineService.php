@@ -61,12 +61,14 @@ class PipelineService
         }
         $noShowLeads = $leads->where('no_show_count', '>', 0)->count();
         $closed = $leads->where('stage', Stage::Fechado->value)->count();
+        $recovered = $leads->where('no_show_count', '>', 0)->whereIn('stage', [Stage::Remarcado->value, Stage::Fup->value, Stage::Negociacao->value, Stage::Fechado->value])->count();
         return [
             'counts' => $counts,
             'total' => $leads->count(),
             'no_show_leads' => $noShowLeads,
             'no_show_rate' => $leads->count() ? round($noShowLeads / $leads->count() * 100, 1) : 0,
             'closed' => $closed,
+            'recovered' => $recovered,
             'loss' => $leads->where('stage', Stage::Loss->value)->count(),
             'disqualified' => $leads->where('stage', Stage::Desqualificado->value)->count(),
         ];

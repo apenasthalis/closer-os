@@ -29,7 +29,7 @@ function Card({ lead, onOpen, onSale }: { lead: any; onOpen: () => void; onSale:
       </div>
       <div className="meta"><span>{lead.call_at ? dateBR(lead.call_at) : 'Sem call'}</span>{open && <span className={`age ${ageCls(d)}`}>{d}d</span>}</div>
       <div className="meta">{lead.no_show_count > 0 ? <span className="pill hot">{lead.no_show_count} no-show</span> : <span></span>}{total > 0 ? <span className="pill ok">{brl(total)}</span> : (lead.loss_reason ? <span className="pill">{lead.loss_reason}</span> : '')}</div>
-      {lead.stage === 'fechado' && !lead.sale && <button className="btn sm primary" onClick={e => { e.stopPropagation(); onSale() }}>Registrar venda</button>}
+      {lead.stage === 'fechado' && <button className="btn sm" onClick={e => { e.stopPropagation(); onSale() }}>{lead.sale ? 'Abrir venda' : 'Registrar venda'}</button>}
     </article>
   )
 }
@@ -78,7 +78,7 @@ export default function Pipeline() {
     transition.mutate({ lead, stage })
   }
 
-  const m = data?.metrics || { counts: {}, total: 0, no_show_rate: 0, no_show_leads: 0, disqualified: 0 }
+  const m = data?.metrics || { counts: {}, total: 0, no_show_rate: 0, no_show_leads: 0, disqualified: 0, recovered: 0 }
   const ag = m.total || 0
   const ns = m.no_show_leads || 0
   const pct = (a:number,b:number)=> b? Math.round(a/b*100)+'%':'0%'
@@ -98,7 +98,7 @@ export default function Pipeline() {
       </div>
 
       <div className="kstrip">
-        {[['Calls agendadas', ag, 'leads com call no filtro',''], ['No-shows', ns, 'leads que faltaram', ns?'var(--crit)':''], ['Taxa de no-show', pct(ns,ag), 'no-shows / agendadas',''], ['Fechados', m.counts?.fechado||0, 'no pipeline', 'var(--accent-text)'], ['Desqualificados', m.disqualified||0, 'no pipeline','']].map((k:any)=>(
+        {[['Calls agendadas', ag, 'leads com call no filtro',''], ['No-shows', ns, 'leads que faltaram', ns?'var(--crit)':''], ['Taxa de no-show', pct(ns,ag), 'no-shows / agendadas',''], ['Recuperados', m.recovered||0, 'voltaram após faltar','var(--accent-text)'], ['Desqualificados', m.disqualified||0, pct(m.disqualified||0,ag)+' dos leads','']].map((k:any)=>(
           <div className="ks" key={k[0]}><span className="eyebrow">{k[0]}</span><div><strong className="num" style={k[3]?{color:k[3]}:undefined}>{k[1]}</strong><small>{k[2]}</small></div></div>
         ))}
       </div>
