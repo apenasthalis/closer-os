@@ -22,14 +22,11 @@ function Card({ lead, onOpen, onSale }: { lead: any; onOpen: () => void; onSale:
   const d = daysInStage(lead)
   const open = !['fechado','loss','desqualificado','reembolso'].includes(lead.stage)
   return (
-    <article ref={setNodeRef} className={`kc${isDragging ? ' dragging' : ''}`} onClick={onOpen} tabIndex={0} role="button">
-      <div className="kc-top">
-        <strong>{lead.name}</strong>
-        <button className="drag" {...listeners} {...attributes} onClick={e => e.stopPropagation()} aria-label="Arrastar lead">⠿</button>
-      </div>
+    <article ref={setNodeRef} className={`kc${isDragging ? ' dragging' : ''}`} onClick={onOpen} {...listeners} {...attributes}>
+      <strong>{lead.name}</strong>
       <div className="meta"><span>{lead.call_at ? dateBR(lead.call_at) : 'Sem call'}</span>{open && <span className={`age ${ageCls(d)}`}>{d}d</span>}</div>
-      <div className="meta">{lead.no_show_count > 0 ? <span className="pill hot">{lead.no_show_count} no-show</span> : <span></span>}{total > 0 ? <span className="pill ok">{brl(total)}</span> : (lead.loss_reason ? <span className="pill">{lead.loss_reason}</span> : '')}</div>
-      {lead.stage === 'fechado' && <button className="btn sm" onClick={e => { e.stopPropagation(); onSale() }}>{lead.sale ? 'Abrir venda' : 'Registrar venda'}</button>}
+      <div className="meta">{lead.no_show_count > 0 ? <span className="pill hot">{lead.no_show_count} no-show</span> : <span></span>}{total > 0 ? <span className="pill ok">{brl(total)}</span> : (lead.loss_reason ? <span className="pill">{lead.loss_reason}</span> : <span></span>)}</div>
+      {lead.stage === 'fechado' && <button className="btn sm" onClick={e => { e.stopPropagation(); onSale() }}>Abrir venda</button>}
     </article>
   )
 }

@@ -7,8 +7,12 @@ use App\Models\User;
 
 class PipelineService
 {
+    public const STAGES = [
+        'lead_agendado', 'no_show', 'fup', 'remarcado', 'negociacao', 'fechado', 'loss', 'desqualificado',
+    ];
+
     public const LABELS = [
-        'lead_agendado' => 'Lead agendado',
+        'lead_agendado' => 'Lead Agendado',
         'no_show' => 'No-show',
         'fup' => 'FUP',
         'remarcado' => 'Remarcado',
@@ -26,11 +30,11 @@ class PipelineService
             ->orderByDesc('stage_changed_at')->limit(1000)->get();
 
         $columns = [];
-        foreach (Stage::cases() as $stage) {
-            $items = $leads->where('stage', $stage->value)->values();
+        foreach (self::STAGES as $stage) {
+            $items = $leads->where('stage', $stage)->values();
             $columns[] = [
-                'stage' => $stage->value,
-                'label' => self::LABELS[$stage->value] ?? $stage->value,
+                'stage' => $stage,
+                'label' => self::LABELS[$stage] ?? $stage,
                 'count' => $items->count(),
                 'leads' => $items,
             ];
