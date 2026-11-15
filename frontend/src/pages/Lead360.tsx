@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '../lib/api'
@@ -59,8 +59,6 @@ export default function Lead360() {
     onError: (e: any) => showToast(apiError(e), 'err'),
   })
 
-  const score = useMemo(() => scoreLead(lead), [lead])
-  const [tlabel, tcls] = temp(score)
   const [engDraft, setEngDraft] = useState<number | null>(null)
   useEffect(() => { setEngDraft(null) }, [leadId, lead?.qualification?.engagement])
 
@@ -75,10 +73,11 @@ export default function Lead360() {
           <input className="in" value={lq} onChange={e => setLq(e.target.value)} placeholder="Buscar por nome" aria-label="Buscar lead por nome" style={{ marginBottom: 10 }} />
           <div className="leadlist">
             {filtered.length ? filtered.map(x => {
-              const qx = x.qualification || {}
-              const bc = BANT_KEYS.filter(k => qx[k]).length
-              const bp = bc * 20
-              return <button className="lbtn" key={x.id} onClick={() => navigate(`/lead/${x.id}`)} aria-pressed={x.id === leadId}><div><strong>{x.name}</strong><span>{STAGE_LABEL[x.stage] || x.stage}</span></div><span className="num" title={`BANT ${bc}/4`} style={{width:34,height:34,borderRadius:'50%',display:'grid',placeItems:'center',fontSize:12,fontWeight:700,background:`conic-gradient(var(--accent) ${bc*90}deg, var(--raise) 0deg)`}}><span style={{width:26,height:26,borderRadius:'50%',background:'var(--surface)',display:'grid',placeItems:'center'}}>{bp}</span></span></button>
+              const sc = scoreLead(x)
+              return <button className="lbtn" key={x.id} onClick={() => navigate(`/lead/${x.id}`)} aria-pressed={x.id === leadId} style={{justifyContent:'flex-start'}}>
+                <span className="num" title={`Score ${sc}`} style={{width:34,height:34,borderRadius:'50%',display:'grid',placeItems:'center',fontSize:12,fontWeight:700,flex:'none',background:`conic-gradient(var(--accent) ${sc*3.6}deg, var(--raise) 0deg)`}}><span style={{width:26,height:26,borderRadius:'50%',background:'var(--surface)',display:'grid',placeItems:'center'}}>{sc}</span></span>
+                <div><strong>{x.name}</strong><span>{STAGE_LABEL[x.stage] || x.stage}</span></div>
+              </button>
             }) : <p className="muted">Nenhum lead encontrado.</p>}
           </div>
         </section>
@@ -101,18 +100,23 @@ export default function Lead360() {
           const baseEngPct = storedEng !== undefined && storedEng !== null && storedEng !== '' ? Math.max(0, Math.min(100, Number(storedEng))) : autoEngPct
           const engPct = engDraft !== null ? engDraft : baseEngPct
           const engPts = Math.round((engPct / 100) * 20)
+          const displayScore = Math.min(100, bantPts + engPts)
+          const [dLabel, dCls] = temp(displayScore)
           const days = lead.stage_changed_at ? Math.max(0, Math.floor((Date.now() - new Date(lead.stage_changed_at).getTime()) / 86400000)) : 0
           const open = !['fechado','loss','desqualificado','reembolso'].includes(lead.stage)
           return <div className="grid" style={{ minWidth: 0 }}>
             <section className="card">
               <div className="top" style={{ marginBottom: 0 }}>
                 <div style={{ display: 'flex', gap: 14, alignItems: 'center', flexWrap: 'wrap' }}>
-                  <div className="ring" style={{ ['--v' as any]: score, width: 72, height: 72 }} aria-label="Score do lead"><span>{score}</span></div>
+                  <div className="ring" style={{ ['--v' as any]: displayScore, width: 72, height: 72 }} aria-label="Score do lead"><span>{displayScore}</span></div>
                   <div>
-                    <h2 style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>{lead.name} <span className="num" title={`BANT ${bantCount}/4`} style={{width:38,height:38,borderRadius:'50%',display:'inline-grid',placeItems:'center',fontSize:13,fontWeight:700,background:`conic-gradient(var(--accent) ${bantCount*90}deg, var(--raise) 0deg)`,flex:'none'}}><span style={{width:30,height:30,borderRadius:'50%',background:'var(--surface)',display:'grid',placeItems:'center'}}>{bantPts}</span></span></h2>
+                    <h2 style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                      <span className="num" title={`Score ${displayScore}`} style={{width:38,height:38,borderRadius:'50%',display:'inline-grid',placeItems:'center',fontSize:13,fontWeight:700,background:`conic-gradient(var(--accent) ${displayScore*3.6}deg, var(--raise) 0deg)`,flex:'none'}}><span style={{width:30,height:30,borderRadius:'50%',background:'var(--surface)',display:'grid',placeItems:'center'}}>{displayScore}</span></span>
+                      {lead.name}
+                    </h2>
                     <p className="sub">{lead.phone || 'Sem telefone'} · {lead.email || 'Sem e-mail'}</p>
                     <div className="opts" style={{ marginTop: 8 }}>
-                      <span className={`pill ${tcls}`}>{tlabel}</span>
+                      <span className={`pill ${dCls}`}>{dLabel}</span>
                       <span className="pill">{STAGE_LABEL[lead.stage] || lead.stage}</span>
                       {open && <span className="pill num">{days} dias na etapa</span>}
                       {lead.no_show_count ? <span className="pill hot">{lead.no_show_count} no-show</span> : null}
