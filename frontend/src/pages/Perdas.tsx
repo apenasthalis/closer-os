@@ -35,7 +35,7 @@ export default function Perdas() {
   })
 
   return (
-    <div className="flex flex-col gap-4">
+    <>
       <div className="head">
         <div><h1>Perdas</h1><p>Motivo, nota e o que fazer diferente. Reativar cria um novo lead em Lead Agendado.</p></div>
         <div className="acts"><button className="btn primary" onClick={() => setNewLead(true)}>Novo lead</button></div>
@@ -79,6 +79,6 @@ export default function Perdas() {
 
       {reactivating && <ConfirmDialog title="Reativar lead?" message={<>{reactivating.name} voltará como novo lead em Lead Agendado, com o mesmo contato e histórico zerado. <strong>{REACTIVATE_HINT[reactivating.loss_reason] ?? 'Retome com uma abordagem diferente.'}</strong></>} confirmLabel="Reativar" busy={reactivate.isPending} onClose={() => setReactivating(null)} onConfirm={() => reactivate.mutate(reactivating)} />}
       {newLead && <LeadModal onClose={() => setNewLead(false)} onSaved={(l: any) => navigate(`/lead/${l.id}`)} />}
-    </div>
+    </>
   )
 }
