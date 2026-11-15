@@ -57,28 +57,16 @@ export default function Objecoes() {
         <section className="card kpi"><div className="eyebrow">Objeções cadastradas</div><strong className="num">{(objections || []).length}</strong><span>ativas no playbook</span></section>
       </div>
 
-      <div className="grid g2">
-        <section className="card">
-          <div className="top"><div><h2>Por objeção</h2><p className="sub">Ocorrências, contorno e conversão.</p></div></div>
-          <table className="tbl">
-            <thead><tr><th>Objeção</th><th>Ocorr.</th><th>Contorno</th><th>Vendas</th><th>Conv.</th></tr></thead>
-            <tbody>
-              {(stats?.by_objection || []).map((o: any) => <tr key={o.name}><td>{o.name}</td><td className="num">{o.occurrences}</td><td className="num">{o.bypass_rate}%</td><td className="num">{o.sales}</td><td className="num">{o.conversion}%</td></tr>)}
-              {(stats?.by_objection || []).length === 0 && <tr><td colSpan={5} className="muted">Nenhuma ocorrência no período.</td></tr>}
-            </tbody>
-          </table>
-        </section>
-        <section className="card">
-          <div className="top"><div><h2>Por closer</h2><p className="sub">Quem contorna melhor.</p></div></div>
-          <table className="tbl">
-            <thead><tr><th>Closer</th><th>Ocorr.</th><th>Contorno</th><th>Vendas</th></tr></thead>
-            <tbody>
-              {(stats?.by_closer || []).map((c: any) => <tr key={c.name}><td>{c.name}</td><td className="num">{c.occurrences}</td><td className="num">{c.bypass_rate}%</td><td className="num">{c.sales}</td></tr>)}
-              {(stats?.by_closer || []).length === 0 && <tr><td colSpan={4} className="muted">Sem dados.</td></tr>}
-            </tbody>
-          </table>
-        </section>
-      </div>
+      <section className="card">
+        <div className="top"><div><h2>Por objeção</h2><p className="sub">Ocorrências, contorno e conversão (seus dados).</p></div></div>
+        <table className="tbl">
+          <thead><tr><th>Objeção</th><th>Ocorr.</th><th>Contorno</th><th>Vendas</th><th>Conv.</th></tr></thead>
+          <tbody>
+            {(stats?.by_objection || []).map((o: any) => <tr key={o.name}><td>{o.name}</td><td className="num">{o.occurrences}</td><td className="num">{o.bypass_rate}%</td><td className="num">{o.sales}</td><td className="num">{o.conversion}%</td></tr>)}
+            {(stats?.by_objection || []).length === 0 && <tr><td colSpan={5} className="muted">Nenhuma ocorrência no período.</td></tr>}
+          </tbody>
+        </table>
+      </section>
 
       <section>
         <div className="head" style={{ marginBottom: 8 }}><div><h2>Playbook</h2><p className="sub">Resposta sugerida e conversão de referência.</p></div></div>

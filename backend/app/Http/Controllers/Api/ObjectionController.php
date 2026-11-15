@@ -73,9 +73,8 @@ class ObjectionController extends Controller
     public function occurrences(Request $request)
     {
         $query = CallObjection::query()->with(['objection','call','lead','closer'])->orderByDesc('created_at');
-        if (!$request->user()->isAdmin()) $query->where('closer_user_id', $request->user()->id);
+        $query->where('closer_user_id', $request->user()->id);
         if ($request->objection_id) $query->where('objection_id', $request->objection_id);
-        if ($request->closer_id) $query->where('closer_user_id', $request->closer_id);
         if ($request->from) $query->whereDate('created_at','>=',$request->from);
         if ($request->to) $query->whereDate('created_at','<=',$request->to);
         return $query->paginate(50);
@@ -83,12 +82,12 @@ class ObjectionController extends Controller
 
     public function stats(Request $request)
     {
-        $query = CallObjection::query()
-            ->when(!$request->user()->isAdmin(), fn ($q) => $q->where('closer_user_id', $request->user()->id))
+        $occurrences = CallObjection::query()
+            ->where('closer_user_id', $request->user()->id)
             ->when($request->from, fn ($q, $v) => $q->whereDate('created_at','>=',$v))
             ->when($request->to, fn ($q, $v) => $q->whereDate('created_at','<=',$v))
-            ->with(['objection','closer']);
-        $occurrences = $query->get();
+            ->with(['objection','closer'])
+            ->get();
 
         $byObjection = $occurrences->groupBy(fn ($o) => $o->objection?->name ?? 'Outra')->map(function ($group, $name) {
             $resolved = $group->where('resolved', true)->count();
@@ -103,25 +102,12 @@ class ObjectionController extends Controller
             ];
         })->values();
 
-        $byCloser = $occurrences->groupBy(fn ($o) => $o->closer?->name ?? 'Sem closer')->map(function ($group, $name) {
-            $resolved = $group->where('resolved', true)->count();
-            $sales = $group->where('sale_happened', true)->count();
-            return [
-                'name' => $name,
-                'occurrences' => $group->count(),
-                'resolved' => $resolved,
-                'sales' => $sales,
-                'bypass_rate' => $group->count() ? round($resolved / $group->count() * 100, 1) : 0,
-            ];
-        })->values();
-
         return [
             'total' => $occurrences->count(),
             'resolved' => $occurrences->where('resolved', true)->count(),
             'sales' => $occurrences->where('sale_happened', true)->count(),
             'bypass_rate' => $occurrences->count() ? round($occurrences->where('resolved', true)->count() / $occurrences->count() * 100, 1) : 0,
             'by_objection' => $byObjection,
-            'by_closer' => $byCloser,
         ];
     }
 
