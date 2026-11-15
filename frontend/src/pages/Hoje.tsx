@@ -35,7 +35,7 @@ export default function Hoje() {
   const sem = data.needs_new_date || []
 
   return (
-    <div>
+    <>
       <div className="head">
         <div><h1>Bom dia, {(data.greeting_name || 'Closer').split(' ')[0]}</h1><p>Sua agenda de calls, o que precisa de nova data e o resumo financeiro do mês.</p></div>
         <div className="acts"><button className="btn primary" onClick={() => setNewLead(true)}>Novo lead</button></div>
@@ -81,6 +81,6 @@ export default function Hoje() {
 
       {newLead && <LeadModal onClose={() => setNewLead(false)} onSaved={(l: any) => navigate(`/lead/${l.id}`)} />}
       {saleLead && <SaleModal leadId={saleLead.id} leadName={saleLead.name} onClose={() => setSaleLead(null)} onSaved={invalidate} />}
-    </div>
+    </>
   )
 }
