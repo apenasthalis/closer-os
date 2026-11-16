@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Company extends Model
 {
-    protected $fillable = ['name','archived_at'];
+    protected $fillable = ['name','archived_at','user_id'];
     protected $casts = ['archived_at'=>'datetime'];
 
     public function departments(): HasMany { return $this->hasMany(Department::class); }

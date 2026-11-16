@@ -18,6 +18,7 @@ class CompanyController extends Controller
     {
         $this->authorizeAdmin($request);
         $data = $request->validate(['name' => ['required','string','max:255']]);
+        $data['user_id'] = $request->user()->id;
         return response()->json(Company::create($data), 201);
     }
 
