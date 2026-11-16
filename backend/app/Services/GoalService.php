@@ -85,7 +85,15 @@ class GoalService
             ->get();
 
         $closedSales = $sales->filter(fn (Sale $s) => !$s->refund);
-        $revenue = $closedSales->sum(fn (Sale $s) => $s->payments->sum('amount_cents'));
+        $revenue = \App\Models\SalePayment::query()
+            ->whereHas('sale', function ($q) use ($companyId, $departmentId, $closerId) {
+                $q->whereDoesntHave('refund');
+                if ($companyId) $q->where('company_id', $companyId);
+                if ($departmentId) $q->where('department_id', $departmentId);
+                if ($closerId) $q->where('user_id', $closerId);
+            })
+            ->whereBetween('received_at', [$start->toDateString(), $end->toDateString()])
+            ->sum('amount_cents');
 
         $payments = SalePayment::query()
             ->with('sale')

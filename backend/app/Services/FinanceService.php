@@ -41,14 +41,18 @@ class FinanceService
             });
         };
 
-        $periodSales = $all->filter(fn (Sale $s) => !$s->refund && $inRange($s->closed_at));
+        $fatPaymentsInRange = function (Sale $sale) use ($inRange, $method) {
+            if ($sale->refund) return collect();
+            return $sale->payments->filter(function ($p) use ($inRange, $method) {
+                if ($method && $p->method !== $method) return false;
+                return $inRange($p->received_at ?? $p->paid_at ?? null);
+            });
+        };
+
+        $periodSales = $all->filter(fn (Sale $s) => !$s->refund && $fatPaymentsInRange($s)->isNotEmpty());
         $fatBruto = 0;
         foreach ($periodSales as $sale) {
-            if ($method) {
-                $fatBruto += $sale->payments->where('method', $method)->sum('amount_cents');
-            } else {
-                $fatBruto += SaleCalculator::totals($sale->payments->toArray())['fat'];
-            }
+            $fatBruto += $fatPaymentsInRange($sale)->sum('amount_cents');
         }
 
         $refunds = collect();
@@ -83,19 +87,16 @@ class FinanceService
             $start = $cursor->copy()->subMonths($i)->startOfMonth();
             $end = $start->copy()->endOfMonth();
             $key = $start->format('Y-m');
-            $monthSales = $all->filter(fn (Sale $s) => !$s->refund && $s->closed_at && $s->closed_at->format('Y-m') === $key);
             $monthGross = 0;
-            foreach ($monthSales as $sale) {
-                $monthGross += $method
-                    ? $sale->payments->where('method', $method)->sum('amount_cents')
-                    : SaleCalculator::totals($sale->payments->toArray())['fat'];
-            }
             $monthCash = 0;
             foreach ($all as $sale) {
-                foreach ($paymentsInRange($sale) as $p) {
-                    if ($p->received_at && $p->received_at->format('Y-m') === $key) {
-                        $monthCash += $p->netCents();
-                    }
+                if ($sale->refund) continue;
+                foreach ($sale->payments as $p) {
+                    $d = $p->received_at ?? $p->paid_at ?? null;
+                    $dk = $d ? (\Illuminate\Support\Carbon::parse($d)->format('Y-m')) : null;
+                    if ($dk !== $key) continue;
+                    if (!$method || $p->method === $method) $monthGross += $p->amount_cents;
+                    if ($p->isCash() && $p->status === 'paid' && (!$method || $p->method === $method)) $monthCash += $p->netCents();
                 }
             }
             $months[] = [
@@ -108,21 +109,21 @@ class FinanceService
             ];
         }
 
-        $group = function (string $relation, string $field = 'name') use ($periodSales, $method) {
+        $group = function (string $relation, string $field = 'name') use ($periodSales, $fatPaymentsInRange) {
             $out = [];
             foreach ($periodSales as $sale) {
                 $name = $sale->{$relation}?->{$field} ?? 'Sem vínculo';
-                $value = $method
-                    ? $sale->payments->where('method', $method)->sum('amount_cents')
-                    : SaleCalculator::totals($sale->payments->toArray())['fat'];
+                $value = $fatPaymentsInRange($sale)->sum('amount_cents');
                 $out[$name] = ($out[$name] ?? 0) + $value;
             }
             arsort($out);
             return $out;
         };
 
-        $sales = $periodSales->map(function (Sale $sale) {
+        $sales = $periodSales->map(function (Sale $sale) use ($fatPaymentsInRange, $paymentsInRange) {
             $totals = SaleCalculator::totals($sale->payments->toArray());
+            $fat = $fatPaymentsInRange($sale)->sum('amount_cents');
+            $caixa = $paymentsInRange($sale)->sum(fn ($p) => $p->netCents());
             return [
                 'id' => $sale->id,
                 'lead_id' => $sale->lead_id,
@@ -136,10 +137,10 @@ class FinanceService
                 'operation' => $sale->operation?->name,
                 'closed_at' => $sale->closed_at?->toDateString(),
                 'commission_percent' => (float) $sale->commission_percent,
-                'faturamento' => $totals['fat'],
-                'caixa' => $totals['caixa'],
+                'faturamento' => $fat,
+                'caixa' => $caixa,
                 'a_receber' => $totals['aberto'],
-                'comissao' => (int) round($totals['caixa'] * (float) $sale->commission_percent / 100),
+                'comissao' => (int) round($caixa * (float) $sale->commission_percent / 100),
                 'refunded' => (bool) $sale->refund,
                 'refunded_at' => $sale->refund?->refunded_at?->toDateString(),
                 'payments' => $sale->payments->map(fn ($p) => [
@@ -152,7 +153,7 @@ class FinanceService
                     'received_at' => $p->received_at?->toDateString(),
                 ])->values(),
             ];
-        })->sortByDesc('closed_at')->values();
+        })->values();
 
         return [
             'faturamento_bruto' => $fatBruto,

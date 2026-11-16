@@ -18,18 +18,15 @@ class CompensationService
         $start = \Carbon\Carbon::parse($month.'-01')->startOfMonth();
         $end = $start->copy()->endOfMonth();
 
-        $salesInMonth = \App\Models\Sale::query()
-            ->with('payments')
-            ->where('user_id', $userId)
-            ->whereDoesntHave('refund')
-            ->whereBetween('closed_at', [$start->toDateString(), $end->toDateString()])
-            ->when($companyId, fn ($q) => $q->where('company_id', $companyId))
-            ->when($departmentId, fn ($q) => $q->where('department_id', $departmentId))
+        $faturamentoPayments = \App\Models\SalePayment::query()
+            ->whereHas('sale', function ($q) use ($userId, $companyId, $departmentId) {
+                $q->where('user_id', $userId)->whereDoesntHave('refund');
+                if ($companyId) $q->where('company_id', $companyId);
+                if ($departmentId) $q->where('department_id', $departmentId);
+            })
+            ->whereBetween('received_at', [$start->toDateString(), $end->toDateString()])
             ->get();
-        $faturamento = 0;
-        foreach ($salesInMonth as $sale) {
-            $faturamento += (int) $sale->payments->sum('amount_cents');
-        }
+        $faturamento = (int) $faturamentoPayments->sum('amount_cents');
 
         $payments = SalePayment::query()
             ->with('sale')
