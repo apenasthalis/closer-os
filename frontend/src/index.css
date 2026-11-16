@@ -228,7 +228,8 @@ td.r,th.r{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 .mpair i.c{background:var(--accent);opacity:.38}
 .mpair i.r{background:var(--accent)}
 .mcol b{font-size:calc(var(--u)*11);font-variant-numeric:tabular-nums}
-.bars{display:grid;grid-template-columns:repeat(auto-fit,minmax(36px,1fr));gap:8px;align-items:end}
+.bars{display:grid;grid-template-columns:repeat(12,minmax(28px,1fr));gap:8px;align-items:end;overflow-x:auto;padding-bottom:4px}
+@media (max-width:700px){.bars{min-width:520px}}
 .bcol{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0}
 .bwrap{display:flex;align-items:flex-end;justify-content:center;width:100%;height:100%}
 .bar-v{width:100%;max-width:28px;background:var(--accent);border-radius:6px 6px 2px 2px;min-height:2px}
@@ -369,3 +370,10 @@ body{margin:0}
 .l360-list .leadlist::-webkit-scrollbar-thumb:hover{background:var(--accent)}
 .l360-detail{align-content:start;align-self:start;min-height:0}
 @media (max-width:1020px){.l360-list{position:static;max-height:360px}}
+
+/* ritmo responsive */
+@media (max-width:700px){
+  .head .acts{width:100%}
+  .head .acts .in,.head .acts .btn{width:100%!important;flex:1 1 100%!important}
+  .tbl{font-size:calc(var(--u)*12)}
+}

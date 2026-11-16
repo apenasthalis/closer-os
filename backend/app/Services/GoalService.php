@@ -84,7 +84,8 @@ class GoalService
             ->whereBetween('closed_at', [$start->toDateString(), $end->toDateString()])
             ->get();
 
-        $revenue = $sales->filter(fn (Sale $s) => !$s->refund)->sum(fn (Sale $s) => $s->payments->sum('amount_cents'));
+        $closedSales = $sales->filter(fn (Sale $s) => !$s->refund);
+        $revenue = $closedSales->sum(fn (Sale $s) => $s->payments->sum('amount_cents'));
 
         $payments = SalePayment::query()
             ->with('sale')
@@ -108,7 +109,7 @@ class GoalService
         return [
             'calls_scheduled' => $leads->count(),
             'calls_held' => $calls->where('status', 'held')->count(),
-            'sales' => $sales->filter(fn (Sale $s) => !$s->refund)->count(),
+            'sales' => $closedSales->count(),
             'revenue_cents' => (int) $revenue,
             'cash_cents' => (int) $cashIn,
             'commission_cents' => (int) $commissions,

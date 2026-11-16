@@ -64,9 +64,9 @@ export default function Ritmo() {
       <div className="head">
         <div><h1>Ritmo & Comissão</h1><p>Metas do mês, progresso e a regra de remuneração com snapshot histórico.</p></div>
         <div className="acts">
-          <input className="in" type="month" style={{ width: 160 }} value={month} onChange={e => setMonth(e.target.value)} />
-          {user?.role === 'admin' && <select className="in" style={{ width: 190 }} value={closerId} onChange={e => setCloserId(e.target.value)}>{(users || []).filter((u: any) => u.active).map((u: any) => <option key={u.id} value={u.id}>{u.name}</option>)}</select>}
-          <button className="btn primary" onClick={() => setGoalModal({ metric: 'calls_scheduled', target: '', company_id: companies?.[0]?.id ?? '', department_id: '', user_id: closerId || user?.id })}>Nova meta</button>
+          <input className="in" type="month" style={{ minWidth: 150, flex: '1 1 150px' }} value={month} onChange={e => setMonth(e.target.value)} />
+          {user?.role === 'admin' && <select className="in" style={{ minWidth: 170, flex: '1 1 170px' }} value={closerId} onChange={e => setCloserId(e.target.value)}>{(users || []).filter((u: any) => u.active).map((u: any) => <option key={u.id} value={u.id}>{u.name}</option>)}</select>}
+          <button className="btn primary" style={{ flex: '0 0 auto' }} onClick={() => setGoalModal({ metric: 'calls_scheduled', target: '', company_id: companies?.[0]?.id ?? '', department_id: '', user_id: closerId || user?.id })}>Nova meta</button>
         </div>
       </div>
 
@@ -94,7 +94,9 @@ export default function Ritmo() {
           <div className="top"><div><h2>Remuneração do mês</h2><p className="sub">Meta alcançada e quanto você vai receber (fixo + comissão).</p></div><span className={`pill ${comp?.fixed_status === 'fixo_integral' ? 'ok' : comp?.fixed_status === 'fixo_parcial' ? 'warm' : 'danger'}`}>{fixedStatus}</span></div>
           {loadingComp ? <p className="muted">Calculando...</p> : comp && <>
             <div className="kgrid">
-              <div><span className="eyebrow">Meta alcançada</span><strong className="num">{brl(comp.cash_received_cents)} <span className="sub">de {brl(comp.target_cents)}</span></strong></div>
+              <div><span className="eyebrow">Faturamento (mês)</span><strong className="num">{brl(comp.faturamento_cents ?? 0)}</strong></div>
+              <div><span className="eyebrow">Caixa recebido (conta p/ meta)</span><strong className="num">{brl(comp.cash_received_cents)}</strong></div>
+              <div><span className="eyebrow">Meta de caixa</span><strong className="num">{brl(comp.target_cents)}</strong></div>
               <div><span className="eyebrow">% da meta</span><strong className="num">{comp.percent}%</strong></div>
               <div><span className="eyebrow">A receber (fixo + comissão)</span><strong className="num">{brl(comp.total_cents)}</strong></div>
             </div>
@@ -102,7 +104,7 @@ export default function Ritmo() {
             <div className="row"><span className="grow">Fixo do mês</span><b className="num">{brl(comp.fixed_cents)}</b></div>
             <div className="row"><span className="grow">Comissão do mês</span><b className="num">{brl(comp.commission_cents)}</b></div>
             <div className="row"><span className="grow"><strong>Total a receber</strong></span><b className="num">{brl(comp.total_cents)}</b></div>
-            <p className="sub" style={{ marginTop: 8 }}>Faltam {brl(comp.missing_intermediate_cents)} para o fixo parcial ({comp.intermediate_percent}%) e {brl(comp.missing_full_cents)} para o fixo integral.</p>
+            <p className="sub" style={{ marginTop: 8 }}>Meta considera apenas o caixa recebido. Faltam {brl(comp.missing_intermediate_cents)} para o fixo parcial ({comp.intermediate_percent}%) e {brl(comp.missing_full_cents)} para o fixo integral.</p>
           </>}
         </section>
         <section className="card">
