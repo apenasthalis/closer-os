@@ -8,6 +8,10 @@ import { showToast } from '../lib/toast'
 import LeadModal from '../components/LeadModal'
 import SaleModal from '../components/SaleModal'
 import ReasonModal from '../components/ReasonModal'
+import ScorecardModal from '../components/ScorecardModal'
+
+const SCORE_STAGES = new Set(['remarcado', 'negociacao', 'fechado', 'loss', 'desqualificado'])
+const SCORE_ICON = '<path d="M4 14v-2a8 8 0 0116 0v2"/><rect x="3" y="14" width="4" height="6" rx="1"/><rect x="17" y="14" width="4" height="6" rx="1"/>'
 
 function saleTotal(sale: any): number {
   if (!sale || sale.refund) return 0
@@ -16,28 +20,32 @@ function saleTotal(sale: any): number {
 function daysInStage(l: any){ const t = l.stage_changed_at ? new Date(l.stage_changed_at).getTime() : Date.now(); return Math.max(0, Math.floor((Date.now()-t)/86400000)); }
 function ageCls(d:number){ return d>=6?'crit':d>=3?'warn':'ok'; }
 
-function Card({ lead, onOpen, onSale }: { lead: any; onOpen: () => void; onSale: () => void }) {
+function Card({ lead, onOpen, onSale, onScore }: { lead: any; onOpen: () => void; onSale: () => void; onScore: (lead: any) => void }) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: lead.id })
   const total = saleTotal(lead.sale)
   const d = daysInStage(lead)
   const open = !['fechado','loss','desqualificado','reembolso'].includes(lead.stage)
+  const canScore = SCORE_STAGES.has(lead.stage)
   return (
     <article ref={setNodeRef} className={`kc${isDragging ? ' dragging' : ''}`} onClick={onOpen} {...listeners} {...attributes}>
       <div className="kc-head"><strong className="kc-name">{lead.name}</strong>{total > 0 && <span className="pill ok num">{brl(total)}</span>}</div>
       <div className="meta"><span>{lead.call_at ? dateBR(lead.call_at) : 'Sem call'}</span>{open && <span className={`age ${ageCls(d)}`}>{d}d</span>}</div>
       <div className="meta">{lead.no_show_count > 0 ? <span className="pill hot">{lead.no_show_count} no-show</span> : <span></span>}{lead.loss_reason ? <span className="pill">{lead.loss_reason}</span> : <span></span>}</div>
-      {lead.stage === 'fechado' && <button className="btn sm" onClick={e => { e.stopPropagation(); onSale() }}>Abrir venda</button>}
+      {(canScore || lead.stage === 'fechado') && <div className="kc-actions">
+        {canScore && <button className="btn sm iconb" title="Avaliar call" aria-label="Avaliar call" onClick={e => { e.stopPropagation(); onScore(lead) }}><svg viewBox="0 0 24 24" aria-hidden="true" dangerouslySetInnerHTML={{ __html: SCORE_ICON }} /></button>}
+        {lead.stage === 'fechado' && <button className="btn sm" onClick={e => { e.stopPropagation(); onSale() }}>Abrir venda</button>}
+      </div>}
     </article>
   )
 }
 
-function Column({ stage, label, leads, onOpen, onSale }: any) {
+function Column({ stage, label, leads, onOpen, onSale, onScore }: any) {
   const { setNodeRef, isOver } = useDroppable({ id: stage })
   return (
     <div ref={setNodeRef} className={`col${isOver ? ' over' : ''}`} data-stage={stage}>
       <header><h3>{label}</h3><span className="pill num">{leads.length}</span></header>
       <div className="cards">
-        {leads.map((lead: any) => <Card key={lead.id} lead={lead} onOpen={() => onOpen(lead)} onSale={() => onSale(lead)} />)}
+        {leads.map((lead: any) => <Card key={lead.id} lead={lead} onOpen={() => onOpen(lead)} onSale={() => onSale(lead)} onScore={onScore} />)}
         {leads.length === 0 && <div className="empty">Solte um card aqui</div>}
       </div>
     </div>
@@ -52,11 +60,28 @@ export default function Pipeline() {
   const [saleLead, setSaleLead] = useState<any>(null)
   const [reason, setReason] = useState<{ lead: any; stage: 'loss' | 'desqualificado' } | null>(null)
   const [dragging, setDragging] = useState<any>(null)
+  const [scoreCall, setScoreCall] = useState<any>(null)
 
   const { data, isLoading, error } = useQuery({ queryKey: ['pipeline', filters], queryFn: async () => (await api.get('/pipeline/board', { params: filters })).data })
 
   const invalidate = () => {
-    qc.invalidateQueries({ queryKey: ['pipeline'] }); qc.invalidateQueries({ queryKey: ['leads'] }); qc.invalidateQueries({ queryKey: ['lead'] }); qc.invalidateQueries({ queryKey: ['dashboard'] })
+    qc.invalidateQueries({ queryKey: ['pipeline'] }); qc.invalidateQueries({ queryKey: ['leads'] }); qc.invalidateQueries({ queryKey: ['lead'] }); qc.invalidateQueries({ queryKey: ['dashboard'] }); qc.invalidateQueries({ queryKey: ['calls'] }); qc.invalidateQueries({ queryKey: ['call-stats'] })
+  }
+
+  async function openScore(lead: any) {
+    try {
+      const r = await api.get('/calls', { params: { lead_id: lead.id, per_page: 20 } })
+      const list = r.data?.data ?? r.data ?? []
+      let call = list.find((c: any) => c.status !== 'no_show') || list[0]
+      if (!call) {
+        call = (await api.post('/calls', { lead_id: lead.id, call_at: lead.call_at || new Date().toISOString(), status: 'held' })).data
+      } else if (call.status === 'scheduled') {
+        call = (await api.put(`/calls/${call.id}`, { status: 'held' })).data
+      }
+      setScoreCall({ ...call, lead })
+    } catch (e) {
+      showToast(apiError(e), 'err')
+    }
   }
   const transition = useMutation({
     mutationFn: async ({ lead, stage, reason, note }: any) => (await api.post(`/leads/${lead.id}/transition`, { stage, loss_reason: reason, loss_note: note })).data,
@@ -109,7 +134,7 @@ export default function Pipeline() {
           onDragEnd={(e) => { setDragging(null); if (e.over) drop(Number(e.active.id), String(e.over.id)) }}
           onDragCancel={() => setDragging(null)}>
           <div className="kanban" id="kanban">
-            {data.columns.map((col: any) => <Column key={col.stage} stage={col.stage} label={col.label} leads={col.leads} onOpen={(lead: any) => navigate(`/lead/${lead.id}`)} onSale={(lead: any) => setSaleLead(lead)} />)}
+            {data.columns.map((col: any) => <Column key={col.stage} stage={col.stage} label={col.label} leads={col.leads} onOpen={(lead: any) => navigate(`/lead/${lead.id}`)} onSale={(lead: any) => setSaleLead(lead)} onScore={openScore} />)}
           </div>
           <DragOverlay>{dragging && <div className="kc ghost" style={{width:500}}><div className="kc-head"><strong className="kc-name">{dragging.name}</strong>{saleTotal(dragging.sale) > 0 && <span className="pill ok num">{brl(saleTotal(dragging.sale))}</span>}</div><div className="meta"><span>{STAGE_LABEL[dragging.stage]}</span></div></div>}</DragOverlay>
         </DndContext>
@@ -118,6 +143,7 @@ export default function Pipeline() {
       {newLead && <LeadModal onClose={() => setNewLead(false)} onSaved={(l: any) => navigate(`/lead/${l.id}`)} />}
       {saleLead && <SaleModal leadId={saleLead.id} leadName={saleLead.name} onClose={() => setSaleLead(null)} onSaved={invalidate} />}
       {reason && <ReasonModal stage={reason.stage} leadName={reason.lead.name} onClose={() => setReason(null)} onConfirm={(r, n) => { transition.mutate({ lead: reason.lead, stage: reason.stage, reason: r, note: n }); setReason(null) }} />}
+      {scoreCall && <ScorecardModal call={scoreCall} onClose={() => setScoreCall(null)} onSaved={invalidate} />}
     </>
   )
 }

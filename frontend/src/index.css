@@ -145,6 +145,9 @@ textarea{resize:vertical}
 .kc.ghost{position:fixed;z-index:60;pointer-events:none;cursor:grabbing;box-shadow:0 14px 36px rgba(0,0,0,.45);border-color:var(--accent);transform:rotate(1.5deg);margin:0}
 body.dragging{cursor:grabbing;user-select:none;-webkit-user-select:none}
 .kc .meta{display:flex;justify-content:space-between;align-items:center;gap:6px;font-size:calc(var(--u)*13);color:var(--muted);flex-wrap:wrap}
+.kc-actions{display:flex;gap:8px;align-items:center;margin-top:2px}
+.kc-actions .iconb{width:30px;height:30px;padding:0;display:inline-flex;align-items:center;justify-content:center}
+.kc-actions .iconb svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .kc select{font-size:calc(var(--u)*12);padding:4px 6px}
 .age{font-size:calc(var(--u)*11);font-weight:700;font-variant-numeric:tabular-nums}
 .age.ok{color:var(--accent-text)}.age.warn{color:var(--warn)}.age.crit{color:var(--crit)}

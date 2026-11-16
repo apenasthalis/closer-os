@@ -114,29 +114,32 @@ class CallController extends Controller
         foreach (ScorecardService::CRITERIA as $meta) {
             $key = $meta['key'];
             $checked = $evaluated->filter(fn (Call $c) => (bool)($c->scorecard->criteria[$key] ?? false));
+            $fails = $evaluated->count() - $checked->count();
             $byCriterion[] = [
                 'key' => $key,
                 'label' => $meta['label'],
                 'points' => $meta['weight'],
                 'checked' => $checked->count(),
                 'total' => $evaluated->count(),
+                'fails' => $fails,
                 'percent' => $evaluated->count() ? round($checked->count() / $evaluated->count() * 100, 1) : 0,
             ];
         }
 
-        $byCloser = $evaluated->groupBy(fn (Call $c) => $c->closer?->name ?? 'Sem closer')->map(function ($group, $name) {
-            return [
-                'name' => $name,
-                'evaluations' => $group->count(),
-                'average' => round($group->avg(fn (Call $c) => $c->scorecard->score), 1),
-            ];
-        })->values();
+        $now = Carbon::now('America/Sao_Paulo');
+        $todayAvg = $evaluated->filter(fn (Call $c) => $c->call_at && Carbon::parse($c->call_at)->setTimezone('America/Sao_Paulo')->isSameDay($now));
+        $weekAvg = $evaluated->filter(fn (Call $c) => $c->call_at && Carbon::parse($c->call_at)->setTimezone('America/Sao_Paulo')->isSameWeek($now));
 
-        $evolution = $evaluated->sortBy(fn (Call $c) => $c->call_at?->timestamp ?? 0)->take(-12)->values()->map(fn (Call $c) => [
-            'date' => $c->call_at?->toDateString(),
-            'score' => $c->scorecard->score,
+        $list = $evaluated->sortByDesc(fn (Call $c) => $c->call_at?->timestamp ?? 0)->values()->map(fn (Call $c) => [
+            'id' => $c->id,
+            'call_at' => $c->call_at?->toISOString(),
+            'lead_id' => $c->lead_id,
+            'lead_name' => $c->lead?->name,
             'closer' => $c->closer?->name,
-            'lead' => $c->lead?->name,
+            'score' => $c->scorecard->score,
+            'penalty' => $c->scorecard->penalty,
+            'talk_ratio' => $c->scorecard->talk_ratio,
+            'criteria' => $c->scorecard->criteria ?? [],
         ]);
 
         return [
@@ -145,10 +148,11 @@ class CallController extends Controller
             'no_shows' => $calls->where('status','no_show')->count(),
             'evaluated' => $evaluated->count(),
             'average_score' => $evaluated->count() ? round($evaluated->avg(fn (Call $c) => $c->scorecard->score), 1) : 0,
+            'average_today' => $todayAvg->count() ? round($todayAvg->avg(fn (Call $c) => $c->scorecard->score), 1) : null,
+            'average_week' => $weekAvg->count() ? round($weekAvg->avg(fn (Call $c) => $c->scorecard->score), 1) : null,
             'average_penalty' => $evaluated->count() ? round($evaluated->avg(fn (Call $c) => $c->scorecard->penalty), 1) : 0,
             'by_criterion' => $byCriterion,
-            'by_closer' => $byCloser,
-            'evolution' => $evolution,
+            'calls' => $list,
         ];
     }
 

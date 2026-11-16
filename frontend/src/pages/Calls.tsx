@@ -1,68 +1,80 @@
-import { useState } from 'react'
-
-const CHECK: [string, number][] = [
-  ['Abri com contrato de tempo e objetivo da call', 10],
-  ['Mapeei a situação atual do lead', 15],
-  ['O lead disse a dor com as próprias palavras', 15],
-  ['Quantifiquei o custo de não resolver', 15],
-  ['Defini critério e prazo de decisão', 10],
-  ['Apresentei a solução ligada à dor', 15],
-  ['Pedi o fechamento de forma direta', 10],
-  ['Combinei próximo passo com data e hora', 10],
-]
+import { useMemo, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { api } from '../lib/api'
+import { dateTimeBR } from '../lib/format'
 
 export default function Calls() {
-  const [c, setC] = useState<boolean[]>(Array(CHECK.length).fill(false))
-  const [ratio, setRatio] = useState(40)
-  const total = CHECK.reduce((a, x, i) => a + (c[i] ? x[1] : 0), 0)
-  const pen = ratio >= 30 && ratio <= 50 ? 0 : ratio >= 20 && ratio <= 60 ? 5 : 10
-  const final = Math.max(0, total - pen)
-  const past = [62, 70, 58, 74, 66, 81, 77, final]
-  const miss = CHECK.map((x, i) => ({ t: x[0], w: x[1], i })).filter(x => !c[x.i]).sort((a, b) => b.w - a.w)[0]
-  const rtxt = ratio < 30 ? 'Você falou pouco. Pergunte menos e dê mais contexto.' : ratio > 50 ? 'Você falou demais. Pergunte mais e deixe o lead desenvolver.' : 'Boa proporção. O lead falou mais da metade da call.'
+  const [from, setFrom] = useState('')
+  const [to, setTo] = useState('')
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['call-stats', from, to],
+    queryFn: async () => (await api.get('/calls/stats', { params: { from: from || undefined, to: to || undefined } })).data,
+  })
+
+  const worst = useMemo(() => {
+    const list = (data?.by_criterion || []).filter((c: any) => c.total > 0)
+    if (!list.length) return null
+    return [...list].sort((a: any, b: any) => b.fails - a.fails || a.percent - b.percent)[0]
+  }, [data])
+
+  const failedCalls = useMemo(() => {
+    if (!worst) return []
+    return (data?.calls || []).filter((c: any) => c.criteria && c.criteria[worst.key] === false)
+  }, [data, worst])
 
   return (
     <div>
       <div className="head">
-        <div><h1>Scorecard de calls</h1><p>Depois de cada call, marque o que aconteceu. A nota mostra onde você perde força antes de perder a venda.</p></div>
+        <div><h1>Scorecard de calls</h1><p>Média do dia e da semana, critério que você mais deixa de cumprir e as calls do período.</p></div>
       </div>
 
-      <div className="grid g2">
-        <section className="card">
-          <div className="top"><div><h2>Call de hoje</h2><p className="sub">Descoberta</p></div></div>
-          <div className="leadlist">
-            {CHECK.map((x, i) => (
-              <button key={i} className="tog" aria-pressed={c[i]} onClick={() => { const n = c.slice(); n[i] = !n[i]; setC(n) }}>
-                <span className="bx" />{x[0]}<em>+{x[1]}</em>
-              </button>
-            ))}
-          </div>
-          <div className="field" style={{ marginTop: 16 }}>
-            <label htmlFor="rt">Quanto da call você falou: <b className="num" id="rtv">{ratio}%</b></label>
-            <input id="rt" type="range" min={10} max={80} value={ratio} onChange={e => setRatio(+e.target.value)} />
-            <p className="sub">{rtxt} Ideal entre 30% e 50%.</p>
-          </div>
-        </section>
+      <section className="card">
+        <div className="filters">
+          <div className="field"><label htmlFor="cf">De</label><input className="in" type="date" id="cf" value={from} onChange={e => setFrom(e.target.value)} /></div>
+          <div className="field"><label htmlFor="ct">Até</label><input className="in" type="date" id="ct" value={to} onChange={e => setTo(e.target.value)} /></div>
+          {(from || to) && <button className="btn" onClick={() => { setFrom(''); setTo('') }}>Limpar período</button>}
+        </div>
+      </section>
 
-        <div className="grid" style={{ alignContent: 'start' }}>
-          <section className="card" style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
-            <div className="ring" style={{ ['--v' as any]: final, width: 92, height: 92 }}><span>{final}</span></div>
-            <div><h2>Nota {final}</h2><p className="sub">{pen ? `Descontei ${pen} pontos pela proporção de fala.` : 'Sem desconto por proporção de fala.'}</p></div>
+      {isLoading && <p className="muted">Carregando scorecards...</p>}
+      {error && <div className="alert"><h3>Erro ao carregar</h3><p className="sub">Não foi possível carregar os dados.</p></div>}
+
+      {data && <>
+        <div className="kgrid">
+          <section className="card kpi"><div className="eyebrow">Média do dia</div><strong className="num">{data.average_today ?? '—'}</strong><span>calls avaliadas hoje</span></section>
+          <section className="card kpi"><div className="eyebrow">Média da semana</div><strong className="num">{data.average_week ?? '—'}</strong><span>calls avaliadas na semana</span></section>
+          <section className="card kpi"><div className="eyebrow">Média do período</div><strong className="num">{data.average_score || 0}</strong><span>{data.evaluated || 0} calls avaliadas</span></section>
+        </div>
+
+        <div className="grid g2">
+          <section className="card">
+            <div className="top"><div><h2>Critério que você mais deixa de cumprir</h2><p className="sub">{worst ? `${worst.fails} falha(s) em ${worst.total} call(s) · ${worst.percent}% de cumprimento` : 'Sem avaliações no período.'}</p></div></div>
+            {worst ? <>
+              <p style={{ marginBottom: 14 }}><strong>{worst.label}</strong> <span className="muted">({worst.points} pontos)</span></p>
+              <h3 style={{ marginBottom: 10 }}>Calls em que este critério falhou</h3>
+              <div className="list">
+                {failedCalls.length ? failedCalls.map((c: any) => (
+                  <div className="row" key={c.id}>
+                    <div className="grow"><strong>{c.lead_name || 'Sem lead'}</strong><span>{dateTimeBR(c.call_at)} · nota {c.score} · falou {c.talk_ratio}%</span></div>
+                  </div>
+                )) : <p className="muted">Nenhuma falha registrada para este critério no período.</p>}
+              </div>
+            </> : <p className="muted">Avalie calls no pipeline para ver o critério com mais falhas.</p>}
           </section>
 
           <section className="card">
-            <h3 style={{ marginBottom: 6 }}>Foco da próxima call</h3>
-            <p>{miss ? <><strong>{miss.t}</strong><br /><span className="muted">É o critério de maior peso que ficou de fora ({miss.w} pontos).</span></> : 'Todos os critérios cumpridos. Mantenha o padrão.'}</p>
-          </section>
-
-          <section className="card">
-            <h3 style={{ marginBottom: 22 }}>Últimas 8 calls</h3>
-            <div className="trend">
-              {past.map((v, i) => <div key={i} style={{ height: `${Math.max(4, v)}%`, ...(i === 7 ? {} : { opacity: 0.55 }) }}><span>{v}</span></div>)}
+            <div className="top"><div><h2>Calls do período</h2><p className="sub">Todas as calls avaliadas no filtro selecionado.</p></div></div>
+            <div className="list">
+              {(data.calls || []).length ? (data.calls || []).map((c: any) => (
+                <div className="row" key={c.id}>
+                  <div className="grow"><strong>{c.lead_name || 'Sem lead'}</strong><span>{dateTimeBR(c.call_at)}{c.closer ? ` · ${c.closer}` : ''}</span></div>
+                  <span className="pill ok num">Nota {c.score}</span>
+                </div>
+              )) : <p className="muted">Nenhuma call avaliada neste período.</p>}
             </div>
           </section>
         </div>
-      </div>
+      </>}
     </div>
   )
 }
