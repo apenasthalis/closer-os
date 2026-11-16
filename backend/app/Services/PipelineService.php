@@ -8,7 +8,7 @@ use App\Models\User;
 class PipelineService
 {
     public const STAGES = [
-        'lead_agendado', 'no_show', 'fup', 'remarcado', 'negociacao', 'fechado', 'loss', 'desqualificado',
+        'lead_agendado', 'no_show', 'fup', 'remarcado', 'negociacao', 'fechado', 'reembolso', 'loss', 'desqualificado',
     ];
 
     public const LABELS = [
