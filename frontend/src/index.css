@@ -121,9 +121,18 @@ textarea{resize:vertical}
 .alert{border:1px solid var(--warn);background:var(--warn-soft);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px}
 .alert h3{color:var(--warn)}
 .note{border:1px dashed var(--line);border-radius:12px;padding:12px 14px;color:var(--muted);font-size:calc(var(--u)*12.5);display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
-.kanban{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(calc(var(--u)*360),1fr);gap:14px;overflow-x:auto;overflow-y:hidden;flex:1;min-height:0;padding-bottom:6px}
+.kanban{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(calc(var(--u)*360),1fr);gap:14px;overflow-x:auto;overflow-y:hidden;flex:1;min-height:0;padding-bottom:10px;scrollbar-width:thin;scrollbar-color:var(--accent) var(--surface);scrollbar-gutter:stable}
+.kanban::-webkit-scrollbar{height:10px}
+.kanban::-webkit-scrollbar-track{background:var(--surface);border:1px solid var(--line);border-radius:99px}
+.kanban::-webkit-scrollbar-thumb{background:linear-gradient(90deg,var(--accent),color-mix(in srgb,var(--accent) 65%,transparent));border-radius:99px;border:2px solid var(--surface)}
+.kanban::-webkit-scrollbar-thumb:hover{background:var(--accent)}
 .col{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:10px;min-height:0;min-width:0;overflow:hidden}
-.col .cards{display:flex;flex-direction:column;gap:10px;overflow-y:auto;min-height:0;flex:1;padding:2px 2px 8px 0;align-content:start}
+.col .cards{display:flex;flex-direction:column;gap:10px;overflow-y:auto;min-height:0;flex:1;padding:2px 6px 8px 0;align-content:start;scrollbar-width:thin;scrollbar-color:color-mix(in srgb,var(--accent) 70%,var(--line)) transparent}
+.col .cards::-webkit-scrollbar{width:8px}
+.col .cards::-webkit-scrollbar-track{background:transparent}
+.col .cards::-webkit-scrollbar-thumb{background:var(--line);border-radius:99px;border:2px solid transparent;background-clip:padding-box}
+.col .cards:hover::-webkit-scrollbar-thumb{background:color-mix(in srgb,var(--accent) 70%,var(--line));background-clip:padding-box}
+.col .cards::-webkit-scrollbar-thumb:hover{background:var(--accent)}
 .col .empty{border:1px dashed var(--line);border-radius:10px;padding:18px 10px;text-align:center;color:var(--muted);font-size:calc(var(--u)*12.5)}
 .col h3{display:flex;align-items:center;gap:8px}
 .col h3::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--muted);flex:none}
