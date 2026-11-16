@@ -68,8 +68,15 @@ export default function Pipeline() {
     qc.invalidateQueries({ queryKey: ['pipeline'] }); qc.invalidateQueries({ queryKey: ['leads'] }); qc.invalidateQueries({ queryKey: ['lead'] }); qc.invalidateQueries({ queryKey: ['dashboard'] }); qc.invalidateQueries({ queryKey: ['calls'] }); qc.invalidateQueries({ queryKey: ['call-stats'] })
   }
 
-  function openScore(lead: any) {
-    setScoreCall({ lead, lead_id: lead.id })
+  async function openScore(lead: any) {
+    try {
+      const r = await api.get('/calls', { params: { lead_id: lead.id, per_page: 20 } })
+      const list = r.data?.data ?? r.data ?? []
+      const call = list.find((c: any) => c.status !== 'no_show') || list[0]
+      setScoreCall(call ? { ...call, lead } : { lead, lead_id: lead.id })
+    } catch {
+      setScoreCall({ lead, lead_id: lead.id })
+    }
   }
   const transition = useMutation({
     mutationFn: async ({ lead, stage, reason, note }: any) => (await api.post(`/leads/${lead.id}/transition`, { stage, loss_reason: reason, loss_note: note })).data,
@@ -124,7 +131,7 @@ export default function Pipeline() {
           <div className="kanban" id="kanban">
             {data.columns.map((col: any) => <Column key={col.stage} stage={col.stage} label={col.label} leads={col.leads} onOpen={(lead: any) => navigate(`/lead/${lead.id}`)} onSale={(lead: any) => setSaleLead(lead)} onScore={openScore} />)}
           </div>
-          <DragOverlay>{dragging && <div className="kc ghost" style={{width:500}}><div className="kc-head"><strong className="kc-name">{dragging.name}</strong>{saleTotal(dragging.sale) > 0 && <span className="pill ok num">{brl(saleTotal(dragging.sale))}</span>}</div><div className="meta"><span>{STAGE_LABEL[dragging.stage]}</span></div></div>}</DragOverlay>
+          <DragOverlay>{dragging && <div className="kc ghost" style={{width:375}}><div className="kc-head"><strong className="kc-name">{dragging.name}</strong>{saleTotal(dragging.sale) > 0 && <span className="pill ok num">{brl(saleTotal(dragging.sale))}</span>}</div><div className="meta"><span>{STAGE_LABEL[dragging.stage]}</span></div></div>}</DragOverlay>
         </DndContext>
       )}
 
