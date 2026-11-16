@@ -23,7 +23,7 @@ export default function Calls() {
   }, [data, worst])
 
   return (
-    <div>
+    <div className="page-stack">
       <div className="head">
         <div><h1>Scorecard de calls</h1><p>Média do dia e da semana, critério que você mais deixa de cumprir e as calls do período.</p></div>
       </div>
