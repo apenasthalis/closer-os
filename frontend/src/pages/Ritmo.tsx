@@ -26,8 +26,8 @@ export default function Ritmo() {
   const { data: departments } = useQuery({ queryKey: ['departments'], queryFn: async () => (await api.get('/departments')).data })
 
   useEffect(() => {
-    if (user?.role === 'admin' && !closerId && users?.length) setCloserId(String(users[0].id))
-  }, [users])
+    if (user?.role === 'admin' && !closerId && user?.id) setCloserId(String(user.id))
+  }, [user, closerId])
 
   const params = { month, ...(user?.role === 'admin' && closerId ? { user_id: closerId } : {}) }
   const { data: goals, isLoading: loadingGoals } = useQuery({ queryKey: ['goals', params], queryFn: async () => (await api.get('/goals', { params })).data })
