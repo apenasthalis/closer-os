@@ -23,9 +23,9 @@ function Card({ lead, onOpen, onSale }: { lead: any; onOpen: () => void; onSale:
   const open = !['fechado','loss','desqualificado','reembolso'].includes(lead.stage)
   return (
     <article ref={setNodeRef} className={`kc${isDragging ? ' dragging' : ''}`} onClick={onOpen} {...listeners} {...attributes}>
-      <strong>{lead.name}</strong>
+      <div className="kc-head"><strong className="kc-name">{lead.name}</strong>{total > 0 && <span className="pill ok num">{brl(total)}</span>}</div>
       <div className="meta"><span>{lead.call_at ? dateBR(lead.call_at) : 'Sem call'}</span>{open && <span className={`age ${ageCls(d)}`}>{d}d</span>}</div>
-      <div className="meta">{lead.no_show_count > 0 ? <span className="pill hot">{lead.no_show_count} no-show</span> : <span></span>}{total > 0 ? <span className="pill ok">{brl(total)}</span> : (lead.loss_reason ? <span className="pill">{lead.loss_reason}</span> : <span></span>)}</div>
+      <div className="meta">{lead.no_show_count > 0 ? <span className="pill hot">{lead.no_show_count} no-show</span> : <span></span>}{lead.loss_reason ? <span className="pill">{lead.loss_reason}</span> : <span></span>}</div>
       {lead.stage === 'fechado' && <button className="btn sm" onClick={e => { e.stopPropagation(); onSale() }}>Abrir venda</button>}
     </article>
   )
@@ -111,7 +111,7 @@ export default function Pipeline() {
           <div className="kanban" id="kanban">
             {data.columns.map((col: any) => <Column key={col.stage} stage={col.stage} label={col.label} leads={col.leads} onOpen={(lead: any) => navigate(`/lead/${lead.id}`)} onSale={(lead: any) => setSaleLead(lead)} />)}
           </div>
-          <DragOverlay>{dragging && <div className="kc ghost" style={{width:220}}><strong>{dragging.name}</strong><div className="meta"><span>{STAGE_LABEL[dragging.stage]}</span></div></div>}</DragOverlay>
+          <DragOverlay>{dragging && <div className="kc ghost" style={{width:500}}><div className="kc-head"><strong className="kc-name">{dragging.name}</strong>{saleTotal(dragging.sale) > 0 && <span className="pill ok num">{brl(saleTotal(dragging.sale))}</span>}</div><div className="meta"><span>{STAGE_LABEL[dragging.stage]}</span></div></div>}</DragOverlay>
         </DndContext>
       )}
 
