@@ -33,6 +33,7 @@ class FinanceService
         };
 
         $paymentsInRange = function (Sale $sale) use ($inRange, $method) {
+            if ($sale->refund) return collect();
             return $sale->payments->filter(function ($p) use ($inRange, $method) {
                 if ($method && $p->method !== $method) return false;
                 if (!$p->isCash() || $p->status !== 'paid') return false;
@@ -40,7 +41,7 @@ class FinanceService
             });
         };
 
-        $periodSales = $all->filter(fn (Sale $s) => $inRange($s->closed_at));
+        $periodSales = $all->filter(fn (Sale $s) => !$s->refund && $inRange($s->closed_at));
         $fatBruto = 0;
         foreach ($periodSales as $sale) {
             if ($method) {
@@ -50,26 +51,10 @@ class FinanceService
             }
         }
 
-        $refundQuery = Refund::query()->with('sale');
-        if ($from) $refundQuery->where('refunded_at', '>=', $from);
-        if ($to) $refundQuery->where('refunded_at', '<=', $to);
-        if (!$user->isAdmin()) $refundQuery->where('closer_user_id', $user->id);
-        if (!empty($f['company_id'])) $refundQuery->where('company_id', $f['company_id']);
-        if (!empty($f['department_id'])) $refundQuery->where('department_id', $f['department_id']);
-        if (!empty($f['closer_id'])) $refundQuery->where('closer_user_id', $f['closer_id']);
-        if ($method) {
-            $refundQuery->whereHas('sale.payments', fn (Builder $p) => $p->where('method', $method));
-        }
-        if (!empty($f['operation_id'])) {
-            $refundQuery->whereHas('sale', fn (Builder $q) => $q->where('operation_id', $f['operation_id']));
-        }
-        if ($q !== '') {
-            $refundQuery->whereHas('sale.lead', fn (Builder $l) => $l->where('name', 'like', '%'.$q.'%'));
-        }
-        $refunds = $refundQuery->get();
-        $refundTotal = $refunds->sum('amount_cents');
-        $cashRefundTotal = $refunds->sum('cash_refunded_cents');
-        $commissionReversed = $refunds->sum('commission_reversed_cents');
+        $refunds = collect();
+        $refundTotal = 0;
+        $cashRefundTotal = 0;
+        $commissionReversed = 0;
 
         $cashIn = 0;
         $commissionBase = 0;
@@ -83,7 +68,8 @@ class FinanceService
         }
         // Commission per month is frozen per sale; use ledger when available.
         $commissionQuery = Commission::query()
-            ->whereBetween('period_month', [$from ?: '0000-01-01', $to ?: '9999-12-31']);
+            ->whereBetween('period_month', [$from ?: '0000-01-01', $to ?: '9999-12-31'])
+            ->whereDoesntHave('sale.refund');
         if (!$user->isAdmin()) $commissionQuery->where('user_id', $user->id);
         if (!empty($f['company_id'])) $commissionQuery->where('company_id', $f['company_id']);
         if (!empty($f['department_id'])) $commissionQuery->where('department_id', $f['department_id']);
@@ -105,31 +91,28 @@ class FinanceService
             $start = $cursor->copy()->subMonths($i)->startOfMonth();
             $end = $start->copy()->endOfMonth();
             $key = $start->format('Y-m');
-            $monthSales = $all->filter(fn (Sale $s) => $s->closed_at && $s->closed_at->format('Y-m') === $key);
+            $monthSales = $all->filter(fn (Sale $s) => !$s->refund && $s->closed_at && $s->closed_at->format('Y-m') === $key);
             $monthGross = 0;
             foreach ($monthSales as $sale) {
                 $monthGross += $method
                     ? $sale->payments->where('method', $method)->sum('amount_cents')
                     : SaleCalculator::totals($sale->payments->toArray())['fat'];
             }
-            $monthRefunds = $refunds->filter(fn (Refund $r) => $r->refunded_at->format('Y-m') === $key)->sum('amount_cents');
             $monthCash = 0;
             foreach ($all as $sale) {
-                foreach ($sale->payments as $p) {
-                    if ($method && $p->method !== $method) continue;
-                    if ($p->isCash() && $p->status === 'paid' && $p->received_at && $p->received_at->format('Y-m') === $key) {
+                foreach ($paymentsInRange($sale) as $p) {
+                    if ($p->received_at && $p->received_at->format('Y-m') === $key) {
                         $monthCash += $p->netCents();
                     }
                 }
             }
-            $monthCashRefunds = $refunds->filter(fn (Refund $r) => $r->refunded_at->format('Y-m') === $key)->sum('cash_refunded_cents');
             $months[] = [
                 'month' => $key,
                 'label' => $start->translatedFormat('M'),
                 'contratado' => $monthGross,
-                'reembolsos' => $monthRefunds,
-                'faturamento_liquido' => $monthGross - $monthRefunds,
-                'caixa' => $monthCash - $monthCashRefunds,
+                'reembolsos' => 0,
+                'faturamento_liquido' => $monthGross,
+                'caixa' => $monthCash,
             ];
         }
 
