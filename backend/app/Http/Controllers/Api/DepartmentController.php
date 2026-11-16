@@ -11,7 +11,9 @@ class DepartmentController extends Controller
     {
         $query = Department::query()->with('company')->orderBy('name');
         if ($request->company_id) $query->where('company_id', $request->company_id);
-        if (!$request->boolean('include_archived')) $query->whereNull('archived_at');
+        if (!$request->boolean('include_archived') && \Illuminate\Support\Facades\Schema::hasColumn('departments', 'archived_at')) {
+            $query->whereNull('archived_at');
+        }
         return $query->get();
     }
 
@@ -40,8 +42,11 @@ class DepartmentController extends Controller
     {
         $this->authorizeAdmin($request);
         if ($department->sales()->exists()) {
-            $department->update(['archived_at' => now()]);
-            return response()->json(['message' => 'Gerência arquivada.', 'department' => $department->fresh()]);
+            if (\Illuminate\Support\Facades\Schema::hasColumn('departments', 'archived_at')) {
+                $department->update(['archived_at' => now()]);
+                return response()->json(['message' => 'Gerência arquivada.', 'department' => $department->fresh()]);
+            }
+            abort(422, 'Não é possível remover gerência com vínculos.');
         }
         $department->delete();
         return response()->noContent();
