@@ -14,8 +14,12 @@ const SCORE_STAGES = new Set(['remarcado', 'negociacao', 'fechado', 'loss', 'des
 const SCORE_ICON = '<path d="M4 14v-2a8 8 0 0116 0v2"/><rect x="3" y="14" width="4" height="6" rx="1"/><rect x="17" y="14" width="4" height="6" rx="1"/>'
 
 function saleTotal(sale: any): number {
-  if (!sale || sale.refund) return 0
+  if (!sale) return 0
   return (sale.payments || []).reduce((sum: number, p: any) => sum + p.amount_cents, 0)
+}
+function refundAmount(sale: any): number {
+  if (!sale?.refund) return 0
+  return sale.refund.amount_cents ?? saleTotal(sale)
 }
 function daysInStage(l: any){ const t = l.stage_changed_at ? new Date(l.stage_changed_at).getTime() : Date.now(); return Math.max(0, Math.floor((Date.now()-t)/86400000)); }
 function ageCls(d:number){ return d>=6?'crit':d>=3?'warn':'ok'; }
@@ -23,12 +27,13 @@ function ageCls(d:number){ return d>=6?'crit':d>=3?'warn':'ok'; }
 function Card({ lead, onOpen, onSale, onScore }: { lead: any; onOpen: () => void; onSale: () => void; onScore: (lead: any) => void }) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: lead.id })
   const total = saleTotal(lead.sale)
+  const refunded = refundAmount(lead.sale)
   const d = daysInStage(lead)
   const open = !['fechado','loss','desqualificado','reembolso'].includes(lead.stage)
   const canScore = SCORE_STAGES.has(lead.stage)
   return (
     <article ref={setNodeRef} className={`kc${isDragging ? ' dragging' : ''}`} onClick={onOpen} {...listeners} {...attributes}>
-      <div className="kc-head"><strong className="kc-name">{lead.name}</strong>{total > 0 && <span className="pill ok num">{brl(total)}</span>}</div>
+      <div className="kc-head"><strong className="kc-name">{lead.name}</strong>{refunded > 0 ? <span className="pill hot num">{brl(refunded)}</span> : total > 0 && <span className="pill ok num">{brl(total)}</span>}</div>
       <div className="meta"><span>{lead.call_at ? dateBR(lead.call_at) : 'Sem call'}</span>{open && <span className={`age ${ageCls(d)}`}>{d}d</span>}</div>
       <div className="meta">{lead.no_show_count > 0 ? <span className="pill hot">{lead.no_show_count} no-show</span> : <span></span>}{lead.loss_reason ? <span className="pill">{lead.loss_reason}</span> : <span></span>}</div>
       {(canScore || lead.stage === 'fechado') && <div className="kc-actions">
@@ -131,7 +136,7 @@ export default function Pipeline() {
           <div className="kanban" id="kanban">
             {data.columns.map((col: any) => <Column key={col.stage} stage={col.stage} label={col.label} leads={col.leads} onOpen={(lead: any) => navigate(`/lead/${lead.id}`)} onSale={(lead: any) => setSaleLead(lead)} onScore={openScore} />)}
           </div>
-          <DragOverlay>{dragging && <div className="kc ghost" style={{width:375}}><div className="kc-head"><strong className="kc-name">{dragging.name}</strong>{saleTotal(dragging.sale) > 0 && <span className="pill ok num">{brl(saleTotal(dragging.sale))}</span>}</div><div className="meta"><span>{STAGE_LABEL[dragging.stage]}</span></div></div>}</DragOverlay>
+          <DragOverlay>{dragging && (() => { const r = refundAmount(dragging.sale); const t = saleTotal(dragging.sale); return <div className="kc ghost" style={{width:375}}><div className="kc-head"><strong className="kc-name">{dragging.name}</strong>{r > 0 ? <span className="pill hot num">{brl(r)}</span> : t > 0 && <span className="pill ok num">{brl(t)}</span>}</div><div className="meta"><span>{STAGE_LABEL[dragging.stage]}</span></div></div> })()}</DragOverlay>
         </DndContext>
       )}
 
