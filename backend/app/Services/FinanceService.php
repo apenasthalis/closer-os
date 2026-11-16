@@ -64,17 +64,9 @@ class FinanceService
                 $net = $p->netCents();
                 $cashIn += $net;
                 $commissionBase += $net;
+                $commissionGenerated += (int) round($net * (float) ($sale->commission_percent ?? 0) / 100);
             }
         }
-        // Commission per month is frozen per sale; use ledger when available.
-        $commissionQuery = Commission::query()
-            ->whereBetween('period_month', [$from ?: '0000-01-01', $to ?: '9999-12-31'])
-            ->whereDoesntHave('sale.refund');
-        if (!$user->isAdmin()) $commissionQuery->where('user_id', $user->id);
-        if (!empty($f['company_id'])) $commissionQuery->where('company_id', $f['company_id']);
-        if (!empty($f['department_id'])) $commissionQuery->where('department_id', $f['department_id']);
-        if (!empty($f['closer_id'])) $commissionQuery->where('user_id', $f['closer_id']);
-        $commissionGenerated = (int) $commissionQuery->sum('amount_cents');
 
         $pending = 0;
         foreach ($all as $sale) {

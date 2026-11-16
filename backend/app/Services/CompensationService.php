@@ -18,7 +18,8 @@ class CompensationService
         $start = \Carbon\Carbon::parse($month.'-01')->startOfMonth();
         $end = $start->copy()->endOfMonth();
 
-        $paymentsQuery = SalePayment::query()
+        $payments = SalePayment::query()
+            ->with('sale')
             ->whereHas('sale', function ($q) use ($userId, $companyId, $departmentId) {
                 $q->where('user_id', $userId)
                   ->whereDoesntHave('refund');
@@ -27,16 +28,15 @@ class CompensationService
             })
             ->whereIn('method', ['pix','card'])
             ->where('status', 'paid')
-            ->whereBetween('received_at', [$start->toDateString(), $end->toDateString()]);
-        $cash = (int) $paymentsQuery->get()->sum(fn ($p) => $p->netCents());
-
-        $commissionQuery = Commission::query()
-            ->where('user_id', $userId)
-            ->where('period_month', $start->toDateString())
-            ->whereDoesntHave('sale.refund');
-        if ($companyId) $commissionQuery->where('company_id', $companyId);
-        if ($departmentId) $commissionQuery->where('department_id', $departmentId);
-        $commission = (int) $commissionQuery->sum('amount_cents');
+            ->whereBetween('received_at', [$start->toDateString(), $end->toDateString()])
+            ->get();
+        $cash = 0;
+        $commission = 0;
+        foreach ($payments as $p) {
+            $net = $p->netCents();
+            $cash += $net;
+            $commission += (int) round($net * (float) ($p->sale->commission_percent ?? 0) / 100);
+        }
 
         $rule = self::ruleFor($companyId, $departmentId, $start);
         $snapshot = self::snapshotFor($userId, $companyId, $departmentId, $start, $rule);
