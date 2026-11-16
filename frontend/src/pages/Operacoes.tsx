@@ -59,7 +59,7 @@ export default function Operacoes() {
 
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="page-stack">
       <div className="head">
         <div><h1>Operações</h1><p>Empresas, gerências, operações e regras de comissão. {admin ? 'Gerencie tudo por aqui.' : 'Visão somente leitura.'}</p></div>
       </div>

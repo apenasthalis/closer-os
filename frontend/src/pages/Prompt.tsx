@@ -2,7 +2,7 @@ import promptMd from '../../../prompt.md?raw'
 
 export default function Prompt() {
   return (
-    <div className="flex flex-col gap-4">
+    <div className="page-stack">
       <div className="head">
         <div><h1>Prompt do produto</h1><p>Especificação original do Closer OS Pro, embarcada no build para consulta.</p></div>
       </div>

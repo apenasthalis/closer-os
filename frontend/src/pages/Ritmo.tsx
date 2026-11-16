@@ -60,7 +60,7 @@ export default function Ritmo() {
   const depts = (departments || []).filter((d: any) => !goalModal?.company_id || d.company_id === Number(goalModal.company_id))
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="page-stack">
       <div className="head">
         <div><h1>Ritmo & Comissão</h1><p>Metas do mês, progresso e a regra de remuneração com snapshot histórico.</p></div>
         <div className="acts">

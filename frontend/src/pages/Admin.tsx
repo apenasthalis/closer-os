@@ -38,7 +38,7 @@ export default function Admin() {
   if (!isAdmin) return <div className="alert"><h3>Acesso restrito</h3><p className="sub">Apenas administradores podem gerenciar usuários e ver a auditoria.</p></div>
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="page-stack">
       <div className="head">
         <div><h1>Administração</h1><p>Usuários, permissões e trilha de auditoria.</p></div>
         <div className="acts"><div className="seg"><button aria-pressed={tab === 'users'} onClick={() => setTab('users')}>Usuários</button><button aria-pressed={tab === 'audit'} onClick={() => setTab('audit')}>Auditoria</button></div>{tab === 'users' && <button className="btn primary" onClick={() => setEditing({ role: 'closer', active: true })}>Novo usuário</button>}</div>
