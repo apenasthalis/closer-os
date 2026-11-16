@@ -91,22 +91,22 @@ export default function Ritmo() {
 
       <div className="grid g2">
         <section className="card">
-          <div className="top"><div><h2>Remuneração do mês</h2><p className="sub">Caixa recebido e comissão congelada por venda.</p></div><span className={`pill ${comp?.fixed_status === 'fixo_integral' ? 'ok' : comp?.fixed_status === 'fixo_parcial' ? 'warm' : 'danger'}`}>{fixedStatus}</span></div>
+          <div className="top"><div><h2>Remuneração do mês</h2><p className="sub">Meta alcançada e quanto você vai receber (fixo + comissão).</p></div><span className={`pill ${comp?.fixed_status === 'fixo_integral' ? 'ok' : comp?.fixed_status === 'fixo_parcial' ? 'warm' : 'danger'}`}>{fixedStatus}</span></div>
           {loadingComp ? <p className="muted">Calculando...</p> : comp && <>
             <div className="kgrid">
-              <div><span className="eyebrow">Caixa no mês</span><strong className="num">{brl(comp.cash_received_cents)}</strong></div>
-              <div><span className="eyebrow">Meta de caixa</span><strong className="num">{brl(comp.target_cents)}</strong></div>
+              <div><span className="eyebrow">Meta alcançada</span><strong className="num">{brl(comp.cash_received_cents)} <span className="sub">de {brl(comp.target_cents)}</span></strong></div>
               <div><span className="eyebrow">% da meta</span><strong className="num">{comp.percent}%</strong></div>
+              <div><span className="eyebrow">A receber (fixo + comissão)</span><strong className="num">{brl(comp.total_cents)}</strong></div>
             </div>
             <div className="bar" style={{ margin: '10px 0' }}><i style={{ width: `${Math.min(100, comp.percent)}%` }} /></div>
-            <div className="row"><span className="grow">Fixo</span><b className="num">{brl(comp.fixed_cents)}</b></div>
-            <div className="row"><span className="grow">Comissão</span><b className="num">{brl(comp.commission_cents)}</b></div>
-            <div className="row"><span className="grow"><strong>Total</strong></span><b className="num">{brl(comp.total_cents)}</b></div>
+            <div className="row"><span className="grow">Fixo do mês</span><b className="num">{brl(comp.fixed_cents)}</b></div>
+            <div className="row"><span className="grow">Comissão do mês</span><b className="num">{brl(comp.commission_cents)}</b></div>
+            <div className="row"><span className="grow"><strong>Total a receber</strong></span><b className="num">{brl(comp.total_cents)}</b></div>
             <p className="sub" style={{ marginTop: 8 }}>Faltam {brl(comp.missing_intermediate_cents)} para o fixo parcial ({comp.intermediate_percent}%) e {brl(comp.missing_full_cents)} para o fixo integral.</p>
           </>}
         </section>
         <section className="card">
-          <div className="top"><div><h2>Histórico de 12 meses</h2><p className="sub">Caixa, fixo, comissão e total.</p></div></div>
+          <div className="top"><div><h2>Fixo e remuneração por mês</h2><p className="sub">Histórico de 12 meses: caixa, fixo, comissão e total a receber.</p></div></div>
           <div className="bars" style={{ height: 130 }}>
             {(history || []).map((h: any, i: number) => <div className="bcol" key={i}><div className="bwrap"><div className="bar-v" style={{ height: `${Math.max(2, (h.total_cents / historyMax) * 100)}%` }} title={`${brl(h.total_cents)}`} /></div><span>{h.month.slice(5)}</span><em>{(h.total_cents / 100 / 1000).toFixed(1)}k</em></div>)}
           </div>
