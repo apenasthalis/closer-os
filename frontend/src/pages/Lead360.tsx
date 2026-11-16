@@ -75,12 +75,12 @@ export default function Lead360() {
   })()
 
   return (
-    <div>
+    <div className="page-stack l360">
       <div className="head">
         <div><h1>Lead 360</h1><p>Tudo sobre uma pessoa em uma tela: qualificação, descrição, venda e histórico.</p></div>
       </div>
-      <div className="grid gsplit">
-        <section className="card">
+      <div className="grid gsplit l360-grid">
+        <section className="card l360-list">
           <h3 style={{ marginBottom: 10 }}>Leads</h3>
           <input className="in" value={lq} onChange={e => setLq(e.target.value)} placeholder="Buscar por nome" aria-label="Buscar lead por nome" style={{ marginBottom: 10 }} />
           <div className="leadlist">
@@ -116,7 +116,7 @@ export default function Lead360() {
           const [dLabel, dCls] = temp(displayScore)
           const days = lead.stage_changed_at ? Math.max(0, Math.floor((Date.now() - new Date(lead.stage_changed_at).getTime()) / 86400000)) : 0
           const open = !['fechado','loss','desqualificado','reembolso'].includes(lead.stage)
-          return <div className="grid" style={{ minWidth: 0 }}>
+          return <div className="grid l360-detail" style={{ minWidth: 0 }}>
             <section className="card">
               <div className="top" style={{ marginBottom: 0 }}>
                 <div>

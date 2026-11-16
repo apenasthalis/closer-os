@@ -353,3 +353,13 @@ body{margin:0}
 .toast.err{background:var(--crit);color:#fff}
 .content.pipe .kanban{flex:1}
 .leadlist{display:flex;flex-direction:column;gap:6px}
+.l360-grid{align-items:start}
+.l360-list{position:sticky;top:16px;max-height:calc(100vh - 120px);display:flex;flex-direction:column;min-height:0;align-self:start}
+.l360-list .leadlist{flex:1;min-height:0;overflow-y:auto;padding-right:4px;scrollbar-width:thin;scrollbar-color:color-mix(in srgb,var(--accent) 70%,var(--line)) transparent}
+.l360-list .leadlist::-webkit-scrollbar{width:8px}
+.l360-list .leadlist::-webkit-scrollbar-track{background:transparent}
+.l360-list .leadlist::-webkit-scrollbar-thumb{background:var(--line);border-radius:99px;border:2px solid transparent;background-clip:padding-box}
+.l360-list .leadlist:hover::-webkit-scrollbar-thumb{background:color-mix(in srgb,var(--accent) 70%,var(--line));background-clip:padding-box}
+.l360-list .leadlist::-webkit-scrollbar-thumb:hover{background:var(--accent)}
+.l360-detail{align-content:start;align-self:start;min-height:0}
+@media (max-width:1020px){.l360-list{position:static;max-height:360px}}
