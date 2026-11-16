@@ -10,7 +10,9 @@ class CompanyController extends Controller
     public function index(Request $request)
     {
         $query = Company::query()->with('departments')->orderBy('name');
-        if (!$request->boolean('include_archived')) $query->whereNull('archived_at');
+        if (!$request->boolean('include_archived') && \Illuminate\Support\Facades\Schema::hasColumn('companies', 'archived_at')) {
+            $query->whereNull('archived_at');
+        }
         return $query->get();
     }
 
@@ -34,8 +36,11 @@ class CompanyController extends Controller
     {
         $this->authorizeAdmin($request);
         if ($company->departments()->exists() || $company->sales()->exists()) {
-            $company->update(['archived_at' => now()]);
-            return response()->json(['message' => 'Empresa arquivada.', 'company' => $company->fresh()]);
+            if (\Illuminate\Support\Facades\Schema::hasColumn('companies', 'archived_at')) {
+                $company->update(['archived_at' => now()]);
+                return response()->json(['message' => 'Empresa arquivada.', 'company' => $company->fresh()]);
+            }
+            abort(422, 'Não é possível remover empresa com vínculos.');
         }
         $company->delete();
         return response()->noContent();
