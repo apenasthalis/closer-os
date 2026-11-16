@@ -80,6 +80,8 @@ class CallController extends Controller
             'talk_ratio' => ['required','integer','min:0','max:100'],
         ]);
         $result = ScorecardService::calculate($data['criteria'], (int)$data['talk_ratio']);
+        $result['talk_ratio'] = (int) $data['talk_ratio'];
+        unset($result['missing']);
         $scorecard = DB::transaction(function () use ($request, $call, $result) {
             $scorecard = $call->scorecard()->updateOrCreate([], $result);
             if ($call->status !== 'held') $call->update(['status' => 'held']);

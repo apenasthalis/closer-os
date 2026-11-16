@@ -68,20 +68,8 @@ export default function Pipeline() {
     qc.invalidateQueries({ queryKey: ['pipeline'] }); qc.invalidateQueries({ queryKey: ['leads'] }); qc.invalidateQueries({ queryKey: ['lead'] }); qc.invalidateQueries({ queryKey: ['dashboard'] }); qc.invalidateQueries({ queryKey: ['calls'] }); qc.invalidateQueries({ queryKey: ['call-stats'] })
   }
 
-  async function openScore(lead: any) {
-    try {
-      const r = await api.get('/calls', { params: { lead_id: lead.id, per_page: 20 } })
-      const list = r.data?.data ?? r.data ?? []
-      let call = list.find((c: any) => c.status !== 'no_show') || list[0]
-      if (!call) {
-        call = (await api.post('/calls', { lead_id: lead.id, call_at: lead.call_at || new Date().toISOString(), status: 'held' })).data
-      } else if (call.status === 'scheduled') {
-        call = (await api.put(`/calls/${call.id}`, { status: 'held' })).data
-      }
-      setScoreCall({ ...call, lead })
-    } catch (e) {
-      showToast(apiError(e), 'err')
-    }
+  function openScore(lead: any) {
+    setScoreCall({ lead, lead_id: lead.id })
   }
   const transition = useMutation({
     mutationFn: async ({ lead, stage, reason, note }: any) => (await api.post(`/leads/${lead.id}/transition`, { stage, loss_reason: reason, loss_note: note })).data,

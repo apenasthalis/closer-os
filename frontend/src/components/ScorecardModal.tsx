@@ -25,11 +25,21 @@ export default function ScorecardModal({ call, onClose, onSaved }: { call: any; 
   }, [criteria, checked, ratio])
 
   const save = useMutation({
-    mutationFn: async () => (await api.post(`/calls/${call.id}/scorecard`, { criteria: checked, talk_ratio: ratio })).data,
+    mutationFn: async () => {
+      let callId = call?.id
+      if (!callId) {
+        const leadId = call?.lead_id ?? call?.lead?.id
+        if (!leadId) throw new Error('Lead não encontrado para esta call.')
+        const created = (await api.post('/calls', { lead_id: leadId, call_at: call?.lead?.call_at || new Date().toISOString(), status: 'held' })).data
+        callId = created?.id
+      }
+      return (await api.post(`/calls/${callId}/scorecard`, { criteria: checked, talk_ratio: ratio })).data
+    },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['calls'] })
       qc.invalidateQueries({ queryKey: ['call-stats'] })
       qc.invalidateQueries({ queryKey: ['lead'] })
+      qc.invalidateQueries({ queryKey: ['pipeline'] })
       showToast('Scorecard salvo.')
       onSaved?.()
       onClose()
@@ -40,7 +50,7 @@ export default function ScorecardModal({ call, onClose, onSaved }: { call: any; 
   return (
     <Modal
       title="Avaliar call"
-      sub={`${call?.lead?.name ?? 'Sem lead'}${call?.closer?.name ? ` · ${call.closer.name}` : ''}`}
+      sub={`${call?.lead?.name ?? 'Lead'}${call?.closer?.name ? ` · ${call.closer.name}` : ''}`}
       wide
       onClose={onClose}
       footer={<><button className="btn" onClick={onClose}>Cancelar</button><button className="btn primary" disabled={save.isPending} onClick={() => { setErr(''); save.mutate() }}>{save.isPending ? 'Salvando...' : 'Salvar scorecard'}</button></>}
