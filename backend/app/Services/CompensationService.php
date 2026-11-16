@@ -20,29 +20,23 @@ class CompensationService
 
         $paymentsQuery = SalePayment::query()
             ->whereHas('sale', function ($q) use ($userId, $companyId, $departmentId) {
-                $q->where('user_id', $userId);
+                $q->where('user_id', $userId)
+                  ->whereDoesntHave('refund');
                 if ($companyId) $q->where('company_id', $companyId);
                 if ($departmentId) $q->where('department_id', $departmentId);
             })
             ->whereIn('method', ['pix','card'])
             ->where('status', 'paid')
             ->whereBetween('received_at', [$start->toDateString(), $end->toDateString()]);
-        $cashIn = (int) $paymentsQuery->get()->sum(fn ($p) => $p->netCents());
-
-        $refundsQuery = Refund::query()
-            ->where('closer_user_id', $userId)
-            ->whereBetween('refunded_at', [$start->toDateString(), $end->toDateString()]);
-        if ($companyId) $refundsQuery->where('company_id', $companyId);
-        if ($departmentId) $refundsQuery->where('department_id', $departmentId);
-        $refunds = $refundsQuery->get();
-        $cash = $cashIn - (int) $refunds->sum('cash_refunded_cents');
+        $cash = (int) $paymentsQuery->get()->sum(fn ($p) => $p->netCents());
 
         $commissionQuery = Commission::query()
             ->where('user_id', $userId)
-            ->where('period_month', $start->toDateString());
+            ->where('period_month', $start->toDateString())
+            ->whereDoesntHave('sale.refund');
         if ($companyId) $commissionQuery->where('company_id', $companyId);
         if ($departmentId) $commissionQuery->where('department_id', $departmentId);
-        $commission = (int) $commissionQuery->sum('amount_cents') - (int) $refunds->sum('commission_reversed_cents');
+        $commission = (int) $commissionQuery->sum('amount_cents');
 
         $rule = self::ruleFor($companyId, $departmentId, $start);
         $snapshot = self::snapshotFor($userId, $companyId, $departmentId, $start, $rule);
