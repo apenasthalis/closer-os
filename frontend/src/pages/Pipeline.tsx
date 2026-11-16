@@ -141,7 +141,7 @@ export default function Pipeline() {
       )}
 
       {newLead && <LeadModal onClose={() => setNewLead(false)} onSaved={(l: any) => navigate(`/lead/${l.id}`)} />}
-      {saleLead && <SaleModal leadId={saleLead.id} leadName={saleLead.name} onClose={() => setSaleLead(null)} onSaved={invalidate} />}
+      {saleLead && <SaleModal leadId={saleLead.id} leadName={saleLead.name} sale={saleLead.sale} onClose={() => setSaleLead(null)} onSaved={invalidate} />}
       {reason && <ReasonModal stage={reason.stage} leadName={reason.lead.name} onClose={() => setReason(null)} onConfirm={(r, n) => { transition.mutate({ lead: reason.lead, stage: reason.stage, reason: r, note: n }); setReason(null) }} />}
       {scoreCall && <ScorecardModal call={scoreCall} onClose={() => setScoreCall(null)} onSaved={invalidate} />}
     </>
