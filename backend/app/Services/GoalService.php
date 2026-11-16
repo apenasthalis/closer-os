@@ -86,39 +86,32 @@ class GoalService
 
         $revenue = $sales->filter(fn (Sale $s) => !$s->refund)->sum(fn (Sale $s) => $s->payments->sum('amount_cents'));
 
-        $cashIn = SalePayment::query()
+        $payments = SalePayment::query()
+            ->with('sale')
             ->whereHas('sale', function ($q) use ($companyId, $departmentId, $closerId) {
+                $q->whereDoesntHave('refund');
                 if ($companyId) $q->where('company_id', $companyId);
                 if ($departmentId) $q->where('department_id', $departmentId);
                 if ($closerId) $q->where('user_id', $closerId);
             })
             ->whereIn('method', ['pix','card'])->where('status', 'paid')
             ->whereBetween('received_at', [$start->toDateString(), $end->toDateString()])
-            ->get()
-            ->sum(fn ($p) => $p->netCents());
-
-        $refunds = Refund::query()
-            ->when(!$user->isAdmin(), fn ($q) => $q->where('closer_user_id', $user->id))
-            ->when($companyId, fn ($q) => $q->where('company_id', $companyId))
-            ->when($departmentId, fn ($q) => $q->where('department_id', $departmentId))
-            ->when($closerId, fn ($q) => $q->where('closer_user_id', $closerId))
-            ->whereBetween('refunded_at', [$start->toDateString(), $end->toDateString()])
             ->get();
-
-        $commissions = Commission::query()
-            ->when($closerId, fn ($q) => $q->where('user_id', $closerId))
-            ->when($companyId, fn ($q) => $q->where('company_id', $companyId))
-            ->when($departmentId, fn ($q) => $q->where('department_id', $departmentId))
-            ->where('period_month', $start->toDateString())
-            ->sum('amount_cents');
+        $cashIn = 0;
+        $commissions = 0;
+        foreach ($payments as $p) {
+            $net = $p->netCents();
+            $cashIn += $net;
+            $commissions += (int) round($net * (float) ($p->sale->commission_percent ?? 0) / 100);
+        }
 
         return [
             'calls_scheduled' => $leads->count(),
             'calls_held' => $calls->where('status', 'held')->count(),
             'sales' => $sales->filter(fn (Sale $s) => !$s->refund)->count(),
             'revenue_cents' => (int) $revenue,
-            'cash_cents' => (int) $cashIn - (int) $refunds->sum('cash_refunded_cents'),
-            'commission_cents' => (int) $commissions - (int) $refunds->sum('commission_reversed_cents'),
+            'cash_cents' => (int) $cashIn,
+            'commission_cents' => (int) $commissions,
         ];
     }
 }
