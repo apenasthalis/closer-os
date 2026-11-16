@@ -141,7 +141,7 @@ export default function Lead360() {
                     <strong className="num" style={{ fontSize: 22 }}>{engPct}%</strong>
                     <span className="sub">{engPts} de 20 pts</span>
                   </div>
-                  <input className="in" type="range" min={0} max={100} value={engPct} onChange={e => setEngDraft(Number(e.target.value))} onMouseUp={() => bantMut.mutate({ engagement: engPct })} onTouchEnd={() => bantMut.mutate({ engagement: engPct })} style={{ marginTop: 8, padding: 0, border: 0, background: 'transparent' }} aria-label="Engajamento" />
+                  <input className="in" type="range" min={0} max={100} value={engPct} onChange={e => setEngDraft(Number(e.target.value))} onMouseUp={e => bantMut.mutate({ key: 'engagement', value: Number((e.target as HTMLInputElement).value) })} onTouchEnd={e => bantMut.mutate({ key: 'engagement', value: Number((e.target as HTMLInputElement).value) })} style={{ marginTop: 8, padding: 0, border: 0, background: 'transparent' }} aria-label="Engajamento" />
                   <div className="bar" style={{ marginTop: 6 }}><i style={{ width: `${engPct}%` }} /></div>
                   <p className="sub" style={{ marginTop: 4 }}>Ajuste de 0 a 100% (conta nos 20 pts finais do score).</p>
                 </div>
