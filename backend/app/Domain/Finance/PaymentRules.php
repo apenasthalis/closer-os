@@ -32,7 +32,7 @@ class PaymentRules
                 'installments' => 1,
                 'gateway_fee_cents' => 0,
                 'status' => 'paid',
-                'received_at' => null,
+                'received_at' => $p['received_at'] ?? now()->toDateString(),
             ];
         }
 
@@ -41,10 +41,7 @@ class PaymentRules
             throw new InvalidArgumentException('Status de pagamento inválido.');
         }
 
-        $receivedAt = null;
-        if ($status === 'paid') {
-            $receivedAt = $p['received_at'] ?? now()->toDateString();
-        }
+        $receivedAt = $p['received_at'] ?? now()->toDateString();
 
         $fee = $method === 'card' ? max(0, (int) ($p['gateway_fee_cents'] ?? 0)) : 0;
         $installments = $method === 'card' ? max(1, min(12, (int) ($p['installments'] ?? 1))) : 1;

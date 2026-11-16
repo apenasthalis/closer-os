@@ -60,8 +60,8 @@ export default function SaleModal({ leadId, leadName, sale, onClose, onSaved }: 
   function changeMethod(i: number, method: string) {
     const payments = [...form.payments]
     payments[i] = { ...payments[i], method }
-    if (method === 'boleto') payments[i] = { ...payments[i], status: 'paid', fee: '', receivedAt: '', installments: '1' }
-    if (method === 'card' && !payments[i].receivedAt) payments[i].receivedAt = todayInput()
+    if (method === 'boleto') payments[i] = { ...payments[i], status: 'paid', fee: '', receivedAt: payments[i].receivedAt || todayInput(), installments: '1' }
+    if (!payments[i].receivedAt) payments[i].receivedAt = todayInput()
     setForm({ ...form, payments })
   }
 
@@ -70,14 +70,15 @@ export default function SaleModal({ leadId, leadName, sale, onClose, onSaved }: 
       const payments = (form.payments || []).map((p: any) => {
         const amount = toCents(p.amount)
         if (amount <= 0) throw new Error('Informe o valor de todos os pagamentos.')
-        if (p.method === 'boleto') return { method: 'boleto', amount_cents: amount, installments: 1, gateway_fee_cents: 0, status: 'paid', received_at: null }
+        const received_at = p.receivedAt || todayInput()
+        if (p.method === 'boleto') return { method: 'boleto', amount_cents: amount, installments: 1, gateway_fee_cents: 0, status: 'paid', received_at }
         return {
           method: p.method,
           amount_cents: amount,
           installments: p.method === 'card' ? Number(p.installments || 1) : 1,
           gateway_fee_cents: p.method === 'card' ? toCents(p.fee) : 0,
           status: p.status,
-          received_at: p.status === 'paid' ? (p.receivedAt || todayInput()) : null,
+          received_at,
         }
       })
       const payload: any = { description: form.description || null, closed_at: form.closedAt || todayInput(), payments }
@@ -159,9 +160,9 @@ export default function SaleModal({ leadId, leadName, sale, onClose, onSaved }: 
           </div>}
           {isCash(p.method) && <div className="two">
             <div className="field"><label>Status</label><div className="seg"><button type="button" aria-pressed={p.status === 'paid'} onClick={() => update(i, 'status', 'paid')}>Pago</button><button type="button" aria-pressed={p.status === 'pending'} onClick={() => update(i, 'status', 'pending')}>Pendente</button></div></div>
-            {p.status === 'paid' && <div className="field"><label>Data efetiva de recebimento</label><input className="in" type="date" value={p.receivedAt} onChange={e => update(i, 'receivedAt', e.target.value)} /></div>}
+            <div className="field"><label>{p.status === 'paid' ? 'Data efetiva de recebimento' : 'Data prevista do pagamento'}</label><input className="in" type="date" value={p.receivedAt} onChange={e => update(i, 'receivedAt', e.target.value)} /></div>
           </div>}
-          {p.method === 'boleto' && <p className="sub">Boleto é sempre considerado pago, entra só no faturamento e nunca no caixa.</p>}
+          {p.method === 'boleto' && <div className="field"><label>Data do pagamento (boleto)</label><input className="in" type="date" value={p.receivedAt} onChange={e => update(i, 'receivedAt', e.target.value)} /><p className="sub">Boleto entra no faturamento (nunca no caixa). Use a data de competência/pagamento.</p></div>}
         </div>
       ))}
       <button className="btn" style={{ borderStyle: 'dashed' }} onClick={() => setForm({ ...form, payments: [...form.payments, emptyPayment()] })}>Adicionar pagamento</button>
