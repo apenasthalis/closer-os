@@ -146,6 +146,7 @@ class LeadController extends Controller
             'stage' => ['required', Rule::enum(Stage::class)],
             'loss_reason' => ['nullable','string','max:255'],
             'loss_note' => ['nullable','string'],
+            'call_at' => ['nullable','date'],
             'sale' => ['nullable','array'],
             'sale.operation_id' => ['required_with:sale','exists:operations,id'],
             'sale.description' => ['nullable','string'],
@@ -170,10 +171,19 @@ class LeadController extends Controller
         if (StageTransition::requiresReason($to) && empty($data['loss_reason'])) {
             return response()->json(['message' => 'Motivo obrigatório.'], 422);
         }
+        if ($to === Stage::Remarcado->value && empty($data['call_at'])) {
+            return response()->json(['message' => 'Data da call obrigatória ao remarcar.'], 422);
+        }
+        if (!empty($data['call_at'])) {
+            $data['call_at'] = Carbon::parse($data['call_at'], 'America/Sao_Paulo')->utc();
+        }
 
         DB::transaction(function () use ($request, $lead, $to, $data) {
             $from = $lead->stage;
             $payload = ['stage' => $to, 'stage_changed_at' => now()];
+            if (!empty($data['call_at'])) {
+                $payload['call_at'] = $data['call_at'];
+            }
             if (StageTransition::requiresReason($to)) {
                 $payload['loss_reason'] = $data['loss_reason'];
                 $payload['loss_note'] = $data['loss_note'] ?? null;
@@ -199,10 +209,20 @@ class LeadController extends Controller
                 'payload' => [
                     'reason' => $data['loss_reason'] ?? null,
                     'note' => $data['loss_note'] ?? null,
+                    'call_at' => !empty($data['call_at']) ? Carbon::parse($data['call_at'])->toISOString() : null,
                 ],
                 'created_at' => now(),
             ]);
-            AuditService::log($request->user()->id, 'lead_stage_changed', 'lead', $lead->id, ['from'=>$from,'to'=>$to]);
+            if (!empty($data['call_at'])) {
+                LeadEvent::create([
+                    'lead_id' => $lead->id,
+                    'actor_user_id' => $request->user()->id,
+                    'type' => 'call_scheduled',
+                    'payload' => ['call_at' => Carbon::parse($data['call_at'])->toISOString()],
+                    'created_at' => now(),
+                ]);
+            }
+            AuditService::log($request->user()->id, 'lead_stage_changed', 'lead', $lead->id, ['from'=>$from,'to'=>$to, 'call_at' => $data['call_at'] ?? null]);
         });
 
         return $lead->fresh()->load(['events.actor','sale.payments','sale.refund','calls.scorecard']);

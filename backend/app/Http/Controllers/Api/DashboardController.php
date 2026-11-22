@@ -5,6 +5,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Call;
 use App\Models\FollowUpTask;
 use App\Models\Lead;
+use App\Models\SalePayment;
 use App\Services\FinanceService;
 use App\Services\GoalService;
 use App\Services\PipelineService;
@@ -32,9 +33,9 @@ class DashboardController extends Controller
 
         $needsDate = Lead::query()->visibleTo($user)
             ->with(['closer','company','department'])
-            ->whereNotIn('stage', ['fechado','loss','desqualificado','reembolso'])
+            ->whereNotIn('stage', ['fechado','loss','desqualificado','reembolso','no_show'])
             ->where(function ($q) use ($start) {
-                $q->whereNull('call_at')->orWhere('call_at', '<', $start)->orWhere('stage', 'no_show');
+                $q->whereNull('call_at')->orWhere('call_at', '<', $start);
             })
             ->orderBy('call_at')->limit(30)->get();
 
@@ -57,12 +58,35 @@ class DashboardController extends Controller
 
         $pipeline = PipelineService::metrics($user, []);
 
+        $pendingPayments = SalePayment::query()
+            ->with(['sale.lead'])
+            ->where('status', 'pending')
+            ->whereIn('method', ['pix', 'card'])
+            ->whereHas('sale', fn ($q) => $q->visibleTo($user)->whereDoesntHave('refund'))
+            ->orderBy('received_at')
+            ->limit(30)
+            ->get();
+
+        $pendingMoney = [
+            'total_cents' => (int) $pendingPayments->sum('amount_cents'),
+            'items' => $pendingPayments->map(fn ($p) => [
+                'id' => $p->id,
+                'sale_id' => $p->sale_id,
+                'lead_id' => $p->sale?->lead_id,
+                'lead_name' => $p->sale?->lead?->name,
+                'method' => $p->method,
+                'amount_cents' => $p->amount_cents,
+                'received_at' => $p->received_at?->toDateString(),
+            ])->values(),
+        ];
+
         return response()->json([
             'date' => $today->toDateString(),
             'greeting_name' => $user->name,
             'leads_today' => $leadsToday,
             'calls_today' => $callsToday,
             'needs_new_date' => $needsDate,
+            'pending_money' => $pendingMoney,
             'follow_ups_overdue' => $overdue,
             'follow_ups_upcoming' => $upcoming,
             'finance' => $finance,

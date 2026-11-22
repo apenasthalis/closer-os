@@ -32,12 +32,13 @@ export default function Hoje() {
 
   const f = data.finance || {}
   const ag = data.leads_today || []
-  const sem = data.needs_new_date || []
+  const pending = data.pending_money || { total_cents: 0, items: [] }
+  const pendingItems = pending.items || []
 
   return (
     <>
       <div className="head">
-        <div><h1>Bom dia, {(data.greeting_name || 'Closer').split(' ')[0]}</h1><p>Sua agenda de calls, o que precisa de nova data e o resumo financeiro do mês.</p></div>
+        <div><h1>Bom dia, {(data.greeting_name || 'Closer').split(' ')[0]}</h1><p>Sua agenda de calls de hoje e o dinheiro pendente para acompanhar.</p></div>
         <div className="acts"><button className="btn primary" onClick={() => setNewLead(true)}>Novo lead</button></div>
       </div>
 
@@ -45,12 +46,12 @@ export default function Hoje() {
         <section className="card kpi"><div className="eyebrow">Faturamento do mês</div><strong className="num">{brl(f.faturamento_bruto)}</strong><span>contratado</span></section>
         <section className="card kpi"><div className="eyebrow">Caixa do mês</div><strong className="num" style={{ color: 'var(--accent-text)' }}>{brl(f.caixa_liquido)}</strong><span>líquido recebido</span></section>
         <section className="card kpi"><div className="eyebrow">Calls hoje</div><strong className="num">{ag.length}</strong><span>agendadas</span></section>
-        <section className="card kpi"><div className="eyebrow">Precisam de nova data</div><strong className="num" style={{ color: sem.length ? 'var(--warn)' : 'inherit' }}>{sem.length}</strong><span>sem call futura ou no-show</span></section>
+        <section className="card kpi"><div className="eyebrow">Dinheiro pendente</div><strong className="num" style={{ color: pending.total_cents ? 'var(--warn)' : 'inherit' }}>{brl(pending.total_cents)}</strong><span>a receber</span></section>
       </div>
 
       <div className="grid g2">
         <section className="card">
-          <div className="top"><div><h2>Agenda de hoje</h2><p className="sub">Marque o resultado de cada call sem sair da tela.</p></div></div>
+          <div className="top"><div><h2>Calls de hoje</h2><p className="sub">Marque o resultado de cada call sem sair da tela.</p></div></div>
           <div className="list">
             {ag.length ? ag.map((l: any) => (
               <div className="row" key={l.id}>
@@ -68,14 +69,20 @@ export default function Hoje() {
           </div>
         </section>
 
-        <section className="alert">
-          <h3>Precisam de nova data</h3>
-          {sem.length ? sem.map((l: any) => (
-            <div className="row" key={l.id} style={{ padding: '6px 0', borderColor: 'var(--warn)' }}>
-              <div className="grow"><strong>{l.name}</strong><span>{STAGE_LABEL[l.stage] || l.stage} · {l.call_at ? `call em ${dateBR(l.call_at)}` : 'sem call marcada'}</span></div>
-              <button className="btn sm" onClick={() => navigate(`/lead/${l.id}`)}>Definir</button>
-            </div>
-          )) : <p className="muted">Todos os leads em aberto têm uma call futura.</p>}
+        <section className="card">
+          <div className="top"><div><h2>Dinheiro pendente</h2><p className="sub">Pagamentos de Pix e cartão ainda não recebidos.</p></div></div>
+          <div className="list">
+            {pendingItems.length ? pendingItems.map((p: any) => (
+              <div className="row" key={p.id}>
+                <div className="grow">
+                  <strong>{p.lead_name || 'Venda'}</strong>
+                  <span>{p.method === 'pix' ? 'Pix' : 'Cartão'}{p.received_at ? ` · previsto ${dateBR(p.received_at)}` : ''}</span>
+                </div>
+                <span className="pill num" style={{ color: 'var(--warn)' }}>{brl(p.amount_cents)}</span>
+                {p.lead_id && <button className="btn sm" onClick={() => navigate(`/lead/${p.lead_id}`)}>Abrir</button>}
+              </div>
+            )) : <p className="muted">Nenhum pagamento pendente no momento.</p>}
+          </div>
         </section>
       </div>
 

@@ -8,6 +8,7 @@ import { showToast } from '../lib/toast'
 import LeadModal from '../components/LeadModal'
 import SaleModal from '../components/SaleModal'
 import ReasonModal from '../components/ReasonModal'
+import RemarcarModal from '../components/RemarcarModal'
 import ScorecardModal from '../components/ScorecardModal'
 
 const SCORE_STAGES = new Set(['remarcado', 'negociacao', 'fechado', 'loss', 'desqualificado'])
@@ -64,6 +65,7 @@ export default function Pipeline() {
   const [newLead, setNewLead] = useState(false)
   const [saleLead, setSaleLead] = useState<any>(null)
   const [reason, setReason] = useState<{ lead: any; stage: 'loss' | 'desqualificado' } | null>(null)
+  const [remarcar, setRemarcar] = useState<any>(null)
   const [dragging, setDragging] = useState<any>(null)
   const [scoreCall, setScoreCall] = useState<any>(null)
 
@@ -84,7 +86,7 @@ export default function Pipeline() {
     }
   }
   const transition = useMutation({
-    mutationFn: async ({ lead, stage, reason, note }: any) => (await api.post(`/leads/${lead.id}/transition`, { stage, loss_reason: reason, loss_note: note })).data,
+    mutationFn: async ({ lead, stage, reason, note, call_at }: any) => (await api.post(`/leads/${lead.id}/transition`, { stage, loss_reason: reason, loss_note: note, call_at })).data,
     onSuccess: () => { showToast('Lead movido.'); invalidate() },
     onError: (e: any) => showToast(apiError(e), 'err'),
   })
@@ -97,6 +99,7 @@ export default function Pipeline() {
     if (stage === 'fechado') return setSaleLead(lead)
     if (stage === 'reembolso') return showToast('Reembolso só é criado pela exclusão de uma venda.', 'err')
     if (stage === 'loss' || stage === 'desqualificado') return setReason({ lead, stage })
+    if (stage === 'remarcado') return setRemarcar(lead)
     transition.mutate({ lead, stage })
   }
 
@@ -143,6 +146,7 @@ export default function Pipeline() {
       {newLead && <LeadModal onClose={() => setNewLead(false)} onSaved={(l: any) => navigate(`/lead/${l.id}`)} />}
       {saleLead && <SaleModal leadId={saleLead.id} leadName={saleLead.name} sale={saleLead.sale} onClose={() => setSaleLead(null)} onSaved={invalidate} />}
       {reason && <ReasonModal stage={reason.stage} leadName={reason.lead.name} onClose={() => setReason(null)} onConfirm={(r, n) => { transition.mutate({ lead: reason.lead, stage: reason.stage, reason: r, note: n }); setReason(null) }} />}
+      {remarcar && <RemarcarModal leadName={remarcar.name} onClose={() => setRemarcar(null)} onConfirm={(call_at) => { transition.mutate({ lead: remarcar, stage: 'remarcado', call_at }); setRemarcar(null) }} />}
       {scoreCall && <ScorecardModal call={scoreCall} onClose={() => setScoreCall(null)} onSaved={invalidate} />}
     </>
   )
