@@ -42,18 +42,14 @@ class FinanceService
             });
         };
 
-        $fatPaymentsInRange = function (Sale $sale) use ($inRange, $method) {
-            if ($sale->refund) return collect();
-            return $sale->payments->filter(function ($p) use ($inRange, $method) {
-                if ($method && $p->method !== $method) return false;
-                return $inRange($p->received_at ?? $p->paid_at ?? null);
-            });
-        };
-
-        $periodSales = $all->filter(fn (Sale $s) => !$s->refund && $fatPaymentsInRange($s)->isNotEmpty());
+        $periodSales = $all->filter(fn (Sale $s) => !$s->refund && $inRange($s->closed_at));
         $fatBruto = 0;
         foreach ($periodSales as $sale) {
-            $fatBruto += $fatPaymentsInRange($sale)->sum('amount_cents');
+            if ($method) {
+                $fatBruto += $sale->payments->where('method', $method)->sum('amount_cents');
+            } else {
+                $fatBruto += $sale->payments->sum('amount_cents');
+            }
         }
 
         $refunds = collect();
@@ -88,16 +84,21 @@ class FinanceService
             $start = $cursor->copy()->subMonths($i)->startOfMonth();
             $end = $start->copy()->endOfMonth();
             $key = $start->format('Y-m');
+            $monthSales = $all->filter(fn (Sale $s) => !$s->refund && $s->closed_at && $s->closed_at->format('Y-m') === $key);
             $monthGross = 0;
+            foreach ($monthSales as $sale) {
+                $monthGross += $method
+                    ? $sale->payments->where('method', $method)->sum('amount_cents')
+                    : $sale->payments->sum('amount_cents');
+            }
             $monthCash = 0;
             foreach ($all as $sale) {
                 if ($sale->refund) continue;
                 foreach ($sale->payments as $p) {
-                    $d = $p->received_at ?? $p->paid_at ?? null;
-                    $dk = $d ? (\Illuminate\Support\Carbon::parse($d)->format('Y-m')) : null;
-                    if ($dk !== $key) continue;
-                    if (!$method || $p->method === $method) $monthGross += $p->amount_cents;
-                    if ($p->isCash() && $p->status === 'paid' && (!$method || $p->method === $method)) $monthCash += $p->netCents();
+                    if (!$p->received_at || $p->received_at->format('Y-m') !== $key) continue;
+                    if (!$p->isCash() || $p->status !== 'paid') continue;
+                    if ($method && $p->method !== $method) continue;
+                    $monthCash += $p->netCents();
                 }
             }
             $months[] = [
@@ -110,20 +111,24 @@ class FinanceService
             ];
         }
 
-        $group = function (string $relation, string $field = 'name') use ($periodSales, $fatPaymentsInRange) {
+        $group = function (string $relation, string $field = 'name') use ($periodSales, $method) {
             $out = [];
             foreach ($periodSales as $sale) {
                 $name = $sale->{$relation}?->{$field} ?? 'Sem vínculo';
-                $value = $fatPaymentsInRange($sale)->sum('amount_cents');
+                $value = $method
+                    ? $sale->payments->where('method', $method)->sum('amount_cents')
+                    : $sale->payments->sum('amount_cents');
                 $out[$name] = ($out[$name] ?? 0) + $value;
             }
             arsort($out);
             return $out;
         };
 
-        $sales = $periodSales->map(function (Sale $sale) use ($fatPaymentsInRange, $paymentsInRange) {
+        $sales = $periodSales->map(function (Sale $sale) use ($paymentsInRange, $method) {
             $totals = SaleCalculator::totals($sale->payments->toArray());
-            $fat = $fatPaymentsInRange($sale)->sum('amount_cents');
+            $fat = $method
+                ? $sale->payments->where('method', $method)->sum('amount_cents')
+                : $sale->payments->sum('amount_cents');
             $caixa = $paymentsInRange($sale)->sum(fn ($p) => $p->netCents());
             return [
                 'id' => $sale->id,
