@@ -3,6 +3,7 @@ namespace App\Services;
 
 use App\Domain\Finance\SaleCalculator;
 use App\Models\Commission;
+use App\Models\Lead;
 use App\Models\Refund;
 use App\Models\Sale;
 use App\Models\User;
@@ -155,6 +156,24 @@ class FinanceService
             ];
         })->values();
 
+        $myLeads = Lead::query()->where('user_id', $user->id)
+            ->when($f['company_id'] ?? null, fn ($q, $v) => $q->where('company_id', $v))
+            ->when($f['department_id'] ?? null, fn ($q, $v) => $q->where('department_id', $v))
+            ->when($from, fn ($q) => $q->whereDate('created_at', '>=', $from))
+            ->when($to, fn ($q) => $q->whereDate('created_at', '<=', $to))
+            ->count();
+
+        $mySales = Sale::query()->with('refund')->where('user_id', $user->id)
+            ->when($f['company_id'] ?? null, fn ($q, $v) => $q->where('company_id', $v))
+            ->when($f['department_id'] ?? null, fn ($q, $v) => $q->where('department_id', $v))
+            ->when($f['operation_id'] ?? null, fn ($q, $v) => $q->where('operation_id', $v))
+            ->when($from, fn ($q) => $q->whereDate('closed_at', '>=', $from))
+            ->when($to, fn ($q) => $q->whereDate('closed_at', '<=', $to))
+            ->get();
+        $mySalesCount = $mySales->filter(fn (Sale $s) => !$s->refund)->count();
+        $myRefundedCount = $mySales->filter(fn (Sale $s) => (bool) $s->refund)->count();
+        $myTotalSales = $mySalesCount + $myRefundedCount;
+
         return [
             'faturamento_bruto' => $fatBruto,
             'reembolsos' => $refundTotal,
@@ -173,6 +192,13 @@ class FinanceService
             'by_company' => $group('company'),
             'by_department' => $group('department'),
             'by_closer' => $group('closer'),
+            'my_conversion' => [
+                'name' => $user->name,
+                'leads' => $myLeads,
+                'sales' => $mySalesCount,
+                'conversion' => $myLeads > 0 ? round($mySalesCount / $myLeads * 100, 1) : 0,
+                'refund_rate' => $myTotalSales > 0 ? round($myRefundedCount / $myTotalSales * 100, 1) : 0,
+            ],
             'sales' => $sales,
             'refunds' => $refunds->map(fn (Refund $r) => [
                 'id' => $r->id,

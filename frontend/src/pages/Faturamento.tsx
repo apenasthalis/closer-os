@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '../lib/api'
+import { useAuth } from '../stores/auth'
 import { apiError, brl, dateBR, kfmt, todayInput } from '../lib/format'
 import SaleModal from '../components/SaleModal'
 
@@ -9,6 +10,7 @@ function firstOfMonth() { const d=new Date(); return `${d.getFullYear()}-${Strin
 
 export default function Faturamento() {
   const qc = useQueryClient()
+  const { user } = useAuth()
   const [q, setQ] = useState('')
   const [from, setFrom] = useState(firstOfMonth())
   const [to, setTo] = useState(todayInput())
@@ -85,6 +87,36 @@ export default function Faturamento() {
             )) : <p className="muted">Nenhuma venda no período.</p>}
           </section>
         </div>
+
+        <section className="card">
+          <div className="top"><div><h2>Conversão Closer</h2><p className="sub">Sua performance no período selecionado.</p></div></div>
+          {(() => {
+            const c = fin.my_conversion
+            if (!c) return <p className="muted">Sem dados de conversão.</p>
+            const initial = (c.name || user?.name || '?').trim().charAt(0).toUpperCase()
+            return (
+              <div className="tbl">
+                <table>
+                  <thead><tr><th>Membro</th><th className="r">Leads</th><th className="r">Vendas</th><th className="r">Conv.</th><th className="r">Reemb.</th></tr></thead>
+                  <tbody>
+                    <tr>
+                      <td>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <span style={{ width: 22, height: 22, borderRadius: '50%', background: 'var(--accent)', color: '#000', display: 'inline-grid', placeItems: 'center', fontSize: 10, fontWeight: 700, flex: 'none' }}>{initial}</span>
+                          <strong>{c.name || user?.name}</strong>
+                        </div>
+                      </td>
+                      <td className="r num">{c.leads}</td>
+                      <td className="r num">{c.sales}</td>
+                      <td className="r num" style={{ color: 'var(--accent-text)', fontWeight: 700 }}>{Number(c.conversion || 0).toFixed(1)}%</td>
+                      <td className="r num" style={{ color: 'var(--crit, #ef4444)', fontWeight: 700 }}>{Number(c.refund_rate || 0).toFixed(1)}%</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            )
+          })()}
+        </section>
 
         <section className="card">
           <div className="top">
