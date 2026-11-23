@@ -57,8 +57,11 @@ Base: `/api/v1`. Auth: Laravel Sanctum. Todos endpoints exigem sessão autentica
 ## Cadência FUP
 - GET/POST /follow-up-templates, PATCH/DELETE /follow-up-templates/{id}
 - GET /follow-ups/summary
-- GET/POST /follow-ups, PATCH/DELETE /follow-ups/{id}
-- POST /follow-ups/{id}/complete `{result}`
+- GET /follow-ups (`status`, `lead_id`, `lead_stage`, `from`, `to`, `sort`, `dir`)
+- POST /follow-ups `{lead_id, scheduled_at, message, status?, result?, had_response?, completed_at?}`
+- PATCH /follow-ups/{id} `{scheduled_at?, message?, status?, result?, had_response?, completed_at?}`
+- POST /follow-ups/{id}/complete `{result?, had_response?, completed_at?}`
+- DELETE /follow-ups/{id}
 
 ## Auditoria
 - GET /audit-logs?action&entity_type&actor_user_id&from&to (admin)
