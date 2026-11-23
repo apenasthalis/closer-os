@@ -75,30 +75,6 @@ export default function Hoje() {
         <section className="card kpi"><div className="eyebrow">Dinheiro pendente</div><strong className="num" style={{ color: pending.total_cents ? 'var(--warn)' : 'inherit' }}>{brl(pending.total_cents)}</strong><span>a receber</span></section>
       </div>
 
-      {lossLeads.length > 0 && (
-        <div className="alert" style={{ marginBottom: 16 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'flex-start', flexWrap: 'wrap' }}>
-            <div>
-              <h3>Leads em Loss para reativar</h3>
-              <p className="sub">Assim que um lead entra em Loss, a cadência de 14 dias deve ser acompanhada. Confira os próximos passos e registre os follow-ups.</p>
-            </div>
-            <button className="btn sm" onClick={() => navigate('/cadencia')}>Abrir cadência</button>
-          </div>
-          <div className="list" style={{ marginTop: 8 }}>
-            {lossLeads.slice(0, 5).map((l: any) => (
-              <div className="row" key={l.id}>
-                <div className="grow">
-                  <strong>{l.name}</strong>
-                  <span>{l.loss_reason || 'Sem motivo informado'}{l.stage_changed_at ? ` · entrou em loss em ${dateBR(String(l.stage_changed_at).slice(0, 10))}` : ''}</span>
-                </div>
-                <button className="btn sm" onClick={() => navigate(`/lead/${l.id}`)}>Abrir lead</button>
-                <button className="btn sm primary" onClick={() => navigate('/cadencia')}>Ver cadência</button>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
       <div className="grid g2">
         <section className="card">
           <div className="top"><div><h2>Calls de hoje</h2><p className="sub">Marque o resultado de cada call sem sair da tela.</p></div></div>
@@ -187,6 +163,30 @@ export default function Hoje() {
           )}
         </div>
       </section>
+
+      {lossLeads.length > 0 && (
+        <div className="alert" style={{ marginTop: 16 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+            <div>
+              <h3>Leads em Loss para reativar</h3>
+              <p className="sub">Assim que um lead entra em Loss, a cadência de 14 dias deve ser acompanhada. Confira os próximos passos e registre os follow-ups.</p>
+            </div>
+            <button className="btn sm" onClick={() => navigate('/cadencia')}>Abrir cadência</button>
+          </div>
+          <div className="list" style={{ marginTop: 8 }}>
+            {lossLeads.slice(0, 5).map((l: any) => (
+              <div className="row" key={l.id}>
+                <div className="grow">
+                  <strong>{l.name}</strong>
+                  <span>{l.loss_reason || 'Sem motivo informado'}{l.stage_changed_at ? ` · entrou em loss em ${dateBR(String(l.stage_changed_at).slice(0, 10))}` : ''}</span>
+                </div>
+                <button className="btn sm" onClick={() => navigate(`/lead/${l.id}`)}>Abrir lead</button>
+                <button className="btn sm primary" onClick={() => navigate('/cadencia')}>Ver cadência</button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {newLead && <LeadModal onClose={() => setNewLead(false)} onSaved={(l: any) => navigate(`/lead/${l.id}`)} />}
       {saleLead && <SaleModal leadId={saleLead.id} leadName={saleLead.name} onClose={() => setSaleLead(null)} onSaved={invalidate} />}
