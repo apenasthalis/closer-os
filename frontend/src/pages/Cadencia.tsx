@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '../lib/api'
 import { apiError, dateTimeBR, toLocalInput } from '../lib/format'
@@ -31,6 +31,105 @@ function responseLabel(value: boolean | null | undefined) {
   if (value === true) return <span className="pill ok">Sim</span>
   if (value === false) return <span className="pill hot">Não</span>
   return <span className="pill">Sem registro</span>
+}
+
+function LeadSearch({
+  leads,
+  value,
+  onChange,
+  id,
+  placeholder,
+  allowAll,
+  allLabel = 'Todos os leads em loss',
+}: {
+  leads: any[]
+  value: string
+  onChange: (id: string) => void
+  id: string
+  placeholder: string
+  allowAll?: boolean
+  allLabel?: string
+}) {
+  const selected = leads.find((l) => String(l.id) === value)
+  const [query, setQuery] = useState('')
+  const [open, setOpen] = useState(false)
+  const wrapRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) setQuery(selected ? selected.name : '')
+  }, [selected?.id, open])
+
+  useEffect(() => {
+    function onDoc(e: MouseEvent) {
+      if (!wrapRef.current?.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener('mousedown', onDoc)
+    return () => document.removeEventListener('mousedown', onDoc)
+  }, [])
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase()
+    if (!q) return leads
+    return leads.filter((l) => `${l.name} ${l.loss_reason || ''}`.toLowerCase().includes(q))
+  }, [leads, query])
+
+  function pick(idValue: string) {
+    onChange(idValue)
+    const lead = leads.find((l) => String(l.id) === idValue)
+    setQuery(lead ? lead.name : '')
+    setOpen(false)
+  }
+
+  return (
+    <div ref={wrapRef} style={{ position: 'relative' }}>
+      <input
+        className="in"
+        id={id}
+        value={open ? query : (selected ? selected.name : query)}
+        placeholder={placeholder}
+        autoComplete="off"
+        onFocus={() => { setOpen(true); setQuery('') }}
+        onKeyDown={(e) => { if (e.key === 'Escape') { setOpen(false); (e.target as HTMLInputElement).blur() } }}
+        onChange={(e) => { setQuery(e.target.value); setOpen(true); if (!e.target.value && allowAll) onChange('') }}
+      />
+      {open && (
+        <div
+          style={{
+            position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0, zIndex: 30,
+            background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 10,
+            maxHeight: 260, overflowY: 'auto', boxShadow: '0 10px 30px rgba(0,0,0,.35)',
+          }}
+        >
+          {allowAll && (
+            <button
+              type="button"
+              className="lbtn"
+              style={{ border: 0, borderRadius: 0, background: !value ? 'var(--accent-soft)' : 'transparent' }}
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => pick('')}
+            >
+              <div><strong>{allLabel}</strong></div>
+            </button>
+          )}
+          {filtered.length ? filtered.map((l: any) => (
+            <button
+              key={l.id}
+              type="button"
+              className="lbtn"
+              style={{ border: 0, borderRadius: 0, background: String(l.id) === value ? 'var(--accent-soft)' : 'transparent' }}
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => pick(String(l.id))}
+            >
+              <div>
+                <strong>{l.name}</strong>
+                <span>{l.loss_reason || 'Sem motivo informado'}</span>
+              </div>
+            </button>
+          )) : <div className="muted" style={{ padding: '10px 12px' }}>Nenhum lead encontrado.</div>}
+        </div>
+      )}
+    </div>
+  )
 }
 
 export default function Cadencia() {
@@ -117,22 +216,17 @@ export default function Cadencia() {
         <div className="grid g2" style={{ marginBottom: 16 }}>
           <div className="field">
             <label htmlFor="loss-lead">Lead em loss</label>
-            <select
-              className="in"
+            <LeadSearch
               id="loss-lead"
+              leads={lossLeads}
               value={selectedLead}
-              onChange={(e) => {
-                setSelectedLead(e.target.value)
-                setForm((f) => ({ ...f, lead_id: e.target.value || f.lead_id }))
+              allowAll
+              placeholder="Digite para buscar um lead em loss"
+              onChange={(id) => {
+                setSelectedLead(id)
+                setForm((f) => ({ ...f, lead_id: id || f.lead_id }))
               }}
-            >
-              <option value="">Todos os leads em loss</option>
-              {lossLeads.map((l: any) => (
-                <option key={l.id} value={l.id}>
-                  {l.name}{l.loss_reason ? ` — ${l.loss_reason}` : ''}
-                </option>
-              ))}
-            </select>
+            />
           </div>
           <div className="field">
             <label>Resumo</label>
@@ -148,12 +242,13 @@ export default function Cadencia() {
           <div className="grid g3">
             <div className="field">
               <label htmlFor="fup-lead">Lead</label>
-              <select className="in" id="fup-lead" value={form.lead_id} onChange={(e) => setForm({ ...form, lead_id: e.target.value })}>
-                <option value="">Selecione um lead em loss</option>
-                {lossLeads.map((l: any) => (
-                  <option key={l.id} value={l.id}>{l.name}</option>
-                ))}
-              </select>
+              <LeadSearch
+                id="fup-lead"
+                leads={lossLeads}
+                value={form.lead_id}
+                placeholder="Digite para buscar um lead em loss"
+                onChange={(id) => setForm({ ...form, lead_id: id })}
+              />
             </div>
             <div className="field">
               <label htmlFor="fup-date">Data do follow-up</label>
