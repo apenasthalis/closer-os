@@ -66,6 +66,7 @@ class FollowUpTaskController extends Controller
     {
         $this->authorizeTask($request, $followUpTask);
         $data = $request->validate([
+            'lead_id' => ['sometimes','exists:leads,id'],
             'scheduled_at' => ['sometimes','date'],
             'message' => ['sometimes','string','max:2000'],
             'status' => ['sometimes','in:pending,done,cancelled'],
@@ -73,6 +74,10 @@ class FollowUpTaskController extends Controller
             'had_response' => ['nullable','boolean'],
             'completed_at' => ['nullable','date'],
         ]);
+        if (!empty($data['lead_id']) && (int) $data['lead_id'] !== (int) $followUpTask->lead_id) {
+            $lead = Lead::findOrFail($data['lead_id']);
+            $this->authorize('view', $lead);
+        }
         if (!empty($data['scheduled_at'])) {
             $data['scheduled_at'] = Carbon::parse($data['scheduled_at'], 'America/Sao_Paulo')->utc();
         }

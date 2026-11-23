@@ -139,6 +139,7 @@ export default function Cadencia() {
   const [selectedLead, setSelectedLead] = useState('')
   const [form, setForm] = useState<FollowUpForm>(emptyForm())
   const [err, setErr] = useState('')
+  const [editingId, setEditingId] = useState<number | null>(null)
 
   const { data: lossData, isLoading: loadingLoss } = useQuery({
     queryKey: ['leads', 'loss-cadencia'],
@@ -183,6 +184,50 @@ export default function Cadencia() {
     },
     onError: (e: any) => setErr(apiError(e)),
   })
+
+  const update = useMutation({
+    mutationFn: async () => {
+      const payload: any = {
+        lead_id: Number(form.lead_id),
+        scheduled_at: form.completed_at,
+        completed_at: form.completed_at,
+        message: form.message.trim(),
+        status: 'done',
+        result: form.result.trim() || null,
+        had_response: form.had_response === 'unknown' ? null : form.had_response === 'yes',
+      }
+      return (await api.patch(`/follow-ups/${editingId}`, payload)).data
+    },
+    onSuccess: () => {
+      showToast('Follow-up atualizado.')
+      setErr('')
+      setEditingId(null)
+      setForm(emptyForm())
+      qc.invalidateQueries({ queryKey: ['follow-ups'] })
+      qc.invalidateQueries({ queryKey: ['follow-summary'] })
+      qc.invalidateQueries({ queryKey: ['lead'] })
+      qc.invalidateQueries({ queryKey: ['dashboard'] })
+    },
+    onError: (e: any) => setErr(apiError(e)),
+  })
+
+  function startEdit(f: any) {
+    setEditingId(f.id)
+    setErr('')
+    setForm({
+      lead_id: String(f.lead_id || ''),
+      completed_at: toLocalInput(f.completed_at || f.scheduled_at || new Date()),
+      message: f.message || '',
+      had_response: f.had_response === true ? 'yes' : f.had_response === false ? 'no' : 'unknown',
+      result: f.result || '',
+    })
+  }
+
+  function cancelEdit() {
+    setEditingId(null)
+    setErr('')
+    setForm(emptyForm())
+  }
 
   function copy(text: string) {
     const filled = text.replace(/\{nome\}/g, name || '[nome]')
@@ -238,7 +283,7 @@ export default function Cadencia() {
         </div>
 
         <div className="card" style={{ background: 'var(--bg)', marginBottom: 16 }}>
-          <h3 style={{ marginBottom: 12 }}>Registrar follow-up</h3>
+          <h3 style={{ marginBottom: 12 }}>{editingId ? 'Editar follow-up' : 'Registrar follow-up'}</h3>
           <div className="grid g3">
             <div className="field">
               <label htmlFor="fup-lead">Lead</label>
@@ -275,11 +320,12 @@ export default function Cadencia() {
           <div style={{ marginTop: 12, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             <button
               className="btn primary"
-              disabled={!form.lead_id || !form.completed_at || !form.message.trim() || create.isPending}
-              onClick={() => { setErr(''); create.mutate() }}
+              disabled={!form.lead_id || !form.completed_at || !form.message.trim() || create.isPending || update.isPending}
+              onClick={() => { setErr(''); editingId ? update.mutate() : create.mutate() }}
             >
-              {create.isPending ? 'Salvando...' : 'Registrar follow-up'}
+              {(create.isPending || update.isPending) ? 'Salvando...' : editingId ? 'Salvar alterações' : 'Registrar follow-up'}
             </button>
+            {editingId && <button className="btn" onClick={cancelEdit}>Cancelar edição</button>}
             {selectedLossLead && (
               <span className="muted" style={{ alignSelf: 'center' }}>
                 Lead selecionado: <strong>{selectedLossLead.name}</strong>{selectedLossLead.loss_reason ? ` · ${selectedLossLead.loss_reason}` : ''}
@@ -294,7 +340,7 @@ export default function Cadencia() {
             <p className="sub">Data do follow-up, mensagem enviada e se houve resposta.</p>
           </div>
         </div>
-        <table className="tbl">
+        <table className="tbl" style={{ width: '100%', minWidth: 'max(700px, 100%)' }}>
           <thead>
             <tr>
               <th>Lead</th>
@@ -302,13 +348,14 @@ export default function Cadencia() {
               <th>Mensagem</th>
               <th>Teve resposta?</th>
               <th>Resultado</th>
+              <th style={{ width: 96 }}>Ações</th>
             </tr>
           </thead>
           <tbody>
             {loadingLoss || loadingFollowUps ? (
-              <tr><td colSpan={5} className="muted">Carregando...</td></tr>
+              <tr><td colSpan={6} className="muted">Carregando...</td></tr>
             ) : filteredFollowUps.length ? filteredFollowUps.map((f: any) => (
-              <tr key={f.id}>
+              <tr key={f.id} style={editingId === f.id ? { background: 'var(--accent-soft)' } : undefined}>
                 <td>
                   <strong>{f.lead?.name || '—'}</strong>
                   {f.lead?.loss_reason ? <div className="muted" style={{ fontSize: 12 }}>{f.lead.loss_reason}</div> : null}
@@ -317,9 +364,10 @@ export default function Cadencia() {
                 <td style={{ whiteSpace: 'pre-wrap' }}>{f.message || '—'}</td>
                 <td>{responseLabel(f.had_response)}</td>
                 <td>{f.result || '—'}</td>
+                <td><button className="btn sm" onClick={() => startEdit(f)}>Editar</button></td>
               </tr>
             )) : (
-              <tr><td colSpan={5} className="muted">Nenhum follow-up registrado para os leads em loss{selectedLead ? ' selecionado' : ''}.</td></tr>
+              <tr><td colSpan={6} className="muted">Nenhum follow-up registrado para os leads em loss{selectedLead ? ' selecionado' : ''}.</td></tr>
             )}
           </tbody>
         </table>
