@@ -373,6 +373,38 @@ export default function Cadencia() {
         </table>
       </section>
 
+      <section className="card" style={{ marginBottom: 16 }}>
+        <div className="top">
+          <div>
+            <h2>Guia inteligente de follow-up</h2>
+            <p className="sub">Use a abordagem certa conforme a objeção principal do lead em loss.</p>
+          </div>
+        </div>
+        <div className="grid g2">
+          <div className="card" style={{ background: 'var(--bg)' }}>
+            <h3 style={{ marginBottom: 8 }}>Perfil A — Tem dinheiro, mas tem medo</h3>
+            <p className="sub" style={{ marginBottom: 12 }}>Não tente convencer. Descubra o que ele precisa acreditar para tomar uma decisão consciente.</p>
+            <div className="steps">
+              <div className="step"><div className="d">1</div><div className="say"><strong>Identificar a insegurança</strong><br />Quando você pensa em avançar com a consultoria, qual é a principal preocupação que passa pela sua cabeça?</div></div>
+              <div className="step"><div className="d">2</div><div className="say"><strong>Aprofundar</strong><br />Entendi. E o que precisaria acontecer para você se sentir seguro de que essa é uma decisão adequada para o seu momento?</div></div>
+              <div className="step"><div className="d">3</div><div className="say"><strong>Experiência anterior</strong><br />Você já teve alguma experiência anterior em que investiu em algo parecido e não teve o retorno que esperava?</div></div>
+              <div className="step"><div className="d">4</div><div className="say"><strong>Trabalhar a decisão</strong><br />Então, pelo que estou entendendo, não é necessariamente uma questão de querer ou não resolver esse problema. É mais uma questão de ter segurança sobre a decisão. Estou entendendo corretamente?</div></div>
+            </div>
+            <p className="muted" style={{ marginTop: 12 }}>Atenção: só apresente provas, cases, depoimentos e garantias reais e aplicáveis à situação daquele cliente.</p>
+          </div>
+          <div className="card" style={{ background: 'var(--bg)' }}>
+            <h3 style={{ marginBottom: 8 }}>Perfil B — Não tem capacidade financeira</h3>
+            <p className="sub" style={{ marginBottom: 12 }}>Não force a objeção. Entenda se existe viabilidade real.</p>
+            <div className="steps">
+              <div className="step"><div className="d">1</div><div className="say"><strong>Diagnosticar</strong><br />Quando você diz que o investimento não cabe agora, é porque está sem disponibilidade financeira neste momento ou porque precisaria reorganizar outras prioridades para fazer esse investimento?</div></div>
+              <div className="step"><div className="d">2</div><div className="say"><strong>Horizonte</strong><br />Você acredita que essa condição financeira pode mudar nos próximos 30, 60 ou 90 dias, ou ainda não consegue visualizar quando seria possível?</div></div>
+              <div className="step"><div className="d">3</div><div className="say"><strong>Prioridade</strong><br />Considerando tudo que conversamos, resolver esse problema continua sendo uma prioridade para você, mesmo que não seja possível investir agora?</div></div>
+            </div>
+            <p className="muted" style={{ marginTop: 12 }}>Se houver capacidade futura, agende uma retomada. Se não houver, mantenha o relacionamento sem pressionar. Não recomende empréstimos ou compromissos financeiros que coloquem o cliente em dificuldade.</p>
+          </div>
+        </div>
+      </section>
+
       <section className="card">
         <div className="top">
           <div>

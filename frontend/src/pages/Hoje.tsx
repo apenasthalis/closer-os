@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '../lib/api'
-import { apiError, brl, dateBR, STAGE_LABEL, timeBR } from '../lib/format'
+import { apiError, brl, dateBR, dateTimeBR, STAGE_LABEL, timeBR } from '../lib/format'
 import { showToast } from '../lib/toast'
 import SaleModal from '../components/SaleModal'
 import LeadModal from '../components/LeadModal'
@@ -26,6 +26,17 @@ export default function Hoje() {
     onError: (e: any) => showToast(apiError(e), 'err'),
   })
 
+  const completeFollowUp = useMutation({
+    mutationFn: async (id: number) => (await api.post(`/follow-ups/${id}/complete`, {})).data,
+    onSuccess: () => {
+      showToast('Follow-up concluído.')
+      qc.invalidateQueries({ queryKey: ['dashboard'] })
+      qc.invalidateQueries({ queryKey: ['follow-ups'] })
+      qc.invalidateQueries({ queryKey: ['follow-summary'] })
+    },
+    onError: (e: any) => showToast(apiError(e), 'err'),
+  })
+
   if (isLoading) return <p className="muted">Carregando seu dia...</p>
   if (error) return <div className="alert"><h3>Não foi possível carregar o dashboard</h3><p className="sub">{apiError(error)}</p></div>
   if (!data) return null
@@ -34,6 +45,9 @@ export default function Hoje() {
   const ag = data.leads_today || []
   const pending = data.pending_money || { total_cents: 0, items: [] }
   const pendingItems = pending.items || []
+  const overdue = data.follow_ups_overdue || []
+  const upcoming = data.follow_ups_upcoming || []
+  const followUps = [...overdue, ...upcoming].slice(0, 8)
 
   return (
     <>
@@ -85,6 +99,33 @@ export default function Hoje() {
           </div>
         </section>
       </div>
+
+      <section className="card" style={{ marginTop: 16 }}>
+        <div className="top">
+          <div><h2>Próximos follow-ups</h2><p className="sub">Acompanhamentos pendentes para não perder retomadas.</p></div>
+          <button className="btn sm" onClick={() => navigate('/cadencia')}>Ver cadência</button>
+        </div>
+        <div className="list">
+          {followUps.length ? followUps.map((f: any) => {
+            const isOverdue = f.scheduled_at && new Date(f.scheduled_at).getTime() < Date.now()
+            return (
+              <div className="row" key={f.id}>
+                <div className="grow">
+                  <strong>{f.lead?.name || 'Lead'}</strong>
+                  <span>
+                    {isOverdue ? <span style={{ color: 'var(--crit)' }}>Atrasado · </span> : null}
+                    {dateTimeBR(f.scheduled_at)}
+                    {f.message ? ` · ${String(f.message).slice(0, 80)}${String(f.message).length > 80 ? '…' : ''}` : ''}
+                  </span>
+                </div>
+                {isOverdue && <span className="pill hot">Atrasado</span>}
+                {f.lead_id && <button className="btn sm" onClick={() => navigate(`/lead/${f.lead_id}`)}>Abrir</button>}
+                <button className="btn sm primary" disabled={completeFollowUp.isPending} onClick={() => completeFollowUp.mutate(f.id)}>Concluir</button>
+              </div>
+            )
+          }) : <p className="muted">Nenhum follow-up pendente. Registre acompanhamentos na Cadência de FUP.</p>}
+        </div>
+      </section>
 
       {newLead && <LeadModal onClose={() => setNewLead(false)} onSaved={(l: any) => navigate(`/lead/${l.id}`)} />}
       {saleLead && <SaleModal leadId={saleLead.id} leadName={saleLead.name} onClose={() => setSaleLead(null)} onSaved={invalidate} />}
