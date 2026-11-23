@@ -35,6 +35,7 @@ class FollowUpTaskController extends Controller
             'status' => ['nullable','in:pending,done'],
             'result' => ['nullable','string','max:2000'],
             'had_response' => ['nullable','boolean'],
+            'cadence_step' => ['nullable','string','max:50'],
             'completed_at' => ['nullable','date'],
         ]);
         $lead = Lead::findOrFail($data['lead_id']);
@@ -72,6 +73,7 @@ class FollowUpTaskController extends Controller
             'status' => ['sometimes','in:pending,done,cancelled'],
             'result' => ['nullable','string','max:2000'],
             'had_response' => ['nullable','boolean'],
+            'cadence_step' => ['nullable','string','max:50'],
             'completed_at' => ['nullable','date'],
         ]);
         if (!empty($data['lead_id']) && (int) $data['lead_id'] !== (int) $followUpTask->lead_id) {

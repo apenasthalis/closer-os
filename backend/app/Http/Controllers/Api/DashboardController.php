@@ -47,6 +47,16 @@ class DashboardController extends Controller
             ->with('lead')->where('status','pending')
             ->where('scheduled_at','>=', now())->orderBy('scheduled_at')->limit(20)->get();
 
+        $doneFollowUps = FollowUpTask::query()->visibleTo($user)
+            ->with('lead')->where('status','done')
+            ->orderByDesc('completed_at')->orderByDesc('scheduled_at')->limit(20)->get();
+
+        $lossLeads = Lead::query()->visibleTo($user)
+            ->with(['closer','company','department'])
+            ->where('stage', 'loss')
+            ->orderByDesc('stage_changed_at')
+            ->limit(20)->get();
+
         $monthStart = $today->copy()->startOfMonth()->toDateString();
         $monthEnd = $today->copy()->endOfMonth()->toDateString();
         $finance = FinanceService::metrics($user, ['from'=>$monthStart,'to'=>$monthEnd]);
@@ -89,6 +99,8 @@ class DashboardController extends Controller
             'pending_money' => $pendingMoney,
             'follow_ups_overdue' => $overdue,
             'follow_ups_upcoming' => $upcoming,
+            'follow_ups_done' => $doneFollowUps,
+            'loss_leads' => $lossLeads,
             'finance' => $finance,
             'goals' => $goals,
             'pipeline' => $pipeline,

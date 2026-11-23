@@ -58,8 +58,8 @@ Base: `/api/v1`. Auth: Laravel Sanctum. Todos endpoints exigem sessão autentica
 - GET/POST /follow-up-templates, PATCH/DELETE /follow-up-templates/{id}
 - GET /follow-ups/summary
 - GET /follow-ups (`status`, `lead_id`, `lead_stage`, `from`, `to`, `sort`, `dir`)
-- POST /follow-ups `{lead_id, scheduled_at, message, status?, result?, had_response?, completed_at?}`
-- PATCH /follow-ups/{id} `{lead_id?, scheduled_at?, message?, status?, result?, had_response?, completed_at?}`
+- POST /follow-ups `{lead_id, scheduled_at, message, status?, result?, had_response?, cadence_step?, completed_at?}`
+- PATCH /follow-ups/{id} `{lead_id?, scheduled_at?, message?, status?, result?, had_response?, cadence_step?, completed_at?}`
 - POST /follow-ups/{id}/complete `{result?, had_response?, completed_at?}`
 - DELETE /follow-ups/{id}
 

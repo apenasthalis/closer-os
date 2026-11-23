@@ -35,7 +35,7 @@ id, lead_id, type (`created|edited|stage_changed|no_show|note|sale_saved|sale_ca
 
 ## follow_up_templates / follow_up_tasks
 - `follow_up_templates`: id, user_id nullable, situation, day_label, title, body, timestamps.
-- `follow_up_tasks`: id, lead_id, user_id, scheduled_at, message, status (`pending|done|cancelled`), result, had_response (bool nullable), completed_at, timestamps.
+- `follow_up_tasks`: id, lead_id, user_id, scheduled_at, message, status (`pending|done|cancelled`), result, had_response (bool nullable), cadence_step (nullable), completed_at, timestamps.
 
 ## goals
 id, user_id, company_id, department_id nullable, month (primeiro dia), metric (`calls_scheduled|calls_held|sales|revenue_cents|cash_cents|commission_cents`), target_value, timestamps; unique(user_id, company_id, department_id, month, metric).

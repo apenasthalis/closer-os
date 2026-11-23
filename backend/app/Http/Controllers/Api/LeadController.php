@@ -5,6 +5,7 @@ use App\Domain\Pipeline\StageTransition;
 use App\Enums\Stage;
 use App\Http\Controllers\Controller;
 use App\Models\Call;
+use App\Models\FollowUpTask;
 use App\Models\Lead;
 use App\Models\LeadEvent;
 use App\Models\User;
@@ -222,6 +223,9 @@ class LeadController extends Controller
                     'created_at' => now(),
                 ]);
             }
+            if ($to === Stage::Loss->value) {
+                $this->createLossCadence($lead, $request->user()->id);
+            }
             AuditService::log($request->user()->id, 'lead_stage_changed', 'lead', $lead->id, ['from'=>$from,'to'=>$to, 'call_at' => $data['call_at'] ?? null]);
         });
 
@@ -322,5 +326,43 @@ class LeadController extends Controller
         });
 
         return response()->json($newLead->load(['closer','company','department','events']), 201);
+    }
+
+    private function createLossCadence(Lead $lead, int $actorUserId): void
+    {
+        $exists = FollowUpTask::query()
+            ->where('lead_id', $lead->id)
+            ->whereNotNull('cadence_step')
+            ->exists();
+        if ($exists) return;
+
+        $now = now();
+        $steps = [
+            ['step' => '24h', 'offset' => $now->copy()->addDay(), 'message' => '24h — Reabrir a conversa: descobrir o que ficou pendente na decisão.'],
+            ['step' => '3d', 'offset' => $now->copy()->addDays(3), 'message' => '3 dias — Identificar o medo: entender o que está impedindo o cliente de avançar.'],
+            ['step' => '5d', 'offset' => $now->copy()->addDays(5), 'message' => '5 dias — Conectar com o problema: trazer a atenção para o custo de continuar na situação atual.'],
+            ['step' => '8d', 'offset' => $now->copy()->addDays(8), 'message' => '8 dias — Trabalhar a decisão financeira: diferenciar falta de dinheiro de falta de percepção de valor.'],
+            ['step' => '14d', 'offset' => $now->copy()->addDays(14), 'message' => '14 dias — Decisão e encerramento: conseguir uma resposta clara, sem insistência.'],
+            ['step' => '30d', 'offset' => $now->copy()->addDays(30), 'message' => '30 dias — Reativação: descobrir se o cenário mudou.'],
+        ];
+
+        foreach ($steps as $s) {
+            FollowUpTask::create([
+                'lead_id' => $lead->id,
+                'user_id' => $lead->user_id,
+                'scheduled_at' => $s['offset'],
+                'message' => $s['message'],
+                'status' => 'pending',
+                'cadence_step' => $s['step'],
+            ]);
+        }
+
+        LeadEvent::create([
+            'lead_id' => $lead->id,
+            'actor_user_id' => $actorUserId,
+            'type' => 'note',
+            'payload' => ['note' => 'Cadência de follow-up de 14 dias criada automaticamente para lead em loss.'],
+            'created_at' => now(),
+        ]);
     }
 }
